@@ -34,3 +34,4 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
         TabWgt.addTab(self.Tab_ACV, '交流电压')
         TabWgt.addTab(self.Tab_ACA, '交流电流')
 
+        dfdf
