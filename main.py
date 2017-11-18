@@ -20,6 +20,9 @@ import CurrentDiagramUi
 # 电源及采样校准窗口Ui类
 import PowerCalibrationUi
 
+# 继电器阵列自检类
+import RelaySelfCheckUi
+
 # 绘图类
 import Diagram
 
@@ -30,6 +33,7 @@ class PT_MainWindow(QMainWindow, MainWindowUi.Ui_MainWindow):
         self.Action_ControlSet.triggered.connect(self.showControlSetForm)
         self.Action_RemoteControl.triggered.connect(self.showRemoteControlForm)
         self.Action_Others.triggered.connect(self.showRemoteControlForm)
+        self.Action_PowerCalibration.triggered.connect(self.showPowerCalibrationForm)
 
         self.BT_FullScreen.clicked.connect(self.showCurrentDiagramForm)
 
@@ -52,6 +56,10 @@ class PT_MainWindow(QMainWindow, MainWindowUi.Ui_MainWindow):
         self.currentdiagram = PT_CurrentDiagram()
         self.currentdiagram.show()
 
+    def showPowerCalibrationForm(self):
+        self.powercalibration = PT_PowerCalibration()
+        self.powercalibration.show()
+
 class PT_ControlModeSet(ControlModeSetUi.Ui_ControlModeSet):
     def __init__(self, parent=None):
         super(PT_ControlModeSet, self).__init__(parent)
@@ -68,15 +76,21 @@ class PT_PowerCalibration(PowerCalibrationUi.Ui_PowerCalibrationUi):
     def __init__(self, parent=None):
         super(PT_PowerCalibration, self).__init__(parent)
 
+class PT_RelaySelfCheck(RelaySelfCheckUi.Ui_RelaySelfCheckUi):
+    def __init__(self, parent=None):
+        super(PT_RelaySelfCheck, self).__init__(parent)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # app.setFont(QFont('微软雅黑 Semilight'))
 
-    # win = PT_MainWindow()
+    win = PT_MainWindow()
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
-    win = PT_PowerCalibration()
+    # win = PT_PowerCalibration()
+    win = PT_RelaySelfCheck()
     win.show()
     sys.exit(app.exec_())
 

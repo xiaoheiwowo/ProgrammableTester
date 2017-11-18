@@ -77,9 +77,11 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
 
 
         Label_vinput = QtWidgets.QLabel('电压(V):')
-        self.SB_VInput = QtWidgets.QSpinBox()
+        self.SB_VInput = QtWidgets.QDoubleSpinBox()
         self.SB_VInput.setMinimumWidth(100)
         self.SB_VInput.setMinimumHeight(40)
+        self.SB_VInput.setMinimum(0)
+        self.SB_VInput.setMaximum(5.00)
 
         layout2 = QtWidgets.QHBoxLayout()
         layout2.addWidget(Label_vinput)
@@ -100,15 +102,15 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
         self.Label_dca = QtWidgets.QLabel(self.Tab_DCA)
         self.Label_dca.setGeometry(250, 20, 300, 440)
         self.Label_dca.setText('ddd')
-        self.Label_dca.setPixmap(QtGui.QPixmap(':/dcv.png'))
+        self.Label_dca.setPixmap(QtGui.QPixmap(':/dca.png'))
         self.Label_dca.setScaledContents(True)
 
         self.TE_OperationStepsDCA = QtWidgets.QTextEdit(self.Tab_DCA)
         self.TE_OperationStepsDCA.setGeometry(570, 20, 400, 440)
         self.TE_OperationStepsDCA.setText('操作步骤:\n'
-                                          '1、按照左图连接电压表。\n'
-                                          '2、向Vi中输入一个电压值(0~36V)。\n'
-                                          '3、待电压表读数稳定后将电压表示数填入Vn。\n'
+                                          '1、按照左图连接电流表。\n'
+                                          '2、调节适当的电压值(0~5V)。\n'
+                                          '3、待电流表读数稳定后将电流表示数填入In。\n'
                                           '4、重复上述步骤添加多组数据。')
         self.TE_OperationStepsDCA.setFont(QtGui.QFont('微软雅黑 Semilight', 16))
         self.TE_OperationStepsDCA.setReadOnly(True)
@@ -132,7 +134,7 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
         self.Label_acv = QtWidgets.QLabel(self.Tab_ACV)
         self.Label_acv.setGeometry(350, 20, 300, 440)
         self.Label_acv.setText('ddd')
-        self.Label_acv.setPixmap(QtGui.QPixmap(':/dcv.png'))
+        self.Label_acv.setPixmap(QtGui.QPixmap(':/acv.png'))
         self.Label_acv.setScaledContents(True)
 
         self.TE_OperationStepsACV = QtWidgets.QTextEdit(self.Tab_ACV)
@@ -154,10 +156,11 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
 
 
         Label_vinput = QtWidgets.QLabel('电压(V):')
-        self.SB_ACVInput = QtWidgets.QSpinBox()
+        self.SB_ACVInput = QtWidgets.QDoubleSpinBox()
         self.SB_ACVInput.setMinimumWidth(100)
         self.SB_ACVInput.setMinimumHeight(40)
-
+        self.SB_ACVInput.setMinimum(0)
+        self.SB_ACVInput.setMaximum(10.00)
         layout2 = QtWidgets.QHBoxLayout()
         layout2.addWidget(Label_vinput)
         layout2.addWidget(self.SB_ACVInput)
@@ -177,17 +180,21 @@ class Ui_PowerCalibrationUi(QtWidgets.QDialog):
         Label_aca = QtWidgets.QLabel(self.Tab_ACA)
         Label_aca.setGeometry(250, 20, 300, 440)
         Label_aca.setText('ddd')
-        Label_aca.setPixmap(QtGui.QPixmap(':/dcv.png'))
+        Label_aca.setPixmap(QtGui.QPixmap(':/aca.png'))
         Label_aca.setScaledContents(True)
 
         self.TE_OperationStepsACA = QtWidgets.QTextEdit(self.Tab_ACA)
         self.TE_OperationStepsACA.setGeometry(570, 20, 400, 440)
-        self.TE_OperationStepsACA.setText('操作步骤(注意高压):\n'
-                                          '1、按照左图连接电压表。\n'
-                                          '2、向Vi中输入一个电压值(0~300V)。\n'
-                                          '3、待电压表读数稳定后将电压表示数填入Vn。\n'
+        self.TE_OperationStepsACA.setText('操作步骤:\n'
+                                          '1、按照左图连接电流表。\n'
+                                          '2、调节适当的电压值(0~10V)。\n'
+                                          '3、待电流表读数稳定后将电流表示数填入In。\n'
                                           '4、重复上述步骤添加多组数据。')
         self.TE_OperationStepsACA.setFont(QtGui.QFont('微软雅黑 Semilight', 16))
         self.TE_OperationStepsACA.setReadOnly(True)
         self.TE_OperationStepsACA.setFocusPolicy(QtCore.Qt.NoFocus)
         pass
+
+
+
+
