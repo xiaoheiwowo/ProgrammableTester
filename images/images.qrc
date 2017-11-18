@@ -1,7 +1,9 @@
 <RCC>
 <qresource>
-    <file>network_disconnect_64px_571982_easyicon.net.png</file>
-    <file>network_connect_64px_571981_easyicon.net.png</file>
     <file>qt.png</file>
+    <file>connect_no_48px_19637_easyicon.net.png</file>
+    <file>connect_creating_48px_15285_easyicon.net.png</file>
+    <file>entertainment_valve_72px_547701_easyicon.net.png</file>
+    <file>dcac.png</file>
 </qresource>
 </RCC>
