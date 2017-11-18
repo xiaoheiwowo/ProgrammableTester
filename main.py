@@ -70,6 +70,8 @@ class PT_PowerCalibration(PowerCalibrationUi.Ui_PowerCalibrationUi):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    # app.setFont(QFont('微软雅黑 Semilight'))
+
     # win = PT_MainWindow()
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
