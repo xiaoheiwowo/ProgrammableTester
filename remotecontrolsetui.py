@@ -3,7 +3,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import DialogButton
+import dialogbutton
 
 class Ui_RemoteControlSet(QtWidgets.QDialog):
     '''
@@ -18,7 +18,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         # 保存、确定、取消按钮
-        self.DB_DialogButton = DialogButton.DialogButton(self)
+        self.DB_DialogButton = dialogbutton.DialogButton(self)
         self.DB_DialogButton.move(700, 530)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
 

@@ -3,9 +3,9 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import DialogButton
+import dialogbutton
 
-import RemoteControlSetUi
+import remotecontrolsetui
 
 class Ui_ControlModeSet(QtWidgets.QDialog):
     '''
@@ -26,7 +26,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.Init_Extend()
 
         # 保存、确定、取消按钮
-        self.DB_DialogButton = DialogButton.DialogButton(self)
+        self.DB_DialogButton = dialogbutton.DialogButton(self)
         self.DB_DialogButton.move(700, 530)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
 
@@ -139,7 +139,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.remotecontrolset = PT_RemoteControlSet()
         self.remotecontrolset.show()
 
-class PT_RemoteControlSet(RemoteControlSetUi.Ui_RemoteControlSet):
+class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
     def __init__(self, parent=None):
         super(PT_RemoteControlSet, self).__init__(parent)
 

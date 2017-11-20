@@ -3,21 +3,21 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import DialogButton
+import dialogbutton
 
-class Ui_PowerCalibrationUi(QtWidgets.QDialog):
+class Ui_PowerCalibration(QtWidgets.QDialog):
     '''
     电源及采样校准
     '''
     def __init__(self, parent=None):
-        super(Ui_PowerCalibrationUi, self).__init__(parent)
+        super(Ui_PowerCalibration, self).__init__(parent)
         self.setGeometry(300, 200, 1024, 600)
         self.setWindowTitle('电源及采样校准')
         self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         # 保存、确定、取消按钮
-        self.DB_DialogButton = DialogButton.DialogButton(self)
+        self.DB_DialogButton = dialogbutton.DialogButton(self)
         self.DB_DialogButton.move(700, 530)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
 

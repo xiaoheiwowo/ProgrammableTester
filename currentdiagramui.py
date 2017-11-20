@@ -3,11 +3,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import DialogButton
+import dialogbutton
 
-import Diagram
+import diagram
 
-import DoubleQSlider
+import doubleslider
 class Ui_CurrentDiagram(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Ui_CurrentDiagram, self).__init__(parent)
@@ -42,7 +42,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         wgt = QtWidgets.QWidget(self)
         wgt.setGeometry(50, 50, 900, 480)
-        self.BigDiagram = Diagram.BigPlotWidget(wgt)
+        self.BigDiagram = diagram.BigPlotWidget(wgt)
         wgt2 = QtWidgets.QWidget(wgt)
         wgt2.setGeometry(0,40,100,100)
         layout = QtWidgets.QVBoxLayout(wgt2)
@@ -54,7 +54,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         layout.addWidget(self.Label_d12)
         layout.addWidget(self.Label_d13)
 
-        self.DS_DataSlider = DoubleQSlider.MDoubleSlider(GB_Diagram)
+        self.DS_DataSlider = doubleslider.MDoubleSlider(GB_Diagram)
         self.DS_DataSlider.setGeometry(50, 530, 800, 50)
 
         self.BT_ZoomIn = QtWidgets.QPushButton(GB_Diagram)
