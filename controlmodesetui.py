@@ -30,6 +30,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.DB_DialogButton.move(700, 530)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
 
+        # 变量
+        self.PressedXNum = None
+        self.PressedYNum = None
+
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
         self.TW_ControlModeList.setGeometry(0, 10, 200, 500)
@@ -52,6 +56,89 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
         self.GB_WiringDiagram.setGeometry(210, 10, 600, 500)
         self.GB_WiringDiagram.setTitle('接线图')
+
+        TabWgt = QtWidgets.QTabWidget(self.GB_WiringDiagram)
+        TabWgt.setGeometry(0, 20, 600, 480)
+
+        self.Tab_ON = QtWidgets.QWidget(TabWgt)
+        self.Tab_OFF = QtWidgets.QWidget(TabWgt)
+        self.Tab_STOP = QtWidgets.QWidget(TabWgt)
+        self.Tab_M3 = QtWidgets.QWidget(TabWgt)
+        self.Tab_M4 = QtWidgets.QWidget(TabWgt)
+        TabWgt.addTab(self.Tab_ON, 'ON')
+        TabWgt.addTab(self.Tab_OFF, 'OFF')
+        TabWgt.addTab(self.Tab_STOP, 'STOP')
+        TabWgt.addTab(self.Tab_M3, 'M3')
+        TabWgt.addTab(self.Tab_M4, 'M4')
+
+    # ON标签页
+        SA_ON = QtWidgets.QScrollArea(self.Tab_ON)
+        SA_ON.setGeometry(2, 1, 590, 450)
+        WgtON = QtWidgets.QWidget(SA_ON)
+        WgtON.setMinimumSize(950, 400)
+        SA_ON.setWidget(WgtON)
+
+        self.BT_ONx = []
+        self.BT_ONy = []
+        # 生成X按钮
+        for i in range(16):
+            self.BT_ONx.append(QtWidgets.QPushButton(WgtON))
+            self.BT_ONx[i].setText('X0' + (str(hex(i))[2]).upper())
+            self.BT_ONx[i].setGeometry(55 * i + 60, 10, 50, 30)
+            self.BT_ONx[i].setCheckable(True)
+            self.BT_ONx[i].setFocusPolicy(QtCore.Qt.NoFocus)
+        # 生成Y按钮
+        for j in range(10):
+            self.BT_ONy.append(QtWidgets.QPushButton(WgtON))
+            self.BT_ONy[j].setText('Y0' + str(j))
+            self.BT_ONy[j].setGeometry(5, 35 * j + 45, 50, 30)
+            self.BT_ONy[j].setCheckable(True)
+            self.BT_ONy[j].setFocusPolicy(QtCore.Qt.NoFocus)
+
+        # self.DB_DialogButton.BT_OK1.isChecked()
+
+        self.BT_ONx[0].clicked.connect(self.X00isPressed)
+        self.BT_ONy[0].clicked.connect(self.Y00isPressed)
+        # 画连线
+        self.WgtDraw = QtWidgets.QWidget(WgtON)
+        self.WgtDraw.setGeometry(55, 40, 550, 400)
+
+        self.m = 55
+        self.n = 35
+
+        # self.Wiring = DrawWiring(self.WgtDraw, 30 + 0 * self.m, 20 + 0 * self.n)
+
+    def X00isPressed(self):
+        for i in range(16):
+            if i != 0:
+                self.BT_ONx[i].setChecked(False)
+        for j in range(10):
+            self.BT_ONy[j].setChecked(False)
+        if self.BT_ONx[0].isChecked():
+            self.PressedXNum = 0
+        else:
+            self.PressedXNum = None
+            print('x0ispressed', self.PressedXNum)
+            # self.Wiring = DrawWiring(self.WgtDraw, 30 + self.PressedXNum * self.m, 20 + 1 * self.n)
+            # self.Wiring.show()
+
+    def Y00isPressed(self):
+        for i in range(10):
+            if i != 0:
+                self.BT_ONy[i].setChecked(False)
+        for j in range(16):
+            self.BT_ONx[j].setChecked(False)
+        if self.BT_ONy[0].isChecked():
+            self.PressedYNum = 0
+            print('y0ispressed', self.PressedYNum)
+            if self.PressedXNum == None:
+                pass
+            else:
+                self.Wiring = DrawWiring(self.WgtDraw, 30 + self.PressedXNum * self.m, 20 + self.PressedYNum * self.n)
+                self.Wiring.show()
+
+                self.PressedXNum = None
+                self.PressedYNum = None
 
     def Init_Extend(self):
         self.GB_Extend = QtWidgets.QGroupBox(self)
@@ -143,3 +230,29 @@ class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
     def __init__(self, parent=None):
         super(PT_RemoteControlSet, self).__init__(parent)
 
+class DrawWiring(QtWidgets.QWidget):
+    def __init__(self, Widget, x, y, parent=None):
+        super(DrawWiring, self).__init__(parent)
+
+        # self.Canvas = Widget
+        self.x_wiring = x
+        self.y_wiring = y
+        self.setParent(Widget)
+
+    def paintEvent(self, QPaintEvent):
+        qp = QtGui.QPainter()
+        qp.begin(self)
+        self.drawWiring(qp)
+        qp.end()
+
+    def drawWiring(self, qp):
+        pen = QtGui.QPen(QtCore.Qt.red, 3, QtCore.Qt.SolidLine)
+        qp.setPen(pen)
+        qp.setBrush(QtCore.Qt.red)
+        qp.drawLine(self.x_wiring, 0, self.x_wiring, self.y_wiring)
+        qp.drawLine(0, self.y_wiring, self.x_wiring, self.y_wiring)
+        qp.drawEllipse(self.x_wiring-3, self.y_wiring-3, 6, 6,)
+
+    def clearAll(self):
+
+        pass
