@@ -10,7 +10,7 @@ class Ui_MainWindow(object):
     '''
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setGeometry(300, 200, 1024, 600)
+        MainWindow.setGeometry(300, 200, 1024, 550)
         MainWindow.setMinimumSize(QtCore.QSize(800, 480))
         MainWindow.setWindowTitle('可编程测试仪')
         MainWindow.setWindowIcon(QtGui.QIcon(":/qt.png"))  #设置程序窗口的图标
@@ -87,7 +87,7 @@ class Ui_MainWindow(object):
         self.Layout_CurrentCurve.addStretch(0)
 
         self.BT_FullScreen = QtWidgets.QPushButton(self.GB_CurrentCurve)
-        self.BT_FullScreen.setGeometry(645, 6, 50, 50)
+        self.BT_FullScreen.setFixedSize(50, 50)
         # self.BT_FullScreen.setText('全屏')
         style = '''QPushButton {background-image: url("./images/zoomout.png")}'''
         self.BT_FullScreen.setStyleSheet(style)
@@ -101,6 +101,7 @@ class Ui_MainWindow(object):
         # self.BT_Static.setGeometry(645, 106, 50, 50)
         self.BT_Static.setText('静态')
         layout = QtWidgets.QVBoxLayout(wgt)
+        layout.addWidget(self.BT_FullScreen)
         layout.addWidget(self.BT_Dynamic)
         layout.addWidget(self.BT_Static)
 

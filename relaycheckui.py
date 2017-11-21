@@ -12,31 +12,39 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
     '''
     def __init__(self, parent=None):
         super(Ui_RelaySelfCheck, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 550)
         self.setWindowTitle('电源及采样校准')
         self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         # 保存、确定、取消按钮
         self.DB_DialogButton = dialogbutton.DialogButton(self)
-        self.DB_DialogButton.move(700, 530)
+        self.DB_DialogButton.setFixedSize(300, 50)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
+        Layout_button = QtWidgets.QHBoxLayout()
+        Layout_button.addStretch(1)
+        Layout_button.addWidget(self.DB_DialogButton)
 
         self.DB_DialogButton.BT_Save1.setText('开始')
         self.DB_DialogButton.BT_OK1.setText('停止')
         self.DB_DialogButton.BT_Cancel1.setText('返回')
-
+        # 信号
         self.DB_DialogButton.BT_Save1.clicked.connect(self.CheckBegin)
         self.DB_DialogButton.BT_OK1.clicked.connect(self.CheckStop)
 
         TabWgt = QtWidgets.QTabWidget(self)
-        TabWgt.setGeometry(12, 10, 1000, 510)
+        TabWgt.setFixedSize(1000, 450)
 
         self.Tab_PowerON = QtWidgets.QWidget(TabWgt)
         self.Tab_PowerOFF = QtWidgets.QWidget(TabWgt)
 
         TabWgt.addTab(self.Tab_PowerON, '线圈通电')
         TabWgt.addTab(self.Tab_PowerOFF, '线圈断电')
+
+        Layout_Main = QtWidgets.QVBoxLayout()
+        Layout_Main.addWidget(TabWgt)
+        Layout_Main.addLayout(Layout_button)
+        self.setLayout(Layout_Main)
 
         self.Label_Fault = QtWidgets.QLabel(TabWgt)
         self.Label_Fault.setText('故障:')

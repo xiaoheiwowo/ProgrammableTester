@@ -34,6 +34,7 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
         self.Action_RemoteControl.triggered.connect(self.showRemoteControlForm)
         self.Action_Others.triggered.connect(self.showRemoteControlForm)
         self.Action_PowerCalibration.triggered.connect(self.showPowerCalibrationForm)
+        self.Action_RelayCheck.triggered.connect(self.showRelayCheckForm)
 
         self.BT_FullScreen.clicked.connect(self.showCurrentDiagramForm)
 
@@ -46,11 +47,9 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
         self.controlset = PT_ControlModeSet()
         self.controlset.show()
 
-
     def showRemoteControlForm(self):
         self.remotecontrol = PT_RemoteControlSet()
         self.remotecontrol.show()
-
 
     def showCurrentDiagramForm(self):
         self.currentdiagram = PT_CurrentDiagram()
@@ -59,6 +58,10 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
     def showPowerCalibrationForm(self):
         self.powercalibration = PT_PowerCalibration()
         self.powercalibration.show()
+
+    def showRelayCheckForm(self):
+        self.relaycheck = PT_RelaySelfCheck()
+        self.relaycheck.show()
 
 class PT_ControlModeSet(controlmodesetui.Ui_ControlModeSet):
     def __init__(self, parent=None):
@@ -85,12 +88,12 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # app.setFont(QFont('微软雅黑 Semilight'))
 
-    # win = PT_MainWindow()
+    win = PT_MainWindow()
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
     # win = PT_PowerCalibration()
-    win = PT_RelaySelfCheck()
+    # win = PT_RelaySelfCheck()
     win.show()
     sys.exit(app.exec_())
 

@@ -13,13 +13,11 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     '''
     def __init__(self, parent = None):
         super(Ui_ControlModeSet, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 550)
         self.setWindowTitle('控制方式设置')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
-
-
 
         self.Init_ControlModeList()
         self.Init_WiringDiagram()
@@ -27,16 +25,29 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
         # 保存、确定、取消按钮
         self.DB_DialogButton = dialogbutton.DialogButton(self)
-        self.DB_DialogButton.move(700, 530)
+        self.DB_DialogButton.setFixedSize(300, 50)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
+        Layout_button = QtWidgets.QHBoxLayout()
+        Layout_button.addStretch(1)
+        Layout_button.addWidget(self.DB_DialogButton)
 
+        Layout_GroupBox = QtWidgets.QHBoxLayout()
+        Layout_GroupBox.addWidget(self.TW_ControlModeList)
+        Layout_GroupBox.addWidget(self.GB_WiringDiagram)
+        Layout_GroupBox.addWidget(self.GB_Extend)
+        Layout_GroupBox.addStretch(1)
+
+        Layout_Main = QtWidgets.QVBoxLayout()
+        Layout_Main.addLayout(Layout_GroupBox)
+        Layout_Main.addLayout(Layout_button)
+        self.setLayout(Layout_Main)
         # 变量
         self.PressedXNum = None
         self.PressedYNum = None
 
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
-        self.TW_ControlModeList.setGeometry(0, 10, 200, 500)
+        self.TW_ControlModeList.setFixedSize(200, 450)
         self.TW_ControlModeList.setRowCount(20)
         self.TW_ControlModeList.setColumnCount(2)
         self.TW_ControlModeList.setHorizontalHeaderLabels(['控制方式', '电压'])
@@ -54,11 +65,11 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     def Init_WiringDiagram(self):
 
         self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
-        self.GB_WiringDiagram.setGeometry(210, 10, 600, 500)
+        self.GB_WiringDiagram.setFixedSize(600, 450)
         self.GB_WiringDiagram.setTitle('接线图')
 
         TabWgt = QtWidgets.QTabWidget(self.GB_WiringDiagram)
-        TabWgt.setGeometry(0, 20, 600, 480)
+        TabWgt.setGeometry(0, 20, 600, 430)
 
         self.Tab_ON = QtWidgets.QWidget(TabWgt)
         self.Tab_OFF = QtWidgets.QWidget(TabWgt)
@@ -73,7 +84,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
     # ON标签页
         SA_ON = QtWidgets.QScrollArea(self.Tab_ON)
-        SA_ON.setGeometry(2, 1, 590, 450)
+        SA_ON.setGeometry(2, 1, 590, 400)
         WgtON = QtWidgets.QWidget(SA_ON)
         WgtON.setMinimumSize(950, 400)
         SA_ON.setWidget(WgtON)
@@ -142,7 +153,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
     def Init_Extend(self):
         self.GB_Extend = QtWidgets.QGroupBox(self)
-        self.GB_Extend.setGeometry(820, 10, 200, 500)
+        self.GB_Extend.setFixedSize(200, 450)
         self.GB_Extend.setTitle('附加参数')
         # 调节阀部分
         self.Layout_Extend = QtWidgets.QVBoxLayout(self.GB_Extend)
