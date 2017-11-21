@@ -13,7 +13,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     '''
     def __init__(self, parent = None):
         super(Ui_ControlModeSet, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 565)
         self.setWindowTitle('控制方式设置')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态

@@ -86,11 +86,11 @@ if __name__ == '__main__':
     # app.setFont(QFont('微软雅黑 Semilight'))
 
     # win = PT_MainWindow()
-    # win = PT_ControlModeSet()
+    win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
     # win = PT_PowerCalibration()
-    win = PT_RelaySelfCheck()
+    # win = PT_RelaySelfCheck()
     win.show()
     sys.exit(app.exec_())
 
