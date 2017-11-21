@@ -11,18 +11,25 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
     '''
     def __init__(self, parent=None):
         super(Ui_PowerCalibration, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 550)
         self.setWindowTitle('电源及采样校准')
         self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+
         # 保存、确定、取消按钮
         self.DB_DialogButton = dialogbutton.DialogButton(self)
-        self.DB_DialogButton.move(700, 530)
+        self.DB_DialogButton.setFixedSize(300, 50)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
+        Layout_button = QtWidgets.QHBoxLayout()
+        Layout_button.addStretch(1)
+        Layout_button.addWidget(self.DB_DialogButton)
 
         TabWgt = QtWidgets.QTabWidget(self)
-        TabWgt.setGeometry(12, 10, 1000, 510)
+        Layout_Main = QtWidgets.QVBoxLayout()
+        Layout_Main.addWidget(TabWgt)
+        Layout_Main.addLayout(Layout_button)
+        self.setLayout(Layout_Main)
 
         self.Tab_DCV = QtWidgets.QWidget(TabWgt)
         self.Tab_DCA = QtWidgets.QWidget(TabWgt)
@@ -41,11 +48,11 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
 
     def Init_TabDCV(self):
         GB_ListDCV = QtWidgets.QGroupBox(self.Tab_DCV)
-        GB_ListDCV.setGeometry(10, 10, 300, 450)
+        # GB_ListDCV.setGeometry(10, 10, 300, 450)
         GB_ListDCV.setTitle('基准表')
 
-        self.TW_ListDCV = QtWidgets.QTableWidget(GB_ListDCV)
-        self.TW_ListDCV.setGeometry(10, 30, 280, 400)
+        self.TW_ListDCV = QtWidgets.QTableWidget()
+        self.TW_ListDCV.setFixedWidth(270)
         self.TW_ListDCV.setRowCount(20)
         self.TW_ListDCV.setColumnCount(3)
         self.TW_ListDCV.setHorizontalHeaderLabels(['Vi(V)', '采样Vo', 'Vn(V)'])
@@ -53,14 +60,17 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         self.TW_ListDCV.setColumnWidth(1, 70)
         self.TW_ListDCV.setColumnWidth(2, 70)
 
+        Layout_GBList = QtWidgets.QHBoxLayout(GB_ListDCV)
+        Layout_GBList.addWidget(self.TW_ListDCV)
+
         self.Label_dcv = QtWidgets.QLabel(self.Tab_DCV)
-        self.Label_dcv.setGeometry(350, 20, 300, 440)
+        self.Label_dcv.setFixedSize(300, 400)
         self.Label_dcv.setText('ddd')
         self.Label_dcv.setPixmap(QtGui.QPixmap(':/dcv.png'))
         self.Label_dcv.setScaledContents(True)
 
         self.TE_OperationStepsDCV = QtWidgets.QTextEdit(self.Tab_DCV)
-        self.TE_OperationStepsDCV.setGeometry(680, 20, 300, 440)
+        # self.TE_OperationStepsDCV.setGeometry(680, 20, 300, 440)
         self.TE_OperationStepsDCV.setText('操作步骤:\n'
                                           '1、按照左图连接电压表。\n'
                                           '2、向Vi中输入一个电压值(0~36V)。\n'
@@ -69,6 +79,11 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         self.TE_OperationStepsDCV.setFont(QtGui.QFont('微软雅黑 Semilight', 16))
         self.TE_OperationStepsDCV.setReadOnly(True)
         self.TE_OperationStepsDCV.setFocusPolicy(QtCore.Qt.NoFocus)
+
+        Layout_DCV = QtWidgets.QHBoxLayout(self.Tab_DCV)
+        Layout_DCV.addWidget(GB_ListDCV)
+        Layout_DCV.addWidget(self.Label_dcv)
+        Layout_DCV.addWidget(self.TE_OperationStepsDCV)
 
     def Init_TabDCA(self):
         GB_ListDCA = QtWidgets.QGroupBox(self.Tab_DCA)

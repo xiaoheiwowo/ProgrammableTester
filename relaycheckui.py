@@ -33,7 +33,7 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
         self.DB_DialogButton.BT_OK1.clicked.connect(self.CheckStop)
 
         TabWgt = QtWidgets.QTabWidget(self)
-        TabWgt.setFixedSize(1000, 450)
+        # TabWgt.setFixedSize(1000, 450)
 
         self.Tab_PowerON = QtWidgets.QWidget(TabWgt)
         self.Tab_PowerOFF = QtWidgets.QWidget(TabWgt)
@@ -46,14 +46,14 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
         Layout_Main.addLayout(Layout_button)
         self.setLayout(Layout_Main)
 
-        self.Label_Fault = QtWidgets.QLabel(TabWgt)
-        self.Label_Fault.setText('故障:')
-        self.Label_Fault.setGeometry(900, -5, 50, 30)
+        # 故障指示
+        # self.Label_Fault = QtWidgets.QLabel(TabWgt)
+        # self.Label_Fault.setText('故障:')
+        # self.Label_Fault.setGeometry(900, -5, 50, 30)
 
-        self.Label_Mark = QtWidgets.QLabel(TabWgt)
-        self.Label_Mark.setPixmap(QtGui.QPixmap(':/trouble_update_24px_2350_easyicon.net.png'))
-        self.Label_Mark.setGeometry(950, -5, 50, 30)
-
+        # self.Label_Mark = QtWidgets.QLabel(TabWgt)
+        # self.Label_Mark.setPixmap(QtGui.QPixmap(':/trouble_update_24px_2350_easyicon.net.png'))
+        # self.Label_Mark.setGeometry(950, -5, 50, 30)
 
         self.StopMark = 0
         self.Init_TabON()

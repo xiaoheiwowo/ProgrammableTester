@@ -11,7 +11,7 @@ import doubleslider
 class Ui_CurrentDiagram(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Ui_CurrentDiagram, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 550)
         self.setWindowTitle('电流曲线')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态
@@ -44,7 +44,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         wgt.setGeometry(50, 50, 900, 480)
         self.BigDiagram = diagram.BigPlotWidget(wgt)
         wgt2 = QtWidgets.QWidget(wgt)
-        wgt2.setGeometry(0,40,100,100)
+        wgt2.setGeometry(0, 40, 100, 100)
         layout = QtWidgets.QVBoxLayout(wgt2)
 
         self.Label_d11 = QtWidgets.QLabel('BD3S')
@@ -58,7 +58,6 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         self.DS_DataSlider.setGeometry(50, 530, 800, 50)
 
         self.BT_ZoomIn = QtWidgets.QPushButton(GB_Diagram)
-
         self.BT_ZoomIn.setFixedSize(50, 50)
         style = '''QPushButton {background-image: url("./images/zoomin.png")}'''
         self.BT_ZoomIn.setStyleSheet(style)

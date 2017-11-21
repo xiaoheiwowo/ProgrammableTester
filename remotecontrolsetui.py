@@ -11,7 +11,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
     '''
     def __init__(self, parent = None):
         super(Ui_RemoteControlSet, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 600)
+        self.setGeometry(300, 200, 1024, 550)
         self.setWindowTitle('外控设置')
         self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
         # 设置窗口模态
@@ -19,15 +19,35 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
 
         # 保存、确定、取消按钮
         self.DB_DialogButton = dialogbutton.DialogButton(self)
-        self.DB_DialogButton.move(700, 530)
+        self.DB_DialogButton.setFixedSize(300, 50)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
+        Layout_button = QtWidgets.QHBoxLayout()
+        Layout_button.addStretch(1)
+        Layout_button.addWidget(self.DB_DialogButton)
 
         self.Init_LocalNetSet()
         self.Init_ServerSelect()
         self.Init_ConnectionState()
         self.Init_BusValveAdvance()
         self.Init_CurrentDiagramSet()
-        self.Init_PowerSet()
+
+        Layout_Net = QtWidgets.QVBoxLayout()
+        Layout_Net.addWidget(self.GB_LocalNetSet)
+        Layout_Net.addWidget(self.GB_ServerSelect)
+
+        Layout_Current = QtWidgets.QVBoxLayout()
+        Layout_Current.addWidget(self.GB_Test)
+        Layout_Current.addWidget(self.GB_CurrentDiagramSet)
+
+        Layout_GB = QtWidgets.QHBoxLayout()
+        Layout_GB.addLayout(Layout_Net)
+        Layout_GB.addLayout(Layout_Current)
+        Layout_GB.addWidget(self.GB_BusValveAdvance)
+
+        Layout_Main = QtWidgets.QVBoxLayout(self)
+        Layout_Main.addLayout(Layout_GB)
+        Layout_Main.addLayout(Layout_button)
+
 
     # 初始化网络本地设置
     def Init_LocalNetSet(self):
@@ -97,14 +117,13 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.Layout_ServerSelect.addWidget(self.CB_ServerIP, 1, 1, 1, 3)
     # 初始化连接测试
     def Init_ConnectionState(self):
-        GB_Test = QtWidgets.QGroupBox(self)
-        GB_Test.setTitle('测试')
-        GB_Test.setGeometry(10, 370, 300, 140)
-        layout = QtWidgets.QHBoxLayout(GB_Test)
+        self.GB_Test = QtWidgets.QGroupBox(self)
+        self.GB_Test.setTitle('测试')
+        self.GB_Test.setMaximumHeight(150)
+        layout = QtWidgets.QHBoxLayout(self.GB_Test)
 
         self.Label_c11 = QtWidgets.QLabel(self)
         # self.Label_c11.setGeometry(600, 350, 48, 48)
-        self.Label_c11.setText('111')
         self.Label_c11.setPixmap(QtGui.QPixmap(':/connect_no_48px_19637_easyicon.net.png'))
         self.BT_ConnectTest = QtWidgets.QPushButton(self)
         # self.BT_ConnectTest.setGeometry(680, 350, 80, 40)
@@ -121,9 +140,9 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.BT_ConnectTest.released.connect(self.ConnectFailed)
     # 初始化总线阀高级设置
     def Init_BusValveAdvance(self):
-        GB_BusValveAdvance = QtWidgets.QGroupBox(self)
-        GB_BusValveAdvance.setTitle('总线阀高级设置')
-        GB_BusValveAdvance.setGeometry(320, 10, 300, 300) #695, 500)
+        self.GB_BusValveAdvance = QtWidgets.QGroupBox(self)
+        self.GB_BusValveAdvance.setTitle('总线阀高级设置')
+        self.GB_BusValveAdvance.setGeometry(320, 10, 300, 300) #695, 500)
 
         Label_e11 = QtWidgets.QLabel('开阀命令:')
         Label_e12 = QtWidgets.QLabel('关阀命令:')
@@ -142,7 +161,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.CB_CheckBits = QtWidgets.QComboBox()
         self.CB_StopBits = QtWidgets.QComboBox()
         # 布局
-        layout = QtWidgets.QGridLayout(GB_BusValveAdvance)
+        layout = QtWidgets.QGridLayout(self.GB_BusValveAdvance)
         layout.addWidget(Label_e11,0,0)
         layout.addWidget(self.LE_OpenCommand,0,1)
         layout.addWidget(Label_e12)
@@ -161,9 +180,9 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         layout.addWidget(self.CB_StopBits)
     # 初始化电流曲线设置
     def Init_CurrentDiagramSet(self):
-        GB_CurrentDiagramSet = QtWidgets.QGroupBox(self)
-        GB_CurrentDiagramSet.setGeometry(320, 315, 300, 195)
-        GB_CurrentDiagramSet.setTitle('电流曲线设置')
+        self.GB_CurrentDiagramSet = QtWidgets.QGroupBox(self)
+        self.GB_CurrentDiagramSet.setGeometry(320, 315, 300, 195)
+        self.GB_CurrentDiagramSet.setTitle('电流曲线设置')
 
         Label_f11 = QtWidgets.QLabel('数据储存深度：')
         Label_f12 = QtWidgets.QLabel('pts')
@@ -179,7 +198,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.SB_DateStorageInterval = QtWidgets.QSpinBox()
         self.SB_DisplayTime = QtWidgets.QSpinBox()
 
-        layout = QtWidgets.QGridLayout(GB_CurrentDiagramSet)
+        layout = QtWidgets.QGridLayout(self.GB_CurrentDiagramSet)
         layout.addWidget(Label_f11, 1, 0)
         layout.addWidget(self.LE_DataStorageDepth, 1 ,1)
         layout.addWidget(Label_f12, 1, 2)
@@ -191,58 +210,6 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         layout.addWidget(Label_f16, 4, 0)
         layout.addWidget(self.SB_DisplayTime, 4, 1)
         layout.addWidget(Label_f17, 4, 2)
-    # 初始化电源设置
-    def Init_PowerSet(self):
-        GB_PowerSet = QtWidgets.QGroupBox(self)
-        GB_PowerSet.setGeometry(630, 10, 380, 500)
-        GB_PowerSet.setTitle('电源设置')
-
-        Label_g11 = QtWidgets.QLabel('DC调节精度Δ1：')
-        Label_g12 = QtWidgets.QLabel('DC调节精度Δ2：')
-        Label_g13 = QtWidgets.QLabel('AC调节精度Δ1：')
-        Label_g14 = QtWidgets.QLabel('AC调节精度Δ2：')
-        Label_g15 = QtWidgets.QLabel('安全极限误差Δ3：')
-        Label_g16 = QtWidgets.QLabel('%')
-        Label_g17 = QtWidgets.QLabel('%')
-        Label_g18 = QtWidgets.QLabel('%')
-        Label_g19 = QtWidgets.QLabel('%')
-        Label_g21 = QtWidgets.QLabel('%')
-        Label_g22 = QtWidgets.QLabel('')
-        Label_g22.setPixmap(QtGui.QPixmap(':/dcac.png'))
-        Label_g22.setFixedSize(300, 150)
-
-        self.DCAdjustPrecision1 = QtWidgets.QSpinBox()
-        self.DCPermissibleErrors2 = QtWidgets.QSpinBox()
-        self.ACAdjustPrecision1 = QtWidgets.QSpinBox()
-        self.ACPermissibleErrors2 = QtWidgets.QSpinBox()
-        self.SafetyLimit = QtWidgets.QSpinBox()
-        TE_Instructions = QtWidgets.QTextEdit()
-        TE_Instructions.setText('电源设置参数说明\n '
-                                'Vx:电压设定值\n'
-                                'Δ1:以Vx为中心的偏移相对值，调节时电压到达此区域视为达到要求\n'
-                                'Δ2:以Vx为中心的偏移相对值，工作中当电压超出此区域开始调整\n'
-                                'Δ3:电压误差超过Δ3断开电源，调整到Δ1范围内再接通。\n')
-        TE_Instructions.setReadOnly(True)
-
-        layout = QtWidgets.QGridLayout(GB_PowerSet)
-        layout.addWidget(Label_g11, 1, 0)
-        layout.addWidget(self.DCAdjustPrecision1,1 ,1)
-        layout.addWidget(Label_g16,1 ,2)
-        layout.addWidget(Label_g12)
-        layout.addWidget(self.DCPermissibleErrors2)
-        layout.addWidget(Label_g17)
-        layout.addWidget(Label_g13)
-        layout.addWidget(self.ACAdjustPrecision1)
-        layout.addWidget(Label_g18)
-        layout.addWidget(Label_g14)
-        layout.addWidget(self.ACPermissibleErrors2)
-        layout.addWidget(Label_g19)
-        layout.addWidget(Label_g15)
-        layout.addWidget(self.SafetyLimit)
-        layout.addWidget(Label_g21)
-        layout.addWidget(Label_g22, 6, 0, 2, 3)
-        layout.addWidget(TE_Instructions, 8, 0, 4, 3)
-
     # 槽
     def IPSetEnable(self):
         self.LE_LocalIP.setDisabled(False)

@@ -14,6 +14,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Ui_ControlModeSet, self).__init__(parent)
         self.setGeometry(300, 200, 1024, 550)
+        self.setMinimumSize(800, 480)
         self.setWindowTitle('控制方式设置')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态
@@ -33,9 +34,8 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
         Layout_GroupBox = QtWidgets.QHBoxLayout()
         Layout_GroupBox.addWidget(self.TW_ControlModeList)
-        Layout_GroupBox.addWidget(self.GB_WiringDiagram)
+        Layout_GroupBox.addWidget(self.TabWgt)
         Layout_GroupBox.addWidget(self.GB_Extend)
-        Layout_GroupBox.addStretch(1)
 
         Layout_Main = QtWidgets.QVBoxLayout()
         Layout_Main.addLayout(Layout_GroupBox)
@@ -47,7 +47,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
-        self.TW_ControlModeList.setFixedSize(200, 450)
+        self.TW_ControlModeList.setFixedWidth(200)
         self.TW_ControlModeList.setRowCount(20)
         self.TW_ControlModeList.setColumnCount(2)
         self.TW_ControlModeList.setHorizontalHeaderLabels(['控制方式', '电压'])
@@ -64,29 +64,33 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
     def Init_WiringDiagram(self):
 
-        self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
-        self.GB_WiringDiagram.setFixedSize(600, 450)
-        self.GB_WiringDiagram.setTitle('接线图')
+        # self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
+        # self.GB_WiringDiagram.setTitle('接线图')
 
-        TabWgt = QtWidgets.QTabWidget(self.GB_WiringDiagram)
-        TabWgt.setGeometry(0, 20, 600, 430)
+        self.TabWgt = QtWidgets.QTabWidget(self)
+        self.Tab_ON = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_OFF = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_STOP = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_M3 = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_M4 = QtWidgets.QWidget(self.TabWgt)
+        self.TabWgt.addTab(self.Tab_ON, 'ON')
+        self.TabWgt.addTab(self.Tab_OFF, 'OFF')
+        self.TabWgt.addTab(self.Tab_STOP, 'STOP')
+        self.TabWgt.addTab(self.Tab_M3, 'M3')
+        self.TabWgt.addTab(self.Tab_M4, 'M4')
 
-        self.Tab_ON = QtWidgets.QWidget(TabWgt)
-        self.Tab_OFF = QtWidgets.QWidget(TabWgt)
-        self.Tab_STOP = QtWidgets.QWidget(TabWgt)
-        self.Tab_M3 = QtWidgets.QWidget(TabWgt)
-        self.Tab_M4 = QtWidgets.QWidget(TabWgt)
-        TabWgt.addTab(self.Tab_ON, 'ON')
-        TabWgt.addTab(self.Tab_OFF, 'OFF')
-        TabWgt.addTab(self.Tab_STOP, 'STOP')
-        TabWgt.addTab(self.Tab_M3, 'M3')
-        TabWgt.addTab(self.Tab_M4, 'M4')
+        # Layout_Tab = QtWidgets.QHBoxLayout(self.GB_WiringDiagram)
+        # Layout_Tab.addWidget(self.TabWgt)
 
     # ON标签页
         SA_ON = QtWidgets.QScrollArea(self.Tab_ON)
-        SA_ON.setGeometry(2, 1, 590, 400)
+        Layout_on = QtWidgets.QHBoxLayout(self.Tab_ON)
+        Layout_on.addWidget(SA_ON)
+        Layout_on.setContentsMargins(2, 2, 2, 2)
+
         WgtON = QtWidgets.QWidget(SA_ON)
-        WgtON.setMinimumSize(950, 400)
+        WgtON.resize(950, 400)
+        self.update()
         SA_ON.setWidget(WgtON)
 
         self.BT_ONx = []
@@ -153,7 +157,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
     def Init_Extend(self):
         self.GB_Extend = QtWidgets.QGroupBox(self)
-        self.GB_Extend.setFixedSize(200, 450)
+        self.GB_Extend.setMinimumWidth(200)
         self.GB_Extend.setTitle('附加参数')
         # 调节阀部分
         self.Layout_Extend = QtWidgets.QVBoxLayout(self.GB_Extend)
