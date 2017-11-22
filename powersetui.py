@@ -11,8 +11,8 @@ class Ui_PowerSet(QtWidgets.QDialog):
     '''
     def __init__(self, parent = None):
         super(Ui_PowerSet, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 550)
-        self.setMinimumSize(800, 480)
+        self.resize(1024, 550)
+        self.setMinimumSize(600, 300)
         self.setWindowTitle('电源设置')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态

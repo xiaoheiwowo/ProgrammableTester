@@ -42,10 +42,6 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
 
         self.BT_FullScreen.clicked.connect(self.showCurrentDiagramForm)
 
-        # 电流曲线
-        # wgt = QWidget(self)
-        # wgt.setGeometry(450, 50, 450, 160)
-        # DIAGRAM = diagram.PlotWidget(wgt)
 
     def showControlSetForm(self):
         self.controlset = PT_ControlModeSet()
@@ -98,13 +94,14 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    # 设置字体 在树莓派上使用注释下行
     app.setFont(QFont('微软雅黑 Semilight', 9))
 
-    # win = PT_MainWindow()
+    win = PT_MainWindow()
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
-    win = PT_PowerCalibration()
+    # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
     win.show()

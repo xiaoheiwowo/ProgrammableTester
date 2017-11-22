@@ -11,7 +11,8 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
     '''
     def __init__(self, parent=None):
         super(Ui_PowerCalibration, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 550)
+        self.resize(1024, 550)
+        self.setMinimumSize(600, 300)
         self.setWindowTitle('电源及采样校准')
         self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
         # 设置窗口模态

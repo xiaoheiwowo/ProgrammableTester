@@ -7,14 +7,18 @@ import dialogbutton
 
 import remotecontrolsetui
 
+# 常量
+m = 55
+n = 35
+
 class Ui_ControlModeSet(QtWidgets.QDialog):
     '''
     控制方式设置窗口，
     '''
     def __init__(self, parent = None):
         super(Ui_ControlModeSet, self).__init__(parent)
-        self.setGeometry(300, 200, 1024, 550)
-        self.setMinimumSize(800, 480)
+        self.resize(1024, 550)
+        self.setMinimumSize(600, 300)
         self.setWindowTitle('控制方式设置')
         self.setWindowIcon(QtGui.QIcon(":/qt.png"))
         # 设置窗口模态
@@ -28,6 +32,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.DB_DialogButton = dialogbutton.DialogButton(self)
         self.DB_DialogButton.setFixedSize(300, 50)
         self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
+        # self.DB_DialogButton.BT_Save1.setFocusPolicy(QtCore.Qt.StrongFocus)
         Layout_button = QtWidgets.QHBoxLayout()
         Layout_button.addStretch(1)
         Layout_button.addWidget(self.DB_DialogButton)
@@ -41,9 +46,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         Layout_Main.addLayout(Layout_GroupBox)
         Layout_Main.addLayout(Layout_button)
         self.setLayout(Layout_Main)
-        # 变量
-        self.PressedXNum = None
-        self.PressedYNum = None
+
 
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
@@ -82,78 +85,12 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         # Layout_Tab = QtWidgets.QHBoxLayout(self.GB_WiringDiagram)
         # Layout_Tab.addWidget(self.TabWgt)
 
-    # ON标签页
-        SA_ON = QtWidgets.QScrollArea(self.Tab_ON)
-        Layout_on = QtWidgets.QHBoxLayout(self.Tab_ON)
-        Layout_on.addWidget(SA_ON)
-        Layout_on.setContentsMargins(2, 2, 2, 2)
-
-        WgtON = QtWidgets.QWidget(SA_ON)
-        WgtON.resize(950, 400)
-        self.update()
-        SA_ON.setWidget(WgtON)
-
-        self.BT_ONx = []
-        self.BT_ONy = []
-        # 生成X按钮
-        for i in range(16):
-            self.BT_ONx.append(QtWidgets.QPushButton(WgtON))
-            self.BT_ONx[i].setText('X0' + (str(hex(i))[2]).upper())
-            self.BT_ONx[i].setGeometry(55 * i + 60, 10, 50, 30)
-            self.BT_ONx[i].setCheckable(True)
-            self.BT_ONx[i].setFocusPolicy(QtCore.Qt.NoFocus)
-        # 生成Y按钮
-        for j in range(10):
-            self.BT_ONy.append(QtWidgets.QPushButton(WgtON))
-            self.BT_ONy[j].setText('Y0' + str(j))
-            self.BT_ONy[j].setGeometry(5, 35 * j + 45, 50, 30)
-            self.BT_ONy[j].setCheckable(True)
-            self.BT_ONy[j].setFocusPolicy(QtCore.Qt.NoFocus)
-
-        # self.DB_DialogButton.BT_OK1.isChecked()
-
-        self.BT_ONx[0].clicked.connect(self.X00isPressed)
-        self.BT_ONy[0].clicked.connect(self.Y00isPressed)
-        # 画连线
-        self.WgtDraw = QtWidgets.QWidget(WgtON)
-        self.WgtDraw.setGeometry(55, 40, 550, 400)
-
-        self.m = 55
-        self.n = 35
-
-        # self.Wiring = DrawWiring(self.WgtDraw, 30 + 0 * self.m, 20 + 0 * self.n)
-
-    def X00isPressed(self):
-        for i in range(16):
-            if i != 0:
-                self.BT_ONx[i].setChecked(False)
-        for j in range(10):
-            self.BT_ONy[j].setChecked(False)
-        if self.BT_ONx[0].isChecked():
-            self.PressedXNum = 0
-        else:
-            self.PressedXNum = None
-            print('x0ispressed', self.PressedXNum)
-            # self.Wiring = DrawWiring(self.WgtDraw, 30 + self.PressedXNum * self.m, 20 + 1 * self.n)
-            # self.Wiring.show()
-
-    def Y00isPressed(self):
-        for i in range(10):
-            if i != 0:
-                self.BT_ONy[i].setChecked(False)
-        for j in range(16):
-            self.BT_ONx[j].setChecked(False)
-        if self.BT_ONy[0].isChecked():
-            self.PressedYNum = 0
-            print('y0ispressed', self.PressedYNum)
-            if self.PressedXNum == None:
-                pass
-            else:
-                self.Wiring = DrawWiring(self.WgtDraw, 30 + self.PressedXNum * self.m, 20 + self.PressedYNum * self.n)
-                self.Wiring.show()
-
-                self.PressedXNum = None
-                self.PressedYNum = None
+    # 标签页
+        self.TON = ControlModeWiring(self.Tab_ON)
+        self.TOFF = ControlModeWiring(self.Tab_OFF)
+        self.TSTOP = ControlModeWiring(self.Tab_STOP)
+        self.TM3 = ControlModeWiring(self.Tab_M3)
+        self.TM4 = ControlModeWiring(self.Tab_M4)
 
     def Init_Extend(self):
         self.GB_Extend = QtWidgets.QGroupBox(self)
@@ -181,6 +118,9 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.CB_ActionMode.addItem('反作用')
         self.Layout_ActionMode.addWidget(self.Label_a12)
         self.Layout_ActionMode.addWidget(self.CB_ActionMode)
+
+        self.CB_ControlMode2.setDisabled(True)
+        self.CB_ActionMode.setDisabled(True)
         # 分隔线
         self.line1 = QtWidgets.QFrame()
         self.line1.resize(200, 10)
@@ -192,6 +132,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.CK_isBusValve.setText('是总线阀')
         self.BT_Advanced = QtWidgets.QPushButton('高级>>')
         self.BT_Advanced.setMinimumHeight(40)
+        self.BT_Advanced.setFocusPolicy(QtCore.Qt.NoFocus)
         self.Layout_isBusValve.addWidget(self.CK_isBusValve)
         self.Layout_isBusValve.addWidget(self.BT_Advanced)
 
@@ -210,6 +151,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.CB_BaudRate.setMinimumHeight(40)
         self.Layout_BaudRate.addWidget(self.Label_a14)
         self.Layout_BaudRate.addWidget(self.CB_BaudRate)
+
+        self.BT_Advanced.setDisabled(True)
+        self.CB_BaudRate.setDisabled(True)
+        self.CB_BusProtocol.setDisabled(True)
         # 分隔线
         self.line2 = QtWidgets.QFrame()
         self.line2.resize(200, 10)
@@ -236,10 +181,47 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.Layout_Extend.addWidget(self.Label_a15)
         # 信号
         self.BT_Advanced.clicked.connect(self.showRemoteControlForm)
+        self.CK_isAdjustValve.clicked.connect(self.setAdjustValve)
+        self.CK_isBusValve.clicked.connect(self.setBusValve)
+        self.CK_isBP5.clicked.connect(self.setBP5)
 
     def showRemoteControlForm(self):
         self.remotecontrolset = PT_RemoteControlSet()
         self.remotecontrolset.show()
+
+    def setAdjustValve(self):
+        if self.CK_isAdjustValve.isChecked():
+            self.CB_ControlMode2.setDisabled(False)
+            self.CB_ActionMode.setDisabled(False)
+
+            self.CK_isBusValve.setChecked(False)
+            self.CK_isBP5.setChecked(False)
+            self.setBusValve()
+        else:
+            self.CB_ControlMode2.setDisabled(True)
+            self.CB_ActionMode.setDisabled(True)
+
+    def setBusValve(self):
+        if self.CK_isBusValve.isChecked():
+            self.BT_Advanced.setDisabled(False)
+            self.CB_BusProtocol.setDisabled(False)
+            self.CB_BaudRate.setDisabled(False)
+
+            self.CK_isAdjustValve.setChecked(False)
+            self.setAdjustValve()
+            self.CK_isBP5.setChecked(False)
+        else:
+            self.BT_Advanced.setDisabled(True)
+            self.CB_BusProtocol.setDisabled(True)
+            self.CB_BaudRate.setDisabled(True)
+
+    def setBP5(self):
+        if self.CK_isBP5.isChecked():
+            self.CK_isAdjustValve.setChecked(False)
+            self.CK_isBusValve.setChecked(False)
+            self.setAdjustValve()
+            self.setBusValve()
+        pass
 
 class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
     def __init__(self, parent=None):
@@ -248,7 +230,7 @@ class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
 class DrawWiring(QtWidgets.QWidget):
     def __init__(self, Widget, x, y, parent=None):
         super(DrawWiring, self).__init__(parent)
-
+        self.resize(1000, 500)
         # self.Canvas = Widget
         self.x_wiring = x
         self.y_wiring = y
@@ -268,6 +250,133 @@ class DrawWiring(QtWidgets.QWidget):
         qp.drawLine(0, self.y_wiring, self.x_wiring, self.y_wiring)
         qp.drawEllipse(self.x_wiring-3, self.y_wiring-3, 6, 6,)
 
-    def clearAll(self):
+class ControlModeWiring(QtWidgets.QWidget):
+    def __init__(self, wgt, parent = None):
+        super(ControlModeWiring, self).__init__(parent)
 
-        pass
+        self.SA = QtWidgets.QScrollArea(wgt)
+        Layout_tab = QtWidgets.QHBoxLayout(wgt)
+        Layout_tab.addWidget(self.SA)
+        Layout_tab.setContentsMargins(2, 2, 2, 2)
+        Wgt = QtWidgets.QWidget(self.SA)
+        Wgt.resize(950, 400)
+        self.SA.setWidget(Wgt)
+        self.WgtDraw = QtWidgets.QWidget(Wgt)
+        self.WgtDraw.setGeometry(55, 40, 950, 400)
+        self.drawWiring()
+
+        # 变量
+        self.PressedXNum = None
+        self.PressedYNum = None
+        self.XMark = False
+        self.YMark = False
+        self.wiringShow = []
+        for i in range(160):
+            self.wiringShow.append(False)
+
+        self.BT_x = []
+        self.BT_y = []
+        # 生成X按钮
+        for i in range(16):
+            self.BT_x.append(QtWidgets.QPushButton(Wgt))
+            self.BT_x[i].setText('X0' + (str(hex(i))[2]).upper())
+            self.BT_x[i].setGeometry(55 * i + 60, 10, 50, 30)
+            self.BT_x[i].setCheckable(True)
+            self.BT_x[i].setFocusPolicy(QtCore.Qt.NoFocus)
+
+        # 生成Y按钮
+        for j in range(10):
+            self.BT_y.append(QtWidgets.QPushButton(Wgt))
+            self.BT_y[j].setText('Y0' + str(j))
+            self.BT_y[j].setGeometry(5, 35 * j + 45, 50, 30)
+            self.BT_y[j].setCheckable(True)
+            self.BT_y[j].setFocusPolicy(QtCore.Qt.NoFocus)
+
+        # 信号
+        self.BT_x[0].clicked.connect(lambda: self.XisPressed(0))
+        self.BT_x[1].clicked.connect(lambda: self.XisPressed(1))
+        self.BT_x[2].clicked.connect(lambda: self.XisPressed(2))
+        self.BT_x[3].clicked.connect(lambda: self.XisPressed(3))
+        self.BT_x[4].clicked.connect(lambda: self.XisPressed(4))
+        self.BT_x[5].clicked.connect(lambda: self.XisPressed(5))
+        self.BT_x[6].clicked.connect(lambda: self.XisPressed(6))
+        self.BT_x[7].clicked.connect(lambda: self.XisPressed(7))
+        self.BT_x[8].clicked.connect(lambda: self.XisPressed(8))
+        self.BT_x[9].clicked.connect(lambda: self.XisPressed(9))
+        self.BT_x[10].clicked.connect(lambda: self.XisPressed(10))
+        self.BT_x[11].clicked.connect(lambda: self.XisPressed(11))
+        self.BT_x[12].clicked.connect(lambda: self.XisPressed(12))
+        self.BT_x[13].clicked.connect(lambda: self.XisPressed(13))
+        self.BT_x[14].clicked.connect(lambda: self.XisPressed(14))
+        self.BT_x[15].clicked.connect(lambda: self.XisPressed(15))
+
+        self.BT_y[0].clicked.connect(lambda: self.YisPressed(0))
+        self.BT_y[1].clicked.connect(lambda: self.YisPressed(1))
+        self.BT_y[2].clicked.connect(lambda: self.YisPressed(2))
+        self.BT_y[3].clicked.connect(lambda: self.YisPressed(3))
+        self.BT_y[4].clicked.connect(lambda: self.YisPressed(4))
+        self.BT_y[5].clicked.connect(lambda: self.YisPressed(5))
+        self.BT_y[6].clicked.connect(lambda: self.YisPressed(6))
+        self.BT_y[7].clicked.connect(lambda: self.YisPressed(7))
+        self.BT_y[8].clicked.connect(lambda: self.YisPressed(8))
+        self.BT_y[9].clicked.connect(lambda: self.YisPressed(9))
+
+        # 使用QSignalMapper
+        # self.BT_x[0].clicked.connect(self.XMapper.map)
+        # self.BT_y[0].clicked.connect(self.YMapper.map)
+        # self.XMapper = QtCore.QSignalMapper()
+        # self.YMapper = QtCore.QSignalMapper()
+        # self.XMapper.setMapping(self.BT_x[1], self.BT_x[1].text())
+        # self.XMapper.mapped(str).connect(self.XisPressed(str))
+
+    def XisPressed(self, int):
+        print('X', int)
+        self.PressedXNum = int
+        self.XMark = True
+        for i in range(16):
+            if i != int:
+                self.BT_x[i].setChecked(False)
+        # if self.YMark:
+        #     if not self.wiringShow[self.PressedXNum * 10 + self.PressedYNum]:
+        #         self.wiring[self.PressedXNum * 10 + self.PressedYNum].show()
+        #         self.wiringShowMark[self.PressedXNum * 10 + self.PressedYNum] = True
+        #     else:
+        #         self.wiring[self.PressedXNum * 10 + self.PressedYNum].hide()
+        #         self.wiringShow[self.PressedXNum * 10 + self.PressedYNum] = False
+        #
+        #     self.XMark = False
+        #     self.YMark = False
+        #     self.BT_x[self.PressedXNum].setChecked(False)
+        #     self.BT_y[self.PressedYNum].setChecked(False)
+        #     self.PressedXNum = None
+        #     self.PressedYNum = None
+
+    def YisPressed(self, int):
+        print('Y', int)
+        self.YMark = True
+        self.PressedYNum = int
+        for i in range(10):
+            if i != int:
+                self.BT_y[i].setChecked(False)
+
+        if self.XMark:
+            if self.wiringShow[self.PressedXNum * 10 + self.PressedYNum]:
+                self.wiring[self.PressedXNum * 10 + self.PressedYNum].hide()
+                self.wiringShow[self.PressedXNum * 10 + self.PressedYNum] = False
+            else:
+                self.wiring[self.PressedXNum * 10 + self.PressedYNum].show()
+                self.wiringShow[self.PressedXNum * 10 + self.PressedYNum] = True
+            self.BT_x[self.PressedXNum].setChecked(False)
+            self.BT_y[self.PressedYNum].setChecked(False)
+            self.PressedXNum = None
+            self.PressedYNum = None
+            self.XMark = False
+            self.YMark = False
+
+    def drawWiring(self):
+        self.wiring = []
+        for i in range(16):
+            for j in range(10):
+                self.wiring.append(DrawWiring(self.WgtDraw, 30 + i * m, 20 + j * n))
+                # self.wiring[i * 10 + j].show()
+                self.wiring[i * 10 + j].hide()
