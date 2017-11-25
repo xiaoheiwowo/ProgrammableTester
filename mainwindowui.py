@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import images.images_rc
 
 import diagram
+import numpy as np
 
 class Ui_MainWindow(object):
     '''
@@ -13,7 +14,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1024, 550)
-        MainWindow.setMinimumSize(QtCore.QSize(600, 300))
+        MainWindow.setMinimumSize(QtCore.QSize(800, 300))
         MainWindow.setWindowTitle('可编程测试仪')
         MainWindow.setWindowIcon(QtGui.QIcon(":/qt.png"))
 
@@ -59,6 +60,7 @@ class Ui_MainWindow(object):
         # 基本信息GroupBox
         self.GB_Information = QtWidgets.QGroupBox(widget)
         # self.GB_Information.setGeometry(QtCore.QRect(5, 0, 300, 200))
+        self.GB_Information.setMinimumWidth(250)
         self.GB_Information.setTitle('仪器状态')
 
         self.Layout_Information = QtWidgets.QVBoxLayout(self.GB_Information)
@@ -110,13 +112,21 @@ class Ui_MainWindow(object):
         Layout_button.addWidget(self.BT_Dynamic)
         Layout_button.addWidget(self.BT_Static)
 
-        self.Wgt_MainWinCurrent = QtWidgets.QWidget(self.GB_CurrentCurve)
-        DIAGRAM = diagram.PlotWidget(self.Wgt_MainWinCurrent)
+        xx = np.arange(-10.0, 0, 0.05)
+        yy = (np.cos(2*np.pi*xx)+1)*10
+        self.SmallDiagram = diagram.PlotWidget(self, xx, yy)
+        self.SmallDiagram.myTable.remove()
+        self.SmallDiagram.fig.subplots_adjust(0., 0., 1, 1)
+        self.SmallDiagram.myFigure1.xaxis.set_ticks_position('top')
+        self.SmallDiagram.myFigure1.yaxis.set_ticks_position('left')
 
+        # self.DIAGRAM.figure.subplots_adjust(0.02, 0.25, 0.9, 0.96)
+        self.SmallDiagram.myFigure1.spines['top'].set_position(('data', 0))
+        self.SmallDiagram.myFigure1.spines['left'].set_position(('data', 0))
 
         Layout = QtWidgets.QHBoxLayout(self.GB_CurrentCurve)
         Layout.addWidget(Wgt_LB)
-        Layout.addWidget(self.Wgt_MainWinCurrent)
+        Layout.addWidget(self.SmallDiagram)
         Layout.addLayout(Layout_button)
 
     # 初始化阀门控制部分
@@ -196,7 +206,7 @@ class Ui_MainWindow(object):
         self.BT_Lock.setMinimumHeight(40)
         self.BT_Lock.setMinimumWidth(120)
         self.BT_Lock.setText('长按锁定')
-        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_128px_1175616_easyicon.net.png'))
+        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
         self.QTimerLock = QtCore.QTimer(self)
         nousewgt = QtWidgets.QWidget()
 
@@ -361,13 +371,13 @@ class Ui_MainWindow(object):
         else:
             self.LockControl()
     def LockControl(self):
-        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_128px_1175615_easyicon.net.png'))
+        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_closed_outline_105.8691588785px_1158659_easyicon.net.png'))
         self.BT_Lock.setText('长按解锁')
         self.ValveControlButtonDisabled(False)
         self.LockState = True
 
     def UnlockControl(self):
-        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_128px_1175616_easyicon.net.png'))
+        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
         self.BT_Lock.setText('长按锁定')
         self.ValveControlButtonDisabled(True)
         self.LockState = False

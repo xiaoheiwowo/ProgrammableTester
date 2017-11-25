@@ -3,10 +3,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import dialogbutton
-
 import diagram
-
+import matplotlib.animation as animation
+import numpy as np
+import random
+import matplotlib.patheffects as patheffects
 import doubleslider
 class Ui_CurrentDiagram(QtWidgets.QDialog):
     def __init__(self, parent = None):
@@ -25,44 +26,71 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         self.Init_DiagramArea()
 
-        wgt = QtWidgets.QWidget(self)
-        wgt.setGeometry(920,10,90,580)
-        layout = QtWidgets.QVBoxLayout(wgt)
-
         self.BT_Dynamic = QtWidgets.QPushButton('动态')
+        self.BT_Dynamic.setFixedSize(50, 50)
         self.BT_Static = QtWidgets.QPushButton('静态')
-
-        layout.addWidget(self.BT_Dynamic)
-        layout.addWidget(self.BT_Static)
-        layout.addStretch(0)
-
-    def Init_DiagramArea(self):
-        GB_Diagram = QtWidgets.QGroupBox(self)
-        GB_Diagram.setGeometry(10, 10, 900, 580)
-        GB_Diagram.setTitle('电流曲线')
-
-        wgt = QtWidgets.QWidget(self)
-        wgt.setGeometry(50, 50, 900, 480)
-        self.BigDiagram = diagram.BigPlotWidget(wgt)
-        wgt2 = QtWidgets.QWidget(wgt)
-        wgt2.setGeometry(0, 40, 100, 100)
-        layout = QtWidgets.QVBoxLayout(wgt2)
-
-        self.Label_d11 = QtWidgets.QLabel('BD3S')
-        self.Label_d12 = QtWidgets.QLabel('DC 5V')
-        self.Label_d13 = QtWidgets.QLabel('200mA')
-        layout.addWidget(self.Label_d11)
-        layout.addWidget(self.Label_d12)
-        layout.addWidget(self.Label_d13)
-
-        self.DS_DataSlider = doubleslider.MDoubleSlider(GB_Diagram)
-        self.DS_DataSlider.setGeometry(50, 530, 800, 50)
-
-        self.BT_ZoomIn = QtWidgets.QPushButton(GB_Diagram)
+        self.BT_Static.setFixedSize(50, 50)
+        self.BT_ScreenShot = QtWidgets.QPushButton('截屏')
+        self.BT_ScreenShot.setFixedSize(50,50)
+        self.BT_ZoomIn = QtWidgets.QPushButton(self)
         self.BT_ZoomIn.setFixedSize(50, 50)
-        style = '''QPushButton {background-image: url("./images/zoomin.png")}'''
-        self.BT_ZoomIn.setStyleSheet(style)
-        self.BT_ZoomIn.setGeometry(850, 5, 50, 50)
+        self.BT_ZoomIn.setStyleSheet('''QPushButton {background-image: url("./images/zoomin.png")}''')
+
+        # self.Label_d11 = QtWidgets.QLabel('BD3S')
+        # self.Label_d12 = QtWidgets.QLabel('DC 5V')
+        # self.Label_d13 = QtWidgets.QLabel('200mA')
+
+        Layout_Other = QtWidgets.QVBoxLayout()
+
+        # Layout_Other.addWidget(self.Label_d11)
+        # Layout_Other.addWidget(self.Label_d12)
+        # Layout_Other.addWidget(self.Label_d13)
+        Layout_Other.addWidget(self.BT_ZoomIn)
+        Layout_Other.addStretch(0)
+        Layout_Other.addWidget(self.BT_ScreenShot)
+        Layout_Other.addWidget(self.BT_Dynamic)
+        Layout_Other.addWidget(self.BT_Static)
+
+
+
+        Layout_Main = QtWidgets.QHBoxLayout()
+        Layout_Main.addWidget(self.GB_Diagram)
+        Layout_Main.addLayout(Layout_Other)
+        self.setLayout(Layout_Main)
+
+        self.BT_ZoomIn.clicked.connect(self.close)
+        self.BT_Static.clicked.connect(self.onstart)
+    def Init_DiagramArea(self):
+        self.GB_Diagram = QtWidgets.QGroupBox(self)
+        self.GB_Diagram.setGeometry(10, 10, 900, 580)
+        self.GB_Diagram.setTitle('电流曲线')
+
+        xx = np.arange(-10.0, 0, 0.05)
+        yy = (np.cos(2*np.pi*xx)+1)*10
+        self.BigDiagram = diagram.PlotWidget(self, xx, yy)
+
+
+        self.DS_DataSlider = doubleslider.MDoubleSlider(self.GB_Diagram)
+        self.DS_DataSlider.setMinimumHeight(50)
+        # self.DS_DataSlider.setGeometry(50, 530, 800, 50)
+
+        Layout_Diagram = QtWidgets.QVBoxLayout(self.GB_Diagram)
+        Layout_Diagram.addWidget(self.BigDiagram)
+        Layout_Diagram.addWidget(self.DS_DataSlider)
 
         # 信号
-        self.BT_ZoomIn.clicked.connect(self.close)
+
+    def update_line(self, _):
+        Y = 10 * np.random.rand(10)
+        X = range(-10, 0)
+        # self.BigDiagram.myFigure1.clear(self)
+        return self.BigDiagram.myFigure1.plot(X, Y, linewidth=1.5, color='r', label='Current', ls='-', marker='o',
+                            mec='r', mfc='r', ms=6,
+                            path_effects=[patheffects.SimpleLineShadow(), patheffects.Normal()])
+
+    def onstart(self):
+        # self.BigDiagram = diagram.PlotWidget(self,xx=range(-20,0),yy=np.random.rand(20))
+        # self.BigDiagram.__init__(self, xx=range(-20,0),yy=np.random.rand(20))
+        # self.ani = animation.FuncAnimation(self.BigDiagram.figure, self.update_line, blit=True, interval=25)
+        print('d')
+        pass
