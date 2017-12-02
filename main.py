@@ -7,27 +7,25 @@ from PyQt5.QtWidgets import *
 
 # 主窗口Ui类
 import mainwindowui
-
 # 控制方式窗口Ui类
 import controlmodesetui
-
 # 外控设置窗口Ui类
 import remotecontrolsetui
-
 # 电流曲线窗口Ui类
 import currentdiagramui
-
 # 电源及采样校准窗口Ui类
 import powercalibrationui
-
 # 继电器阵列自检Ui类
 import relaycheckui
-
 # 电源设置Ui类
 import powersetui
-
 # 绘图类
-import diagram
+# import diagram
+# socketserver
+from socketserver import TCPServer
+import tcpsocket
+
+import qdarkstyle
 
 class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -41,6 +39,7 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
 
 
         self.BT_FullScreen.clicked.connect(self.showCurrentDiagramForm)
+
 
 
     def showControlSetForm(self):
@@ -91,11 +90,22 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
     def __init__(self, parent=None):
         super(PT_PowerSet, self).__init__(parent)
 
+class tcpThread(QThread):
+    def __init__(self):
+        super(tcpThread, self).__init__()
+        print('new thread init')
+
+    def run(self):
+        serv = TCPServer(('localhost', 21567), tcpsocket.TcpHandler)
+        serv.serve_forever()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # 设置字体 在树莓派上使用注释下行
-    app.setFont(QFont('微软雅黑 Semilight', 9))
+    # app.setFont(QFont('微软雅黑 Semilight', 9))
+    # 启动server线程
+    thread = tcpThread()
+    thread.start()
 
     win = PT_MainWindow()
     # win = PT_ControlModeSet()
@@ -104,6 +114,8 @@ if __name__ == '__main__':
     # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
+    # 全局黑色主题
+    # win.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     win.show()
     sys.exit(app.exec_())
 

@@ -11,12 +11,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 # plt.rcParams['font.sans-serif'] = ['MS Reference Sans Serif']#用来正常显示中文标签
 # plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-# myfont = matplotlib.font_manager.FontProperties(fname=r'C:/Windows/Fonts/adobemingstd-light.otf')
+myfont = matplotlib.font_manager.FontProperties(fname='simhei.ttf')
 from matplotlib.figure import Figure
 from matplotlib import patheffects
 import matplotlib.animation as animation
-
-
 
 
 class PlotWidget(FigureCanvas):
@@ -27,7 +25,6 @@ class PlotWidget(FigureCanvas):
         self.myFigure1.set_facecolor('none')
         # 双y轴
         # self.myFigure1 = self.myFigureno.twinx()
-        self.myFigure1.set_ylabel('I/mA',fontsize=12, labelpad=3)
         self.x_init = xx#np.arange(-10.0, 0, 0.05)
         self.y_init = yy#10 * (np.cos(2 * np.pi * self.x_init) + 1)
         # 添加线

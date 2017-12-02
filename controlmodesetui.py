@@ -6,11 +6,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import dialogbutton
 
 import remotecontrolsetui
-
+import pickle
 # 常量
 m = 55
 n = 35
-
+ControlForm = {'ID': 0, 'NAME': ' ', 'POWER': 0, 'ON': [], 'OFF': [], 'STOP': [], 'M3': [], 'M4': [], 'SPECIAL': 0}
 class Ui_ControlModeSet(QtWidgets.QDialog):
     '''
     控制方式设置窗口，
@@ -24,9 +24,14 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
+        self.readfile()
         self.Init_ControlModeList()
         self.Init_WiringDiagram()
         self.Init_Extend()
+
+
+        for i in range(len(self.file)):
+            self.loaddata(self.file[i], i)
 
         # 保存、确定、取消按钮
         self.DB_DialogButton = dialogbutton.DialogButton(self)
@@ -38,7 +43,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         Layout_button.addWidget(self.DB_DialogButton)
 
         Layout_GroupBox = QtWidgets.QHBoxLayout()
-        Layout_GroupBox.addWidget(self.TW_ControlModeList)
+        Layout_GroupBox.addLayout(self.Layout_ControlList)
         Layout_GroupBox.addWidget(self.TabWgt)
         Layout_GroupBox.addWidget(self.GB_Extend)
 
@@ -51,20 +56,35 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
         self.TW_ControlModeList.setFixedWidth(200)
-        self.TW_ControlModeList.setRowCount(20)
+        self.TW_ControlModeList.setRowCount(len(self.file))
         self.TW_ControlModeList.setColumnCount(2)
         self.TW_ControlModeList.setHorizontalHeaderLabels(['控制方式', '电压'])
         self.TW_ControlModeList.setColumnWidth(0, 89)
         self.TW_ControlModeList.setColumnWidth(1, 60)
         # self.TW_ControlModeList.setRowHeight(0, 30)
-
+        self.CB_VList = []
         for i in range(20):
-            a = QtWidgets.QComboBox()
-            a.addItem('DC')
-            a.addItem('AC')
-            # a.setStyleSheet('QComboBox{margin:3px};')
-            self.TW_ControlModeList.setCellWidget(i, 1, a)
+            self.CB_VList.append(QtWidgets.QComboBox())
+            self.CB_VList[i].addItem('None')
+            self.CB_VList[i].addItem('DC')
+            self.CB_VList[i].addItem('AC')
+            self.CB_VList[i].setStyleSheet('QComboBox{margin:3px}')
+            # CBlist[i].setStyleSheet('QComboBox QAbstractItemView::item:selected {background: rgba(255, 255, 255, 40);
+            #   color: rgb(230, 230, 230);}')
+            self.TW_ControlModeList.setCellWidget(i, 1, self.CB_VList[i])
 
+        self.BT_NewControl = QtWidgets.QPushButton('新建')
+        self.BT_DelateControl = QtWidgets.QPushButton('删除')
+        Layout_New = QtWidgets.QHBoxLayout()
+        Layout_New.addWidget(self.BT_NewControl)
+        Layout_New.addWidget(self.BT_DelateControl)
+
+        self.Layout_ControlList = QtWidgets.QVBoxLayout()
+        self.Layout_ControlList.addWidget(self.TW_ControlModeList)
+        self.Layout_ControlList.addLayout(Layout_New)
+
+        self.BT_NewControl.clicked.connect(self.newcontrolmode)
+        self.TW_ControlModeList.itemClicked.connect(self.loadwiring)
     def Init_WiringDiagram(self):
 
         # self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
@@ -184,6 +204,107 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.CK_isAdjustValve.clicked.connect(self.setAdjustValve)
         self.CK_isBusValve.clicked.connect(self.setBusValve)
         self.CK_isBP5.clicked.connect(self.setBP5)
+
+    def readfile(self):
+        a = [{'ID': 0, 'NAME': 'BD3', 'POWER': 2, 'ON': [20, 21, 32], 'OFF': [20, 32], 'STOP': [], 'M3': [], 'M4': [],
+                'SPECIAL':0, 'K1':0, 'K2':0, },
+             {'ID': 1, 'NAME': 'BD3S', 'POWER': 1, 'ON': [0, 1, 12, 43, 54, 65], 'OFF': [0, 12, 43, 54, 65], 'STOP': [],
+                'M3': [], 'M4': [], 'SPECIAL':0},
+             {'ID': 2, 'NAME': 'B3', 'POWER': 1, 'ON': [0, 11], 'OFF': [0, 12], 'STOP': [], 'M3': [], 'M4': [],
+                'SPECIAL':0},
+             {'ID': 3, 'NAME': '0~20mA', 'POWER': 1, 'ON': [0, 12, 81, 73, 92], 'OFF': [], 'STOP': [], 'M3': [],
+                'M4': [], 'SPECIAL': 1},
+             {'ID': 4, 'NAME': 'RS485', 'POWER': 1, 'ON': [0, 11, 102, 113], 'OFF': [], 'STOP': [], 'M3': [], 'M4': [],
+                'SPECIAL': 2},
+             {'ID': 5, 'NAME': 'BP5', 'POWER': 1, 'ON': [3, 14, 40, 51, 62], 'OFF': [4, 13, 40, 51, 62], 'STOP': [],
+                'M3': [], 'M4': [], 'SPECIAL': 3}
+             ]
+        '''
+        键值说明：
+        ID：int 序号
+        NAME: str 控制方式名称 
+        POWER: int 电源类型 0:None 1:DC 2:AC
+        ON: list 
+        OFF: list
+        STOP: list
+        M3: list
+        M4: list
+        SPECIAL: int 0: 普通  1: 调节阀  2: 总线阀  3: BP5
+        ...
+        '''
+        with open('controlmode', 'wb') as f:
+            f.write(pickle.dumps(a))
+
+        with open('controlmode', 'rb') as f:
+            self.file = pickle.loads(f.read())
+
+    def loaddata(self, data, j):
+        # print(data)
+        item0 = QtWidgets.QTableWidgetItem(data['NAME'])
+        self.TW_ControlModeList.setItem(j, 0, item0)
+        self.CB_VList[j].setCurrentIndex(data['POWER'])
+        # for i in data['ON']:
+        #     self.TON.wiring[i].show()
+        #
+        # for i in data['OFF']:
+        #     self.TOFF.wiring[i].show()
+        pass
+
+    def loadwiring(self, item):
+        for m in range(160):
+            self.TON.wiring[m].hide()
+            self.TOFF.wiring[m].hide()
+            self.TSTOP.wiring[m].hide()
+            self.TM3.wiring[m].hide()
+            self.TM4.wiring[m].hide()
+
+        # print(item.text())
+        for i in range(len(self.file)):
+            if item.text() == self.file[i]['NAME']:
+                data = self.file[i]
+                for j in data['ON']:
+                    self.TON.wiring[j].show()
+                for j in data['OFF']:
+                    self.TOFF.wiring[j].show()
+                for j in data['STOP']:
+                    self.TSTOP.wiring[j].show()
+                for j in data['M3']:
+                    self.TM3.wiring[j].show()
+                for j in data['M4']:
+                    self.TM4.wiring[j].show()
+                if data['SPECIAL'] == 0:
+                    self.CK_isAdjustValve.setChecked(False)
+                    self.CK_isBusValve.setChecked(False)
+                    self.CK_isBP5.setChecked(False)
+                elif data['SPECIAL'] == 1:
+                    self.CK_isAdjustValve.setChecked(True)
+                    self.setAdjustValve()
+                elif data['SPECIAL'] == 2:
+                    self.CK_isBusValve.setChecked(True)
+                    self.setBusValve()
+                elif data['SPECIAL'] == 3:
+                    self.CK_isBP5.setChecked(True)
+                    self.setBP5()
+                else:
+                    pass
+
+    def newcontrolmode(self):
+        text, ok = QtWidgets.QInputDialog.getText(self, '新建控制方式', '输入控制方式名称：')
+        if ok:
+            self.newcontrol = ControlForm
+            self.newcontrol['NAME'] = str(text)
+            self.newcontrol['ID'] = len(self.file)
+            self.file.append(self.newcontrol)
+            print(self.file)
+            self.Init_ControlModeList()
+            for i in range(len(self.file)):
+                self.loaddata(self.file[i], i)
+
+            self.update()
+
+    def saveControl(self):
+
+        pass
 
     def showRemoteControlForm(self):
         self.remotecontrolset = PT_RemoteControlSet()
@@ -380,3 +501,8 @@ class ControlModeWiring(QtWidgets.QWidget):
                 self.wiring.append(DrawWiring(self.WgtDraw, 30 + i * m, 20 + j * n))
                 # self.wiring[i * 10 + j].show()
                 self.wiring[i * 10 + j].hide()
+
+class KeyBoardUi(QtWidgets.QMessageBox):
+    def __init__(self):
+        super(KeyBoardUi, self).__init__()
+
