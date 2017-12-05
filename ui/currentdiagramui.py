@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import matplotlib.patheffects as patheffects
+import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import diagram
-import matplotlib.animation as animation
-import numpy as np
-import random
-import matplotlib.patheffects as patheffects
-import doubleslider
+from ui import diagram, doubleslider
+
+
 class Ui_CurrentDiagram(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Ui_CurrentDiagram, self).__init__(parent)

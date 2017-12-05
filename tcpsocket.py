@@ -8,9 +8,10 @@ array = []
 for i in range(100):
     array.append(i)
 class TcpHandler(BaseRequestHandler):
-    '''
+    """
     服务器消息处理
-    '''
+    """
+
     def handle(self):
         print('Got connection from', self.client_address)
         while True:

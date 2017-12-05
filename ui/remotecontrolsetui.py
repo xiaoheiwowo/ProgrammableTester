@@ -3,7 +3,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import dialogbutton
+from ui import dialogbutton
+
 
 class Ui_RemoteControlSet(QtWidgets.QDialog):
     '''

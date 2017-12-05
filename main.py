@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-
-# 主窗口Ui类
-import mainwindowui
-# 控制方式窗口Ui类
-import controlmodesetui
-# 外控设置窗口Ui类
-import remotecontrolsetui
-# 电流曲线窗口Ui类
-import currentdiagramui
-# 电源及采样校准窗口Ui类
-import powercalibrationui
-# 继电器阵列自检Ui类
-import relaycheckui
-# 电源设置Ui类
-import powersetui
 # 绘图类
 # import diagram
 # socketserver
 from socketserver import TCPServer
-import tcpsocket
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
-import qdarkstyle
+# 控制方式窗口Ui类
+from ui import controlmodesetui
+# 电流曲线窗口Ui类
+from ui import currentdiagramui
+# 电源及采样校准窗口Ui类
+from ui import powercalibrationui
+# 电源设置Ui类
+from ui import powersetui
+# 继电器阵列自检Ui类
+from ui import relaycheckui
+# 外控设置窗口Ui类
+from ui import remotecontrolsetui
+# 主窗口Ui类
+from ui import mainwindowui
+
+import tcpsocket
+# import qdarkstyle
+
 
 class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -37,10 +38,7 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
         self.Action_PowerCalibration.triggered.connect(self.showPowerCalibrationForm)
         self.Action_RelayCheck.triggered.connect(self.showRelayCheckForm)
 
-
         self.BT_FullScreen.clicked.connect(self.showCurrentDiagramForm)
-
-
 
     def showControlSetForm(self):
         self.controlset = PT_ControlModeSet()
@@ -66,29 +64,36 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
         self.powerset = PT_PowerSet()
         self.powerset.show()
 
+
 class PT_ControlModeSet(controlmodesetui.Ui_ControlModeSet):
     def __init__(self, parent=None):
         super(PT_ControlModeSet, self).__init__(parent)
+
 
 class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
     def __init__(self, parent=None):
         super(PT_RemoteControlSet, self).__init__(parent)
 
+
 class PT_CurrentDiagram(currentdiagramui.Ui_CurrentDiagram):
     def __init__(self, parent=None):
         super(PT_CurrentDiagram, self).__init__(parent)
+
 
 class PT_PowerCalibration(powercalibrationui.Ui_PowerCalibration):
     def __init__(self, parent=None):
         super(PT_PowerCalibration, self).__init__(parent)
 
+
 class PT_RelaySelfCheck(relaycheckui.Ui_RelaySelfCheck):
     def __init__(self, parent=None):
         super(PT_RelaySelfCheck, self).__init__(parent)
 
+
 class PT_PowerSet(powersetui.Ui_PowerSet):
     def __init__(self, parent=None):
         super(PT_PowerSet, self).__init__(parent)
+
 
 class tcpThread(QThread):
     def __init__(self):
@@ -99,17 +104,18 @@ class tcpThread(QThread):
         serv = TCPServer(('localhost', 21567), tcpsocket.TcpHandler)
         serv.serve_forever()
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # 设置字体 在树莓派上使用注释下行
-    # app.setFont(QFont('微软雅黑 Semilight', 9))
+    app.setFont(QFont('微软雅黑 Semilight', 9))
     # 启动server线程
-    thread = tcpThread()
-    thread.start()
+    # thread = tcpThread()
+    # thread.start()
 
-    win = PT_MainWindow()
+    # win = PT_MainWindow()
     # win = PT_ControlModeSet()
-    # win = PT_RemoteControlSet()
+    win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
     # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
@@ -118,5 +124,3 @@ if __name__ == '__main__':
     # win.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     win.show()
     sys.exit(app.exec_())
-
-

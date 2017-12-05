@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
 import random
 
-import dialogbutton
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ui import dialogbutton
+
 
 class Ui_RelaySelfCheck(QtWidgets.QDialog):
     '''
