@@ -1,129 +1,152 @@
-#!/usr/bin/env python3
+"""
+:keyword
+"""
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
 
-from PyQt5 import QtCore,QtWidgets,QtGui
-import matplotlib
-matplotlib.use('Qt5Agg')
-import numpy as np
-import random
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
-# plt.rcParams['font.sans-serif'] = ['MS Reference Sans Serif']#用来正常显示中文标签
-# plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-myfont = matplotlib.font_manager.FontProperties(fname='simhei.ttf')
+
 from matplotlib.figure import Figure
+
 from matplotlib import patheffects
-import matplotlib.animation as animation
 
 
 class PlotWidget(FigureCanvas):
-    def __init__(self, parent=None, xx=[], yy=[]):
-        self.fig = Figure(figsize=(8, 5), dpi=80, facecolor='gray') # facecolor为图表外背景色
-        self.canvas = FigureCanvas(self.fig)
-        self.myFigure1 = self.fig.add_subplot(111)
-        self.myFigure1.set_facecolor('none')
-        # 双y轴
-        # self.myFigure1 = self.myFigureno.twinx()
-        self.x_init = xx#np.arange(-10.0, 0, 0.05)
-        self.y_init = yy#10 * (np.cos(2 * np.pi * self.x_init) + 1)
-        # 添加线
-        # self.myFigure1.axvline(-2)
-        # 设置线属性
-        self.myFigure1.plot(self.x_init, self.y_init, linewidth=1.5, color='r', label='Current', ls='-', marker='o', mec='r', mfc='r', ms=6
-                            , path_effects=[patheffects.SimpleLineShadow(),patheffects.Normal()])
-        # self.myFigure1.set_xdata(range(20))
-        # self.myFigure1.set_y(np.random.rand(20))
+    """
+    绘图
+    """
+    def __init__(self, parent=None):
+        self.fig = Figure(figsize=(8, 5), dpi=80, facecolor='gray')
+        self.cvs = FigureCanvas(self.fig)
+        self.ax = self.fig.add_axes([0.02, 0.12, 0.92, 0.8])
         # 设置图标内背景颜色
-        self.myFigure1.set_facecolor('none')
-        # 设置坐标轴限值
-        self.myFigure1.set_xlim(right=0)
-        self.myFigure1.set_ylim(bottom=0)
-        self.myFigure1.yaxis.tick_right()
+        self.ax.set_facecolor('none')
 
-        # Title & Label
-        # self.myFigure1.set_title('vvv')
-        self.myFigure1.yaxis.set_label_position('right')
-        self.myFigure1.set_xlabel('T/s', fontsize=12, labelpad=3)
-        self.myFigure1.set_ylabel('I/mA', fontsize=12, labelpad=3)
-        # 图表
-        rowLabels = ['Mod', 'Vol', 'Cur']
-        tableVal = [['BD3S'],['DC5V'],['200mA']]
-        self.myTable = self.myFigure1.table(cellText=tableVal,
-                                       colWidths=[0.08] * 3,
-                                       rowLabels=rowLabels,
-                                       colLabels=['Valve'],
-                                       loc='upper right')
-        # 图例
-        self.myFigure1.legend(loc=2, ncol=1)
-        # self.myFigure1.legend(loc=2, ncol=1, mode='expand', bbox_to_anchor=(0.0, 0.8, 1, 0.102))
-        # 注解
-        # self.myFigure1.annotate(r'$\cos(\frac{2\pi}{3})=-\frac{1}{2}$', (-10, 0.5), xycoords='data', xytext=(2, 1),
-        #                         textcoords='offset points', fontsize=16,
-        #                         arrowprops=dict(arrowstyle='->', connectionstyle="arc3,rad=.2"))
         # 设置图表边框颜色，位置
-        self.myFigure1.spines['left'].set_color('none')
-        # self.myFigure1.spines['right'].set_position(('data', 1.5))
-        self.myFigure1.spines['top'].set_color('none')
-        # self.myFigure1.spines['bottom'].set_position(('data', 0))
+        self.ax.spines['left'].set_color('none')
+        self.ax.spines['right'].set_position(('data', 0))
+        self.ax.spines['top'].set_color('none')
+        self.ax.spines['bottom'].set_position(('data', 0))
         # 坐标轴数值位置
-        self.myFigure1.xaxis.set_ticks_position('bottom')
-        # self.myFigure1.yaxis.set_ticks_position('right')
-        # 调整边框
-        self.fig.subplots_adjust(0.02, 0.12, 0.92, 0.96)
-        # 网格
-        # self.myFigure1.grid(which='major', axis='both')
+        self.ax.xaxis.set_ticks_position('bottom')
+        self.ax.yaxis.set_ticks_position('right')
+
         # 添加文本 阴影
-        # self.text = self.myFigure1.text(-1,1,'BD3S',fontsize=18,path_effects=[patheffects.withSimplePatchShadow()])
-        # 保存
-        # self.figure.savefig('name.png', dpi=80)
+        # self.text = self.ax.text(-1, 1,
+        #                          'BD3S',
+        #                          fontsize=18,
+        #                          path_effects=[patheffects.withSimplePatchShadow()])
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
         # notify the system of updated policy
         FigureCanvas.updateGeometry(self)
-        self.cid = self.fig.canvas.mpl_connect('button_press_event', self.on_press)
+        # 点击交互
+        # self.cid = self.fig.canvas.mpl_connect('button_press_event', self.fig_press)
 
-        self.liney = self.myFigure1.axvline(0, color='none', ls='--')
-        self.notey = self.myFigure1.annotate('D', (0, 0), color='none')
-
-
-    def on_press(self, event):
+    def fig_press(self, event):
+        """
+        点击图像交互
+        :param event:
+        :return:
+        """
         print('you pressed', event.button, event.xdata, event.ydata)
-        # self.notey._wrap()
-        self.notey.remove()
-        self.liney.remove()
-        self.liney = self.myFigure1.axvline(event.xdata, color='w', ls='--')
-        self.notey = self.myFigure1.annotate(str(round(event.ydata, 2))+'mA', (event.xdata, 16),
-                                xycoords='data', xytext=(20, 20),
-                                textcoords='offset points', fontsize=16,
-                                color='lime',
-                                arrowprops=dict(arrowstyle='-|>', connectionstyle="arc3,rad=.2",color='lime'))
+        if self.line_valve:
+            self.line_valve.remove()
+        if self.v_line:
+            self.v_line.remove()
+        # 添加线
+        self.v_line = self.ax.axvline(event.xdata, color='w', ls='--')
+        # 注解
+        for i in range(200):
+            if event.xdata > -i:
+                break
+
+        self.line_valve = self.ax.annotate(str(round(self.current_valve[200-i], 2)) + 'mA',
+                                              (event.xdata, 20),
+                                              xycoords='data',
+                                              xytext=(20, -40),
+                                              textcoords='offset points',
+                                              fontsize=16,
+                                              color='lime',
+                                              arrowprops=dict(arrowstyle='-|>',
+                                                              connectionstyle="arc3,rad=.2",
+                                                              color='lime'))
         FigureCanvas.draw_idle(self)
 
+    def update_diagram(self, yy):
+        """
+        更新曲线
+        :param yy:
+        :return:
+        """
+        self.current_valve = yy
+        self.ax.clear()
+        list = []
+        for i in range(len(yy)):
+            list.append(-1 * len(yy) + 1 + i)
+        xx = list
+        # 绘制线，设置属性
+        self.line2d = self.ax.plot(xx,
+                                   yy,
+                                   linewidth=1,
+                                   color='r',
+                                   label='Current',
+                                   ls='-',
+                                   marker='',
+                                   mec='r',
+                                   mfc='r',
+                                   ms=6,
+                                   path_effects=[patheffects.SimpleLineShadow(),
+                                                  patheffects.Normal()]
+                                   )
+        # 设置坐标轴限值
+        self.ax.set_xlim(right=0)
+        self.ax.set_ylim(bottom=0)
+        self.ax.yaxis.tick_right()
+        # 网格
+        self.ax.grid()
+        # 图表
+        rowLabels = ['Mod', 'Vol', 'Cur']
+        tableVal = [['BD3S'], ['DC5V'], ['200mA']]
+        self.myTable = self.ax.table(cellText=tableVal,
+                                     colWidths=[0.08] * 3,
+                                     rowLabels=rowLabels,
+                                     colLabels=['Valve'],
+                                     loc='upper right')
+        self.ax.legend(loc=2, ncol=1)
+        # Title & Label
+        self.ax.set_title(u'电流曲线')
+        self.ax.yaxis.set_label_position('right')
+        self.ax.set_xlabel('T/s', fontsize=12, labelpad=3)
+        self.ax.set_ylabel('I/mA', fontsize=12, labelpad=3)
+
+        self.v_line = self.ax.axvline(0.01, color='none', ls='--')
+        self.line_valve = self.ax.annotate('D', (0, 0), color='none')
+        self.draw()
+
+    def save_picture(self):
+        """
+        保存图片
+        :return:
+        """
+        self.fig.savefig('name.png', dpi=80)
+
+    def turn_on_cid(self):
+        """
+        打开点击功能
+        :return:
+        """
+
+        self.cid = self.fig.canvas.mpl_connect('button_press_event', self.fig_press)
+        return self.cid
 
 
-class DrawDiagram(QtWidgets.QWidget):
-    def __init__(self, parent=None, XInput=[0], YInput=[0]):
-        super(DrawDiagram, self).__init__(parent)
+    def turn_off_cid(self, cid):
+        """
+        关闭点击功能
+        :param cid:
+        :return:
+        """
 
-        self.dynamicBegin()
-        self.x = XInput
-        self.y = YInput
-
-        self.Picture1 = PlotWidget(self)
-
-    def dynamicBegin(self):
-        self.ani = animation.FuncAnimation(self.Picture1.figure, self.animate, blit=True, interval=1000)
-
-    def dynamicStop(self):
-        self.ani._stop()
-
-    def animate(self, i):
-        self.x = range(-50,0)
-        self.y = np.random.rand(50)
-        return self.myFigure1.plot(self.x, self.y, linewidth=1.5, color='r', label='Current', ls='-', marker='o',
-                            mec='r', mfc='r', ms=6,
-                            path_effects=[patheffects.SimpleLineShadow(), patheffects.Normal()])
-
-
+        self.fig.canvas.mpl_disconnect(cid)

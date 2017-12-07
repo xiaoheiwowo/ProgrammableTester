@@ -24,6 +24,8 @@ from ui import remotecontrolsetui
 # 主窗口Ui类
 from ui import mainwindowui
 
+from ui import currentwindowui
+
 import tcpsocket
 # import qdarkstyle
 
@@ -95,6 +97,11 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
         super(PT_PowerSet, self).__init__(parent)
 
 
+class PT_CurrentWindow(currentwindowui.Ui_CurrentWindow):
+    def __init__(self, parent=None):
+        super(PT_CurrentWindow, self).__init__(parent)
+
+
 class tcpThread(QThread):
     def __init__(self):
         super(tcpThread, self).__init__()
@@ -108,15 +115,16 @@ class tcpThread(QThread):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # 设置字体 在树莓派上使用注释下行
-    app.setFont(QFont('微软雅黑 Semilight', 9))
+    # app.setFont(QFont('微软雅黑 Semilight', 9))
     # 启动server线程
     # thread = tcpThread()
     # thread.start()
 
-    # win = PT_MainWindow()
+    win = PT_MainWindow()
     # win = PT_ControlModeSet()
-    win = PT_RemoteControlSet()
+    # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
+    # win = PT_CurrentWindow()
     # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
