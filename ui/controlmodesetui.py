@@ -248,10 +248,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         BAUDRATE: 波特率  1200~19200
         ...
         '''
-        # with open('controlmode.pkl', 'wb') as f:
-            # f.write(pickle.dumps(a))
+        # with open('pkl/controlmode.pkl', 'wb') as f:
+        #     f.write(pickle.dumps(a))
 
-        with open('controlmode.pkl', 'rb') as f:
+        with open('pkl/controlmode.pkl', 'rb') as f:
             gv.control_mode = pickle.loads(f.read())
 
     def load_control_list(self):
@@ -397,7 +397,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
 
 
-        with open('controlmode.pkl', 'wb') as f:
+        with open('pkl/controlmode.pkl', 'wb') as f:
             f.write(pickle.dumps(gv.control_mode))
 
         print('save')

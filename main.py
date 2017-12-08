@@ -24,6 +24,8 @@ from ui import remotecontrolsetui
 # 主窗口Ui类
 from ui import mainwindowui
 
+from ui import currentwindowui
+
 import tcpsocket
 # import qdarkstyle
 
@@ -95,6 +97,11 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
         super(PT_PowerSet, self).__init__(parent)
 
 
+class PT_CurrentWindow(currentwindowui.Ui_CurrentWindow):
+    def __init__(self, parent=None):
+        super(PT_CurrentWindow, self).__init__(parent)
+
+
 class tcpThread(QThread):
     def __init__(self):
         super(tcpThread, self).__init__()
@@ -115,9 +122,10 @@ if __name__ == '__main__':
 
     # win = PT_MainWindow()
     # win = PT_ControlModeSet()
-    win = PT_RemoteControlSet()
+    # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
-    # win = PT_PowerCalibration()
+    # win = PT_CurrentWindow()
+    win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
     # 全局黑色主题

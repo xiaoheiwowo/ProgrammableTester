@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from socketserver import BaseRequestHandler, TCPServer
 
-global array
-array = []
-for i in range(100):
-    array.append(i)
+from public.globalvariable import GlobalVariable as gv
+
+
 class TcpHandler(BaseRequestHandler):
     """
     服务器消息处理
@@ -93,6 +92,11 @@ class TcpHandler(BaseRequestHandler):
                 pass
 
     def ReadData(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         if msgstr[2:4] == '00':
             # 读电流
             self.request.send(bytes('500mA', 'utf-8'))
@@ -113,10 +117,15 @@ class TcpHandler(BaseRequestHandler):
             self.request.send(bytes('error', 'utf-8'))
 
     def ReadHistoryData(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         try:
             start = msgstr[2:6]
             lengh = msgstr[6:10]
-            data = array[int(start):int(start)+int(lengh)]
+            data = gv.array[int(start):int(start)+int(lengh)]
             self.request.send(bytes(str(data), 'utf-8'))
         except:
             self.request.send(b'error 01')
