@@ -8,23 +8,23 @@ from ui import diagram
 
 
 class Ui_MainWindow(object):
-    '''
+    """
     程序主界面
-    '''
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1024, 550)
-        MainWindow.setMinimumSize(QtCore.QSize(800, 300))
-        MainWindow.setWindowTitle('可编程测试仪')
-        MainWindow.setWindowIcon(QtGui.QIcon(":/qt.png"))
+    """
+    def setupUi(self, main_window):
+        main_window.setObjectName("MainWindow")
+        main_window.resize(1024, 550)
+        main_window.setMinimumSize(QtCore.QSize(800, 300))
+        main_window.setWindowTitle('可编程测试仪')
+        main_window.setWindowIcon(QtGui.QIcon(":/qt.png"))
 
         # MainWindow.setMaximumSize(QtCore.QSize(1920, 1080)) #不设置最大值可以使用最大化按钮
         # 菜单栏
         self.Init_MenuBar()
-        MainWindow.setMenuBar(self.MenuBar)
+        main_window.setMenuBar(self.MenuBar)
         # 主窗口widget
         self.mainWidget = QtWidgets.QWidget(self)
-        MainWindow.setCentralWidget(self.mainWidget)
+        main_window.setCentralWidget(self.mainWidget)
 
         self.Init_InformationBox(self.mainWidget)
         self.Init_CurrentCurve(self.mainWidget)

@@ -35,29 +35,35 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         Layout_button.addStretch(1)
         Layout_button.addWidget(self.DB_DialogButton)
 
-        TabWgt = QtWidgets.QTabWidget(self)
-
+        self.TabWgt = QtWidgets.QTabWidget(self)
         Layout_Main = QtWidgets.QVBoxLayout()
-        Layout_Main.addWidget(TabWgt)
+        Layout_Main.addWidget(self.TabWgt)
         Layout_Main.addLayout(Layout_button)
         self.setLayout(Layout_Main)
 
-        self.Tab_DCV = QtWidgets.QWidget(TabWgt)
-        self.Tab_DCA = QtWidgets.QWidget(TabWgt)
-        self.Tab_ACV = QtWidgets.QWidget(TabWgt)
-        self.Tab_ACA = QtWidgets.QWidget(TabWgt)
+        self.Tab_DCV = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_DCA = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_ACV = QtWidgets.QWidget(self.TabWgt)
+        self.Tab_ACA = QtWidgets.QWidget(self.TabWgt)
 
-        TabWgt.addTab(self.Tab_DCV, '直流电压')
-        TabWgt.addTab(self.Tab_DCA, '直流电流')
-        TabWgt.addTab(self.Tab_ACV, '交流电压')
-        TabWgt.addTab(self.Tab_ACA, '交流电流')
+        self.TabWgt.addTab(self.Tab_DCV, '直流电压')
+        self.TabWgt.addTab(self.Tab_DCA, '直流电流')
+        self.TabWgt.addTab(self.Tab_ACV, '交流电压')
+        self.TabWgt.addTab(self.Tab_ACA, '交流电流')
+        self.TabWgt.setCurrentIndex(2)
+        # ACV
+        self.tw_list_acv = QtWidgets.QTableWidget(self.Tab_ACV)
+        self.label_png_acv = QtWidgets.QLabel(self.Tab_ACV)
+        self.label_operation_steps_acv = QtWidgets.QLabel(self.Tab_ACV)
+        self.bt_adjust_acv = QtWidgets.QPushButton(self.Tab_ACV)
+        self.bt_calibrate_acv = QtWidgets.QPushButton(self.Tab_ACV)
+        self.list_checkbox_acv = []
 
         self.Init_TabDCV()
         self.Init_TabDCA()
         self.Init_TabACV()
         self.Init_TabACA()
 
-        TabWgt.setCurrentIndex(2)
     def Init_TabDCV(self):
         """
 
@@ -153,63 +159,84 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
 
     def Init_TabACV(self):
         """
-
+        初始化交流电压校准tab
         :return:
         """
         # GB_ListACV = QtWidgets.QGroupBox(self.Tab_ACV)
         # GB_ListACV.setGeometry(10, 10, 300, 450)
         # GB_ListACV.setTitle('基准表')
 
-        self.TW_ListACV = QtWidgets.QTableWidget(self.Tab_ACV)
-        # self.TW_ListACV.setMinimumWidth(280)
-        self.TW_ListACV.setRowCount(20)
-        self.TW_ListACV.setColumnCount(4)
-        self.TW_ListACV.setHorizontalHeaderLabels([' ','Vi(V)', '采样Vo', 'Vn(V)'])
-        self.TW_ListACV.setColumnWidth(0, 30)
-        self.TW_ListACV.setColumnWidth(1, 70)
-        self.TW_ListACV.setColumnWidth(2, 70)
-        self.TW_ListACV.setColumnWidth(3, 70)
-        self.TW_ListACV.horizontalHeader().setSectionResizeMode(2)
+        self.tw_list_acv.setMinimumWidth(265)
+        self.tw_list_acv.setRowCount(20)
+        self.tw_list_acv.setColumnCount(4)
+        self.tw_list_acv.setHorizontalHeaderLabels([' ', 'Vi(V)', '采样Vo', 'Vn(V)'])
+        self.tw_list_acv.setColumnWidth(0, 30)
+        self.tw_list_acv.setColumnWidth(1, 60)
+        self.tw_list_acv.setColumnWidth(2, 60)
+        self.tw_list_acv.setColumnWidth(3, 60)
+        self.tw_list_acv.horizontalHeader().setSectionResizeMode(2)
         # self.TW_ListACV.verticalHeader().setVisible(False)
-        self.TW_ListACV.setSelectionBehavior(1)
-
-        self.list_checkbox = []
+        self.tw_list_acv.setSelectionBehavior(1)
         for i in range(20):
-            self.list_checkbox.append(QtWidgets.QCheckBox())
-            self.list_checkbox[i].setDisabled(True)
-            self.list_checkbox[i].setStyleSheet('QCheckBox{margin:6px}')
-            self.TW_ListACV.setCellWidget(i, 0, self.list_checkbox[i])
+            item0 = QtWidgets.QTableWidgetItem(str(i * 16))
+            self.tw_list_acv.setItem(i, 1, item0)
 
-        self.Label_acv = QtWidgets.QLabel(self.Tab_ACV)
-        # self.Label_acv.setGeometry(350, 20, 300, 440)
-        self.Label_acv.setText('ddd')
-        self.Label_acv.setPixmap(QtGui.QPixmap(':/acv.png'))
-        self.Label_acv.setScaledContents(True)
-        self.Label_acv.setFixedSize(600, 300)
+        self.bt_adjust_acv.setText('调节电压')
+        self.bt_adjust_acv.setFixedSize(80, 40)
+        self.bt_calibrate_acv.setText('采样')
+        self.bt_calibrate_acv.setFixedSize(80, 40)
 
-        self.operation_steps_acv = QtWidgets.QLabel(self.Tab_ACV)
-        # self.operation_steps_acv.setGeometry(680, 20, 300, 440)
-        self.operation_steps_acv.setText('操作步骤(注意高压):\n'
-                                          '1、按照左图连接电压表。\n'
-                                          '2、向Vi中输入一个电压值(0~300V)。\n'
-                                          '3、待电压表读数稳定后将电压表示数填入Vn。\n'
-                                          '4、重复上述步骤添加多组数据。')
-        self.operation_steps_acv.setFont(QtGui.QFont('微软雅黑 Semilight', 10))
+        for i in range(20):
+            self.list_checkbox_acv.append(QtWidgets.QRadioButton())
+            # self.list_checkbox_acv[i].setDisabled(True)
+            self.list_checkbox_acv[i].setStyleSheet('QRadioButton{margin:6px}')
+            self.tw_list_acv.setCellWidget(i, 0, self.list_checkbox_acv[i])
 
-        layout_v = QtWidgets.QVBoxLayout()
-        layout_v.addWidget(self.Label_acv)
-        layout_v.addWidget(self.operation_steps_acv)
-        layout_h = QtWidgets.QHBoxLayout(self.Tab_ACV)
-        layout_h.addWidget(self.TW_ListACV)
-        layout_h.addLayout(layout_v)
-        # self.TE_OperationStepsACV.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.label_png_acv.setPixmap(QtGui.QPixmap(':/acv.png'))
+        self.label_png_acv.setScaledContents(True)
+        self.label_png_acv.setFixedSize(600, 300)
+
+        self.label_operation_steps_acv.setText('                    操作步骤(注意高压):\n'
+                                          '                    1、按照上图连接电压表。\n'
+                                          '                    2、向Vi中输入一个电压值(0~300V)。\n'
+                                          '                    3、待电压表读数稳定后将电压表示数填入Vn。\n'
+                                          '                    4、重复上述步骤添加多组数据。')
+        self.label_operation_steps_acv.setFont(QtGui.QFont('微软雅黑 Semilight', 10))
+
+        layout_bt = QtWidgets.QHBoxLayout()
+        layout_bt.addStretch(1)
+        layout_bt.addWidget(self.bt_adjust_acv)
+        layout_bt.addStretch(1)
+        layout_bt.addWidget(self.bt_calibrate_acv)
+        layout_bt.addStretch(1)
+
+        layout_list_and_bt = QtWidgets.QVBoxLayout()
+        layout_list_and_bt.addWidget(self.tw_list_acv)
+        layout_list_and_bt.addLayout(layout_bt)
+
+        layout_png_and_label = QtWidgets.QVBoxLayout()
+        layout_png_and_label.addWidget(self.label_png_acv)
+        layout_png_and_label.addWidget(self.label_operation_steps_acv)
+        layout_acv = QtWidgets.QHBoxLayout(self.Tab_ACV)
+        layout_acv.addLayout(layout_list_and_bt)
+        layout_acv.addStretch(1)
+        layout_acv.addLayout(layout_png_and_label)
+        layout_acv.addStretch(1)
 
         # SIGNAL
-        self.TW_ListACV.itemClicked.connect(self.acv_select)
-        for i in range(20):
-            item0 = QtWidgets.QTableWidgetItem(str(i))
-            self.TW_ListACV.setItem(i, 1, item0)
-        pass
+        self.tw_list_acv.itemClicked.connect(self.acv_select)
+        self.bt_adjust_acv.clicked.connect(self.adjust_voltage)
+
+    def acv_select(self, item):
+        """
+
+        :param item:
+        :return:
+        """
+        for i in self.list_checkbox_acv:
+            i.setChecked(False)
+        self.list_checkbox_acv[item.row()].setChecked(True)
+        # print('xx')
 
     def Init_TabACA(self):
         """
@@ -260,14 +287,32 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         self.TE_OperationStepsACA.setReadOnly(True)
         self.TE_OperationStepsACA.setFocusPolicy(QtCore.Qt.NoFocus)
 
-    def acv_select(self, item):
+    def load_data(self):
         """
-
-        :param item:
+        载入所有数据
         :return:
         """
-        self.list_checkbox[item.row()].setChecked(True)
-        print('tr')
+        pass
 
+    def save_data(self):
+        """
+        保存所有数据
+        :return:
+        """
+        pass
 
+    def adjust_voltage(self):
+        """
+
+        :return:
+        """
+        print(self.TabWgt.currentIndex())
+        for i in range(20):
+            if self.list_checkbox_acv[i].isChecked():
+                select_row = i
+        try:
+            print(select_row)
+            # 调节电压
+        except:
+            print('err')
 

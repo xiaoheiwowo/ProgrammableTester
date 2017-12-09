@@ -1,5 +1,8 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+全局静态类
+"""
 
 
 class GlobalVariable(object):
@@ -108,6 +111,12 @@ class GlobalVariable(object):
 
     # 开机默认设置
     control_set_bak = {'use_blank': True}
+
+    # 电源采样校准数据
+    power_sampling_acv = [[0,   '0x0000', 0],
+                          [100, '0x5555', 101],
+                          [200, '0xAAAA', 202],
+                          [300, '0xFFFF', 303]]
 
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_valve}
