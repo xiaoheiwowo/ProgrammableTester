@@ -3,7 +3,7 @@
 """
 全局静态类
 """
-
+from PyQt5 import QtGui
 
 class GlobalVariable(object):
     """
@@ -113,10 +113,26 @@ class GlobalVariable(object):
     control_set_bak = {'use_blank': True}
 
     # 电源采样校准数据
-    power_sampling_acv = [[0,   '0x0000', 0],
-                          [100, '0x5555', 101],
-                          [200, '0xAAAA', 202],
-                          [300, '0xFFFF', 303]]
+    data_list = {'acv': [[0,   '0x0000', 0],
+                         [100, '0x5555', 101],
+                         [200, '0xAAAA', 202],
+                         [300, '0xFFFF', 303]],
+
+                 'aca': [[0,   '0x0000', 0],
+                         [100, '0x5555', 1],
+                         [200, '0xAAAA', 2],
+                         [300, '0xFFFF', 3]],
+
+                 'dcv': [[0,  '0x0000', 0],
+                         [10, '0x5555', 11],
+                         [20, '0xAAAA', 22],
+                         [30, '0xFFFF', 33]],
+
+                 'dca': [[0, '0x0000', 0],
+                         [1, '0x5555', 1],
+                         [2, '0xAAAA', 2],
+                         [3, '0xFFFF', 3]]}
+
 
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_valve}

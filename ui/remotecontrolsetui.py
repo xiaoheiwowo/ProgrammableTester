@@ -351,8 +351,8 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         with open('pkl/buscontrol.pkl', 'wb') as f3:
             f3.write(pickle.dumps(gv.bus_control))
         # Json
-        # with open('pkl/data.json', 'w') as f:
-            # json.dump(gv.data, f, ensure_ascii=False, indent=0)
+        # with open('json/data.json', 'w') as f:
+            # json.dump(gv.data, f, ensure_ascii=False, indent=10)
         print('save')
 
     def load_all(self):

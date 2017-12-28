@@ -149,6 +149,13 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
         super(PT_PowerSet, self).__init__(parent)
 
 
+class PT_MainWin(mainwindowui.Ui_MainWin):
+    """
+    introduction
+    """
+    def __init__(self, parent=None):
+        super(PT_MainWin, self).__init__(parent)
+
 class TcpThread(QThread):
     """
     TCP线程，在此线程内接收请求并处理
@@ -178,9 +185,10 @@ if __name__ == '__main__':
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
-    win = PT_PowerCalibration()
+    # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
+    win = PT_MainWin()
     # 全局黑色主题
     # win.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     win.show()

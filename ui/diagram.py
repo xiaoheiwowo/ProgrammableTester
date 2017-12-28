@@ -117,7 +117,7 @@ class PlotWidget(FigureCanvas):
                                      loc='upper right')
         self.ax.legend(loc=2, ncol=1)
         # Title & Label
-        self.ax.set_title(u'电流曲线')
+        self.ax.set_title('Current Curve')
         self.ax.yaxis.set_label_position('right')
         self.ax.set_xlabel('T/s', fontsize=12, labelpad=3)
         self.ax.set_ylabel('I/mA', fontsize=12, labelpad=3)
