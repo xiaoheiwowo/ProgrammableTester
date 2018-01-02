@@ -8,8 +8,7 @@ from socketserver import TCPServer
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-# 绘图类
-# import diagram
+
 # 控制方式窗口Ui类
 from ui import controlmodesetui
 # 电流曲线窗口Ui类
@@ -135,7 +134,7 @@ class PT_PowerCalibration(powercalibrationui.Ui_PowerCalibration):
 
 class PT_RelaySelfCheck(relaycheckui.Ui_RelaySelfCheck):
     """
-    introduction
+    introductiond
     """
     def __init__(self, parent=None):
         super(PT_RelaySelfCheck, self).__init__(parent)
@@ -155,6 +154,69 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
     """
     def __init__(self, parent=None):
         super(PT_MainWin, self).__init__(parent)
+
+        self.control_set = PT_ControlModeSet()
+        self.remote_control = PT_RemoteControlSet()
+        self.current_diagram = PT_CurrentDiagram()
+        self.power_calibration = PT_PowerCalibration()
+        self.relay_check = PT_RelaySelfCheck()
+        self.power_set = PT_PowerSet()
+
+        # SIGNAL
+        self.Action_ControlSet.triggered.connect(self.show_control_set_form)
+        self.Action_RemoteControl.triggered.connect(self.show_remote_control_form)
+        self.Action_Others.triggered.connect(self.show_power_set_form)
+        self.Action_PowerCalibration.triggered.connect(self.show_power_calibration_form)
+        self.Action_RelayCheck.triggered.connect(self.show_relay_check_form)
+
+        self.BT_FullScreen.clicked.connect(self.show_current_diagram_form)
+
+    def show_control_set_form(self):
+        """
+
+        :return:
+        """
+        self.control_set.show()
+
+    def show_remote_control_form(self):
+        """
+
+        :return:
+        """
+        self.remote_control.show()
+
+    def show_current_diagram_form(self):
+        """
+
+        :return:
+        """
+
+        self.current_diagram.show()
+
+    def show_power_calibration_form(self):
+        """
+
+        :return:
+        """
+
+        self.power_calibration.show()
+
+    def show_relay_check_form(self):
+        """
+
+        :return:
+        """
+
+        self.relay_check.show()
+
+    def show_power_set_form(self):
+        """
+
+        :return:
+        """
+
+        self.power_set.show()
+
 
 class TcpThread(QThread):
     """
