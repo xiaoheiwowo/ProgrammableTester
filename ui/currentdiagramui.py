@@ -7,7 +7,7 @@ title
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import diagram, doubleslider
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as sw
 import random
 
 
@@ -24,8 +24,6 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-
-
         self.BT_Dynamic = QtWidgets.QPushButton('动态')
         self.BT_Dynamic.setFixedSize(50, 50)
         self.BT_Static = QtWidgets.QPushButton('静态')
@@ -38,7 +36,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         self.refresh_time = QtCore.QTimer(self)
         self.refresh_time.timeout.connect(self.draw_dynamic)
-        self.refresh_time.start(100)
+        # self.refresh_time.start(300)
         self.init_diagram_area()
         Layout_Other = QtWidgets.QVBoxLayout()
         Layout_Other.addWidget(self.BT_ZoomIn)
@@ -56,7 +54,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         self.val1 = 70
         self.val2 = 100
         # 信号
-        self.BT_ZoomIn.clicked.connect(self.close)
+        self.BT_ZoomIn.clicked.connect(self.stop_timer_and_close)
         self.BT_Static.clicked.connect(self.static_diagram)
 
         self.BT_Dynamic.clicked.connect(self.dynamic_diagram)
@@ -90,14 +88,12 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         :return:
         """
-        gv.static_current_valve = gv.current_valve
+        sw.static_current_valve = sw.current_valve
         self.GB_Diagram.setTitle('静态曲线')
         self.DS_DataSlider.set_handle_disabled(False, False)
         self.mycid = self.BigDiagram.turn_on_cid()
         self.refresh_time.stop()
         # self.refresh_time.start(100)
-
-
 
     def dynamic_diagram(self):
         """
@@ -112,7 +108,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         self.DS_DataSlider.set_valve(70, 100, self.width())
         self.DS_DataSlider.set_handle_disabled(False, True)
 
-        self.refresh_time.start(250)
+        self.refresh_time.start(300)
 
     def draw_dynamic(self):
         """
@@ -120,11 +116,11 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         :return:
         """
         if self.GB_Diagram.title() == '动态曲线':
-            gv.current_valve.append(int(100 * random.random()))
-            del gv.current_valve[0]
+            sw.current_valve.append(int(100 * random.random()))
+            del sw.current_valve[0]
         else:
             pass
-        yy = gv.current_valve[2 * self.val1: 2 * self.val2]
+        yy = sw.current_valve[2 * self.val1: 2 * self.val2]
         self.BigDiagram.update_diagram(yy*2)
 
     def draw_static(self):
@@ -132,7 +128,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         :return:
         """
-        yy = gv.static_current_valve[2 * self.val1: 2 * self.val2]
+        yy = sw.static_current_valve[2 * self.val1: 2 * self.val2]
         self.BigDiagram.update_diagram(yy * 2)
 
     def get_dataslider_valve(self, a, b):
@@ -168,3 +164,10 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         if ok:
             self.BigDiagram.save_picture(file)
 
+    def stop_timer_and_close(self):
+        """
+
+        :return:
+        """
+        self.refresh_time.stop()
+        self.reject()

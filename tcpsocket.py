@@ -3,7 +3,7 @@
 
 from socketserver import BaseRequestHandler, TCPServer
 
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as gv
 
 
 class TcpHandler(BaseRequestHandler):
@@ -12,6 +12,11 @@ class TcpHandler(BaseRequestHandler):
     """
 
     def handle(self):
+        """
+
+        :return:
+        """
+
         print('Got connection from', self.client_address)
         while True:
             msg = self.request.recv(1024)
@@ -132,45 +137,101 @@ class TcpHandler(BaseRequestHandler):
         pass
 
     def RDContinue(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'02')
         pass
 
     def StopRDContinue(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'03')
         pass
 
     def ArrayFixed(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'04')
         pass
 
     def ArrayRecovery(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'05')
         pass
 
     def ReadState(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(bytes('state', 'utf-8'))
         pass
 
     def CleanData(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
+
         self.request.send(b'07')
         pass
 
     def ReadControlMode(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(bytes('BD3S', 'utf-8'))
         pass
 
     def SetControlMode(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'09')
         pass
 
     def SetVoltage(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'0A')
         pass
 
     def ReadSP(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(bytes('5555', 'utf-8'))
         pass
 
     def ControlValve(self, msgstr):
+        """
+
+        :param msgstr:
+        :return:
+        """
         self.request.send(b'0C')
         pass

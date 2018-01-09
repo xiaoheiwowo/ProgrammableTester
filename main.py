@@ -4,6 +4,7 @@
 introduction
 """
 import sys
+import pickle
 from socketserver import TCPServer
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -24,6 +25,7 @@ from ui import remotecontrolsetui
 # 主窗口Ui类
 from ui import mainwindowui
 
+from public.datacache import SoftwareData as sw
 
 import tcpsocket
 # import qdarkstyle
@@ -32,6 +34,7 @@ import tcpsocket
 class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
     """
     introduction
+    useless
     """
     def __init__(self, parent=None):
         super(PT_MainWindow, self).__init__(parent)
@@ -104,6 +107,7 @@ class PT_ControlModeSet(controlmodesetui.Ui_ControlModeSet):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_ControlModeSet, self).__init__(parent)
 
@@ -134,7 +138,7 @@ class PT_PowerCalibration(powercalibrationui.Ui_PowerCalibration):
 
 class PT_RelaySelfCheck(relaycheckui.Ui_RelaySelfCheck):
     """
-    introductiond
+    introduction
     """
     def __init__(self, parent=None):
         super(PT_RelaySelfCheck, self).__init__(parent)
@@ -155,13 +159,14 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
     def __init__(self, parent=None):
         super(PT_MainWin, self).__init__(parent)
 
-        self.control_set = PT_ControlModeSet()
-        self.remote_control = PT_RemoteControlSet()
+        self.load_control_mode()
+
         self.current_diagram = PT_CurrentDiagram()
+        self.control_set = PT_ControlModeSet()
+        self.power_set = PT_PowerSet()
+        self.remote_control = PT_RemoteControlSet()
         self.power_calibration = PT_PowerCalibration()
         self.relay_check = PT_RelaySelfCheck()
-        self.power_set = PT_PowerSet()
-
         # SIGNAL
         self.Action_ControlSet.triggered.connect(self.show_control_set_form)
         self.Action_RemoteControl.triggered.connect(self.show_remote_control_form)
@@ -170,6 +175,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         self.Action_RelayCheck.triggered.connect(self.show_relay_check_form)
 
         self.BT_FullScreen.clicked.connect(self.show_current_diagram_form)
+        self.control_set.confirm.connect(self.update_main_win)
 
     def show_control_set_form(self):
         """
@@ -190,7 +196,6 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         :return:
         """
-
         self.current_diagram.show()
 
     def show_power_calibration_form(self):
@@ -198,7 +203,6 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         :return:
         """
-
         self.power_calibration.show()
 
     def show_relay_check_form(self):
@@ -206,7 +210,6 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         :return:
         """
-
         self.relay_check.show()
 
     def show_power_set_form(self):
@@ -214,8 +217,42 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         :return:
         """
-
         self.power_set.show()
+
+    def load_control_mode(self):
+        """
+
+        :return:
+        """
+        print('load control mode')
+        with open('pkl/controlmode.pkl', 'rb') as f:
+            sw.control_mode = pickle.loads(f.read())
+
+        lst = []
+        for i in range(len(sw.control_mode)):
+            lst.append(sw.control_mode[i]['NAME'])
+        self.CB_SelectControl.clear()
+        self.CB_SelectControl.addItem('None')
+        lst2 = list(set(lst))
+        for i in range(len(lst2)):
+            self.CB_SelectControl.addItem(lst2[i])
+
+    def update_main_win(self):
+        """
+
+        :return:
+        """
+        print('update')
+        self.load_control_mode()
+        # self.delete_dialog()
+        pass
+
+    def delete_dialog(self):
+        try:
+            self.current_diagram.deleteLater()
+        except:
+            pass
+
 
 
 class TcpThread(QThread):

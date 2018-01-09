@@ -8,7 +8,7 @@ import pickle
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import dialogbutton
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as sw
 
 
 class Ui_PowerCalibration(QtWidgets.QDialog):
@@ -68,7 +68,7 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         :return:
         """
         with open('pkl/calibration.pkl', 'rb') as f:
-            gv.data_list = pickle.loads(f.read())
+            sw.data_list = pickle.loads(f.read())
 
         pass
 
@@ -79,7 +79,7 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         :return:
         """
         with open('pkl/calibration.pkl', 'wb') as f:
-            f.write(pickle.dumps(gv.data_list))
+            f.write(pickle.dumps(sw.data_list))
         pass
 
     def ok_and_exit(self):
@@ -158,7 +158,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         :return:
         """
         self.tw_list.setFixedWidth(265)
-        self.tw_list.setRowCount(len(gv.data_list[self.page]))
+        self.tw_list.setRowCount(len(sw.data_list[self.page]))
         self.tw_list.setColumnCount(4)
         self.tw_list.setHorizontalHeaderLabels([' ', '电压(V)', '采样Io', 'In(mA)'])
         self.tw_list.setColumnWidth(0, 30)
@@ -169,7 +169,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.tw_list.verticalHeader().setVisible(False)
         self.tw_list.setSelectionBehavior(1)
 
-        for i in range(len(gv.data_list[self.page])):
+        for i in range(len(sw.data_list[self.page])):
             self.list_checkbox.append(QtWidgets.QCheckBox())
             self.list_checkbox[i].setDisabled(True)
             self.list_checkbox[i].setStyleSheet('QCheckBox{margin:6px}')
@@ -211,10 +211,10 @@ class Tab_Widgets(QtWidgets.QWidget):
 
         :return:
         """
-        for i in range(len(gv.data_list[self.page])):
-            item1 = QtWidgets.QTableWidgetItem(str(gv.data_list[self.page][i][0]))
-            item2 = QtWidgets.QTableWidgetItem(gv.data_list[self.page][i][1])
-            item3 = QtWidgets.QTableWidgetItem(str(gv.data_list[self.page][i][2]))
+        for i in range(len(sw.data_list[self.page])):
+            item1 = QtWidgets.QTableWidgetItem(str(sw.data_list[self.page][i][0]))
+            item2 = QtWidgets.QTableWidgetItem(sw.data_list[self.page][i][1])
+            item3 = QtWidgets.QTableWidgetItem(str(sw.data_list[self.page][i][2]))
             self.tw_list.setItem(i, 1, item1)
             self.tw_list.setItem(i, 2, item2)
             self.tw_list.setItem(i, 3, item3)
@@ -246,9 +246,9 @@ class Tab_Widgets(QtWidgets.QWidget):
         :return:
         """
 
-        for i in range(len(gv.data_list[self.page])):
+        for i in range(len(sw.data_list[self.page])):
             if self.list_checkbox[i].isChecked():
-                gv.data_list[self.page].pop(i)
+                sw.data_list[self.page].pop(i)
         self.update_list()
         pass
 
@@ -349,7 +349,7 @@ class Dia_Add_Line(QtWidgets.QDialog):
             print('ValueError')
             a = False
         if a:
-            gv.data_list[self.page].append(list1)
+            sw.data_list[self.page].append(list1)
             self.get_valve.emit()
             print(list1)
         self.close()

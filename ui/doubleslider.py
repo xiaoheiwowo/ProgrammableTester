@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as sw
+
 
 class MDoubleSlider(QtWidgets.QWidget):
     """
@@ -83,15 +84,15 @@ class MDoubleSlider(QtWidgets.QWidget):
         if self.HandleSelected == 1:
             if mouse_event.x() < 20:
                 self.X_Handle1 = 20
-            elif mouse_event.x() >= self.X_Handle2 - 10 - gv.sliders_interval_min:
-                self.X_Handle1 = self.X_Handle2 - 10 - gv.sliders_interval_min
+            elif mouse_event.x() >= self.X_Handle2 - 10 - sw.sliders_interval_min:
+                self.X_Handle1 = self.X_Handle2 - 10 - sw.sliders_interval_min
             else:
                 self.X_Handle1 = mouse_event.x()
         elif self.HandleSelected == 2:
             if mouse_event.x() > self.width() - 30:
                 self.X_Handle2 = self.width() - 30
-            elif mouse_event.x() < 30 + gv.sliders_interval_min:
-                self.X_Handle2 = 30 + gv.sliders_interval_min
+            elif mouse_event.x() < 30 + sw.sliders_interval_min:
+                self.X_Handle2 = 30 + sw.sliders_interval_min
             else:
                 self.X_Handle2 = mouse_event.x()
                 if self.X_Handle1 > self.X_Handle2 - 50:

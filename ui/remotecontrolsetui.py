@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import dialogbutton
 # 全局变量静态类
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as sw
 
 import pickle
 import json
@@ -127,11 +127,11 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.Layout_ServerSelect = QtWidgets.QGridLayout(self.GB_ServerSelect)
         self.Label_b21 = QtWidgets.QLabel('计算机名:')
         self.CB_ServerName = QtWidgets.QComboBox()
-        for i in gv.upper_name_list:
+        for i in sw.upper_name_list:
             self.CB_ServerName.addItem(i)
         self.Label_b22 = QtWidgets.QLabel('计算机IP:')
         self.CB_ServerIP = QtWidgets.QComboBox()
-        for i in gv.upper_ip_list:
+        for i in sw.upper_ip_list:
             self.CB_ServerIP.addItem(i)
 
         # 布局
@@ -318,38 +318,38 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         保存设置
         :return:
         """
-        gv.net_set['host_name'] = self.LE_LocalName.text()
-        gv.net_set['host_ip'] = self.LE_LocalIP.text()
-        gv.net_set['subnet_mask'] = self.LE_SubnetMask.text()
-        gv.net_set['default_gateway'] = self.LE_DefaultGateway.text()
-        gv.net_set['dns'] = self.LE_DefaultDNS.text()
+        sw.net_set['host_name'] = self.LE_LocalName.text()
+        sw.net_set['host_ip'] = self.LE_LocalIP.text()
+        sw.net_set['subnet_mask'] = self.LE_SubnetMask.text()
+        sw.net_set['default_gateway'] = self.LE_DefaultGateway.text()
+        sw.net_set['dns'] = self.LE_DefaultDNS.text()
 
-        gv.current_set['data_depth'] = int(self.LE_DataStorageDepth.text())
-        gv.current_set['data_interval'] = self.SB_DateStorageInterval.value()
-        gv.current_set['data_time'] = gv.current_set['data_depth'] * gv.current_set['data_interval'] / 1000
-        self.Label_TotalTime.setText(str(gv.current_set['data_time']) + ' s')
-        gv.current_set['small_win_show_time'] = self.SB_DisplayTime.value()
+        sw.current_set['data_depth'] = int(self.LE_DataStorageDepth.text())
+        sw.current_set['data_interval'] = self.SB_DateStorageInterval.value()
+        sw.current_set['data_time'] = sw.current_set['data_depth'] * sw.current_set['data_interval'] / 1000
+        self.Label_TotalTime.setText(str(sw.current_set['data_time']) + ' s')
+        sw.current_set['small_win_show_time'] = self.SB_DisplayTime.value()
 
-        gv.bus_control[0] = self.LE_OpenCommand.text()
-        gv.bus_control[1] = self.LE_CloseCommand.text()
-        gv.bus_control[2] = self.LE_StopCommand.text()
-        gv.bus_control[3] = self.LE_M3Command.text()
-        gv.bus_control[4] = self.LE_M4Command.text()
-        gv.bus_control[5] = self.CB_DataBits.currentIndex()
-        gv.bus_control[6] = self.CB_CheckBits.currentIndex()
-        gv.bus_control[7] = self.CB_StopBits.currentIndex()
+        sw.bus_control[0] = self.LE_OpenCommand.text()
+        sw.bus_control[1] = self.LE_CloseCommand.text()
+        sw.bus_control[2] = self.LE_StopCommand.text()
+        sw.bus_control[3] = self.LE_M3Command.text()
+        sw.bus_control[4] = self.LE_M4Command.text()
+        sw.bus_control[5] = self.CB_DataBits.currentIndex()
+        sw.bus_control[6] = self.CB_CheckBits.currentIndex()
+        sw.bus_control[7] = self.CB_StopBits.currentIndex()
 
         if self.RB_AutoGetIP.isChecked():
-            gv.net_set['auto_ip'] = True
+            sw.net_set['auto_ip'] = True
         else:
-            gv.net_set['auto_ip'] = False
+            sw.net_set['auto_ip'] = False
 
         with open('pkl/currentset.pkl', 'wb') as f1:
-            f1.write(pickle.dumps(gv.current_set))
+            f1.write(pickle.dumps(sw.current_set))
         with open('pkl/netset.pkl', 'wb') as f2:
-            f2.write(pickle.dumps(gv.net_set))
+            f2.write(pickle.dumps(sw.net_set))
         with open('pkl/buscontrol.pkl', 'wb') as f3:
-            f3.write(pickle.dumps(gv.bus_control))
+            f3.write(pickle.dumps(sw.bus_control))
         # Json
         # with open('json/data.json', 'w') as f:
             # json.dump(gv.data, f, ensure_ascii=False, indent=10)
@@ -361,34 +361,34 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         :return:
         """
         with open('pkl/currentset.pkl', 'rb') as f1:
-            gv.current_set = pickle.loads(f1.read())
+            sw.current_set = pickle.loads(f1.read())
         with open('pkl/netset.pkl', 'rb') as f2:
-            gv.net_set = pickle.loads(f2.read())
+            sw.net_set = pickle.loads(f2.read())
         with open('pkl/buscontrol.pkl', 'rb') as f3:
-            gv.bus_control = pickle.loads(f3.read())
+            sw.bus_control = pickle.loads(f3.read())
         print('readall')
 
-        self.LE_LocalName.setText(gv.net_set['host_name'])
-        self.LE_LocalIP.setText(gv.net_set['host_ip'])
-        self.LE_SubnetMask.setText(gv.net_set['subnet_mask'])
-        self.LE_DefaultGateway.setText(gv.net_set['default_gateway'])
-        self.LE_DefaultDNS.setText(gv.net_set['dns'])
+        self.LE_LocalName.setText(sw.net_set['host_name'])
+        self.LE_LocalIP.setText(sw.net_set['host_ip'])
+        self.LE_SubnetMask.setText(sw.net_set['subnet_mask'])
+        self.LE_DefaultGateway.setText(sw.net_set['default_gateway'])
+        self.LE_DefaultDNS.setText(sw.net_set['dns'])
 
-        self.LE_DataStorageDepth.setText(str(gv.current_set['data_depth']))
-        self.SB_DateStorageInterval.setValue(gv.current_set['data_interval'])
-        self.Label_TotalTime.setText(str(gv.current_set['data_time'])+' s')
-        self.SB_DisplayTime.setValue(gv.current_set['small_win_show_time'])
+        self.LE_DataStorageDepth.setText(str(sw.current_set['data_depth']))
+        self.SB_DateStorageInterval.setValue(sw.current_set['data_interval'])
+        self.Label_TotalTime.setText(str(sw.current_set['data_time']) + ' s')
+        self.SB_DisplayTime.setValue(sw.current_set['small_win_show_time'])
 
-        self.LE_OpenCommand.setText(gv.bus_control[0])
-        self.LE_CloseCommand.setText(gv.bus_control[1])
-        self.LE_StopCommand.setText(gv.bus_control[2])
-        self.LE_M3Command.setText(gv.bus_control[3])
-        self.LE_M4Command.setText(gv.bus_control[4])
-        self.CB_DataBits.setCurrentIndex(gv.bus_control[5])
-        self.CB_CheckBits.setCurrentIndex(gv.bus_control[6])
-        self.CB_StopBits.setCurrentIndex(gv.bus_control[7])
+        self.LE_OpenCommand.setText(sw.bus_control[0])
+        self.LE_CloseCommand.setText(sw.bus_control[1])
+        self.LE_StopCommand.setText(sw.bus_control[2])
+        self.LE_M3Command.setText(sw.bus_control[3])
+        self.LE_M4Command.setText(sw.bus_control[4])
+        self.CB_DataBits.setCurrentIndex(sw.bus_control[5])
+        self.CB_CheckBits.setCurrentIndex(sw.bus_control[6])
+        self.CB_StopBits.setCurrentIndex(sw.bus_control[7])
 
-        if gv.net_set['auto_ip']:
+        if sw.net_set['auto_ip']:
             self.RB_AutoGetIP.setChecked(True)
             self.IPSetDisable()
             self.RB_UseSettingBelow.setChecked(False)

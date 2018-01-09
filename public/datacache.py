@@ -3,11 +3,11 @@
 """
 全局静态类
 """
-from PyQt5 import QtGui
 
-class GlobalVariable(object):
+
+class SoftwareData(object):
     """
-    全局变量
+    软件数据缓存区
     """
     # 当前选择行
     select_line = None
@@ -133,6 +133,37 @@ class GlobalVariable(object):
                          [2, '0xAAAA', 2],
                          [3, '0xFFFF', 3]]}
 
-
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_valve}
+
+
+class HardwareData(object):
+    """
+    硬件数据缓存区
+    """
+    i2c_data = []
+    spi_data = []
+    uart_data = []
+
+    control_mode = ''
+    power = [0, 0]
+
+    open_by_i2c = []
+    close_by_i2c = []
+    stop_by_i2c = []
+    m3_by_i2c = []
+    m4_by_i2c = []
+
+    open_by_spi = []
+    close_by_spi = []
+    stop_by_spi = []
+    m3_by_spi = []
+    m4_by_spi = []
+    control_by_spi = []
+    return_from_valve = []
+
+    open_by_uart = []
+    close_by_uart = []
+    stop_by_uart = []
+    m3_by_uart = []
+    m4_by_uart = []

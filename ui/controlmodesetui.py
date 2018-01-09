@@ -5,7 +5,7 @@ import pickle
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from public.globalvariable import GlobalVariable as gv
+from public.datacache import SoftwareData as sw
 
 from ui import remotecontrolsetui, dialogbutton
 
@@ -15,6 +15,8 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     """
     控制方式设置窗口，
     """
+    confirm = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(Ui_ControlModeSet, self).__init__(parent)
         self.resize(1024, 550)
@@ -32,15 +34,19 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.load_control_list()
 
         # 保存、确定、取消按钮
-        self.DB_DialogButton = dialogbutton.DialogButton(self)
-        self.DB_DialogButton.setFixedSize(300, 50)
-        self.DB_DialogButton.BT_Cancel1.clicked.connect(self.close)
-        self.DB_DialogButton.BT_Save1.clicked.connect(self.save_control_mode)
-        self.DB_DialogButton.BT_OK1.clicked.connect(self.save_and_close)
-        # self.DB_DialogButton.BT_Save1.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.bt_save = QtWidgets.QPushButton()
+        self.bt_cancel = QtWidgets.QPushButton()
+        self.bt_save.setText('保存')
+        self.bt_cancel.setText('退出')
+        self.bt_save.clicked.connect(self.save_control_mode)
+        self.bt_cancel.clicked.connect(self.reject)
+        wgt = QtWidgets.QWidget()
+        wgt.setFixedSize(100, 50)
         Layout_button = QtWidgets.QHBoxLayout()
         Layout_button.addStretch(1)
-        Layout_button.addWidget(self.DB_DialogButton)
+        Layout_button.addWidget(wgt)
+        Layout_button.addWidget(self.bt_save)
+        Layout_button.addWidget(self.bt_cancel)
 
         Layout_GroupBox = QtWidgets.QHBoxLayout()
         Layout_GroupBox.addLayout(self.Layout_ControlList)
@@ -55,7 +61,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     def Init_ControlModeList(self):
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
         self.TW_ControlModeList.setFixedWidth(200)
-        self.TW_ControlModeList.setRowCount(len(gv.control_mode) + 1)
+        self.TW_ControlModeList.setRowCount(len(sw.control_mode) + 1)
         self.TW_ControlModeList.setColumnCount(3)
         self.TW_ControlModeList.setHorizontalHeaderLabels(['', '控制方式', '电压'])
         self.TW_ControlModeList.setColumnWidth(0, 30)
@@ -252,16 +258,16 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         #     f.write(pickle.dumps(a))
 
         with open('pkl/controlmode.pkl', 'rb') as f:
-            gv.control_mode = pickle.loads(f.read())
+            sw.control_mode = pickle.loads(f.read())
 
     def load_control_list(self):
-        for i in range(len(gv.control_mode)):
-            item0 = QtWidgets.QTableWidgetItem(gv.control_mode[i]['NAME'])
+        for i in range(len(sw.control_mode)):
+            item0 = QtWidgets.QTableWidgetItem(sw.control_mode[i]['NAME'])
             self.TW_ControlModeList.setItem(i, 1, item0)
-            self.CB_VList[i].setCurrentIndex(gv.control_mode[i]['POWER'])
+            self.CB_VList[i].setCurrentIndex(sw.control_mode[i]['POWER'])
 
     def load_wiring_ex(self, item):
-        gv.select_line = item.row()
+        sw.select_line = item.row()
         for m in range(160):
             self.TON.wiring[m].hide()
             self.TOFF.wiring[m].hide()
@@ -269,11 +275,11 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.TM3.wiring[m].hide()
             self.TM4.wiring[m].hide()
 
-        for n in range(len(gv.control_mode)):
+        for n in range(len(sw.control_mode)):
             self.CK_VList[n].setChecked(False)
 
         self.CK_VList[item.row()].setChecked(True)
-        data = gv.control_mode[item.row()]
+        data = sw.control_mode[item.row()]
         for j in data['ON']:
             self.TON.wiring[j].show()
         for j in data['OFF']:
@@ -309,10 +315,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
     def update_control_list(self):
         # rowcount = len(gv.control_mode) - 1
         self.TW_ControlModeList.setRowCount(0)
-        self.TW_ControlModeList.setRowCount(len(gv.control_mode) + 1)
+        self.TW_ControlModeList.setRowCount(len(sw.control_mode) + 1)
         self.CB_VList = []
         self.CK_VList = []
-        for i in range(len(gv.control_mode)):
+        for i in range(len(sw.control_mode)):
             self.CK_VList.append(QtWidgets.QCheckBox())
             self.CK_VList[i].setDisabled(True)
             self.CK_VList[i].setStyleSheet('QCheckBox{margin:6px}')
@@ -324,88 +330,75 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.CB_VList[i].addItem('AC')
             self.CB_VList[i].setStyleSheet('QComboBox{margin:3px}')
             self.TW_ControlModeList.setCellWidget(i, 2, self.CB_VList[i])
-        # self.CB_VList.append(QtWidgets.QComboBox())
-        # self.CK_VList.append(QtWidgets.QCheckBox())
-        # self.CK_VList[rowcount].setDisabled(True)
-        # self.CK_VList[rowcount].setStyleSheet('QCheckBox{margin:6px}')
-        # self.CB_VList[rowcount].addItem('None')
-        # self.CB_VList[rowcount].addItem('DC')
-        # self.CB_VList[rowcount].addItem('AC')
-        # self.CB_VList[rowcount].setStyleSheet('QComboBox{margin:3px}')
-        # self.TW_ControlModeList.setCellWidget(rowcount, 2, self.CB_VList[rowcount])
-        # self.TW_ControlModeList.setCellWidget(rowcount, 0, self.CK_VList[rowcount])
 
     def new_control_mode(self):
         text, ok = QtWidgets.QInputDialog.getText(self, '新建控制方式', '输入控制方式名称：')
         if ok:
             # 赋值语句不改变引用，不会创建新的对象，此处需调用copy函数生成一个新的对象，否则会导致第二次改动上一次的dict
-            newcontrol = gv.ControlForm.copy()
+            newcontrol = sw.ControlForm.copy()
             newcontrol['NAME'] = str(text)
-        gv.control_mode.append(newcontrol)
+        sw.control_mode.append(newcontrol)
         self.update_control_list()
         self.load_control_list()
 
-
     def delate_control_mode(self):
-        del gv.control_mode[gv.select_line]
-        del self.CB_VList
-        del self.CK_VList
+        if sw.select_line:
+            del sw.control_mode[sw.select_line]
+            del self.CB_VList
+            del self.CK_VList
         self.update_control_list()
         self.load_control_list()
         print('delate')
 
     def save_control_mode(self):
-        wiringON = []
-        wiringOFF = []
-        wiringSTOP = []
-        wiringM3 = []
-        wiringM4 = []
-        for i in range(160):
-            if self.TON.wiringShow[i]:
-                wiringON.append(i)
-            if self.TOFF.wiringShow[i]:
-                wiringOFF.append(i)
-            if self.TSTOP.wiringShow[i]:
-                wiringSTOP.append(i)
-            if self.TM3.wiringShow[i]:
-                wiringM3.append(i)
-            if self.TM4.wiringShow[i]:
-                wiringM4.append(i)
-        # for i in self.CK_VList:
-        #     if i.isChecked():
-        #         gv.select_line = self.CK_VList.index(i)
-        gv.control_mode[gv.select_line]['ON'] = wiringON.copy()
-        gv.control_mode[gv.select_line]['OFF'] = wiringOFF.copy()
-        gv.control_mode[gv.select_line]['STOP'] = wiringSTOP.copy()
-        gv.control_mode[gv.select_line]['M3'] = wiringM3.copy()
-        gv.control_mode[gv.select_line]['M4'] = wiringM4.copy()
-        gv.control_mode[gv.select_line]['POWER'] = self.CB_VList[gv.select_line].currentIndex()
-        gv.control_mode[gv.select_line]['NAME'] = self.TW_ControlModeList.item(gv.select_line, 1).text()
-        if self.CK_isAdjustValve.isChecked():
-            gv.control_mode[gv.select_line]['SPECIAL'] = 1
-            gv.control_mode[gv.select_line]['SIGNAL'] = self.CB_ControlMode2.currentIndex()
-            gv.control_mode[gv.select_line]['EFFECT'] = self.CB_ActionMode.currentIndex()
-        elif self.CK_isBusValve.isChecked():
-            gv.control_mode[gv.select_line]['SPECIAL'] = 2
-            gv.control_mode[gv.select_line]['SIGNAL'] = self.CB_BusProtocol.currentIndex()
-            gv.control_mode[gv.select_line]['EFFECT'] = self.CB_BaudRate.currentIndex()
-        elif self.CK_isBP5.isChecked():
-            gv.control_mode[gv.select_line]['SPECIAL'] = 3
-        else:
-            gv.control_mode[gv.select_line]['SPECIAL'] = 0
+        if sw.select_line:
+            wiringON = []
+            wiringOFF = []
+            wiringSTOP = []
+            wiringM3 = []
+            wiringM4 = []
+            for i in range(160):
+                if self.TON.wiringShow[i]:
+                    wiringON.append(i)
+                if self.TOFF.wiringShow[i]:
+                    wiringOFF.append(i)
+                if self.TSTOP.wiringShow[i]:
+                    wiringSTOP.append(i)
+                if self.TM3.wiringShow[i]:
+                    wiringM3.append(i)
+                if self.TM4.wiringShow[i]:
+                    wiringM4.append(i)
+            sw.control_mode[sw.select_line]['ON'] = wiringON.copy()
+            sw.control_mode[sw.select_line]['OFF'] = wiringOFF.copy()
+            sw.control_mode[sw.select_line]['STOP'] = wiringSTOP.copy()
+            sw.control_mode[sw.select_line]['M3'] = wiringM3.copy()
+            sw.control_mode[sw.select_line]['M4'] = wiringM4.copy()
+            sw.control_mode[sw.select_line]['POWER'] = self.CB_VList[sw.select_line].currentIndex()
+            sw.control_mode[sw.select_line]['NAME'] = self.TW_ControlModeList.item(sw.select_line, 1).text()
+            if self.CK_isAdjustValve.isChecked():
+                sw.control_mode[sw.select_line]['SPECIAL'] = 1
+                sw.control_mode[sw.select_line]['SIGNAL'] = self.CB_ControlMode2.currentIndex()
+                sw.control_mode[sw.select_line]['EFFECT'] = self.CB_ActionMode.currentIndex()
+            elif self.CK_isBusValve.isChecked():
+                sw.control_mode[sw.select_line]['SPECIAL'] = 2
+                sw.control_mode[sw.select_line]['SIGNAL'] = self.CB_BusProtocol.currentIndex()
+                sw.control_mode[sw.select_line]['EFFECT'] = self.CB_BaudRate.currentIndex()
+            elif self.CK_isBP5.isChecked():
+                sw.control_mode[sw.select_line]['SPECIAL'] = 3
+            else:
+                sw.control_mode[sw.select_line]['SPECIAL'] = 0
 
+            with open('pkl/controlmode.pkl', 'wb') as f:
+                f.write(pickle.dumps(sw.control_mode))
 
-
-
-        with open('pkl/controlmode.pkl', 'wb') as f:
-            f.write(pickle.dumps(gv.control_mode))
-
-        print('save')
+            self.confirm.emit()
+            print('save')
 
     def save_and_close(self):
-        self.save_control_mode()
-        self.close()
         print('save and close')
+        # self.save_control_mode()
+        self.close()
+
 
     def showRemoteControlForm(self):
         self.remotecontrolset = PT_RemoteControlSet()

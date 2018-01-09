@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3fe6a35e-117f-4d15-bb6d-92dd750d9785" name="Default" comment="校准$主界面">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/pkl/data.json" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/aca.png" afterPath="$PROJECT_DIR$/images/aca.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/acv.png" afterPath="$PROJECT_DIR$/images/acv.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/dca.png" afterPath="$PROJECT_DIR$/images/dca.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/dcv.png" afterPath="$PROJECT_DIR$/images/dcv.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/images_rc.py" afterPath="$PROJECT_DIR$/images/images_rc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/globalvariable.py" afterPath="$PROJECT_DIR$/public/globalvariable.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/diagram.py" afterPath="$PROJECT_DIR$/ui/diagram.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/mainwindowui.py" afterPath="$PROJECT_DIR$/ui/mainwindowui.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/powercalibrationui.py" afterPath="$PROJECT_DIR$/ui/powercalibrationui.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/remotecontrolsetui.py" afterPath="$PROJECT_DIR$/ui/remotecontrolsetui.py" />
+    <list default="true" id="3fe6a35e-117f-4d15-bb6d-92dd750d9785" name="Default" comment="控制方式和电源分别选择">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/controlmode.pkl" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
+      <change beforePath="$PROJECT_DIR$/pkl/controlmode.pkl" afterPath="$PROJECT_DIR$/pkl/controlmode.pkl" />
+      <change beforePath="$PROJECT_DIR$/public/globalvariable.py" afterPath="$PROJECT_DIR$/public/datacache.py" />
+      <change beforePath="$PROJECT_DIR$/tcpsocket.py" afterPath="$PROJECT_DIR$/tcpsocket.py" />
+      <change beforePath="$PROJECT_DIR$/ui/controlmodesetui.py" afterPath="$PROJECT_DIR$/ui/controlmodesetui.py" />
+      <change beforePath="$PROJECT_DIR$/ui/currentdiagramui.py" afterPath="$PROJECT_DIR$/ui/currentdiagramui.py" />
+      <change beforePath="$PROJECT_DIR$/ui/doubleslider.py" afterPath="$PROJECT_DIR$/ui/doubleslider.py" />
+      <change beforePath="$PROJECT_DIR$/ui/mainwindowui.py" afterPath="$PROJECT_DIR$/ui/mainwindowui.py" />
+      <change beforePath="$PROJECT_DIR$/ui/powercalibrationui.py" afterPath="$PROJECT_DIR$/ui/powercalibrationui.py" />
+      <change beforePath="$PROJECT_DIR$/ui/remotecontrolsetui.py" afterPath="$PROJECT_DIR$/ui/remotecontrolsetui.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,21 +23,28 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/ProgrammableTester$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1510652727809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../MyPractics/pigui" />
-    <SUITE FILE_PATH="coverage/ProgrammableTester$main.coverage" NAME="main Coverage Results" MODIFIED="1514367598406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ProgrammableTester$tcpsocket.coverage" NAME="tcpsocket Coverage Results" MODIFIED="1512105928997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ProgrammableTester$tcpclient.coverage" NAME="tcpclient Coverage Results" MODIFIED="1511776740927" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../MyPractics" />
+    <SUITE FILE_PATH="coverage/ProgrammableTester$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1510652727809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../MyPractics/pigui" />
     <SUITE FILE_PATH="coverage/ProgrammableTester$tcpserver.coverage" NAME="tcpserver Coverage Results" MODIFIED="1511775464431" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../MyPractics" />
+    <SUITE FILE_PATH="coverage/ProgrammableTester$tcpsocket.coverage" NAME="tcpsocket Coverage Results" MODIFIED="1512105928997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ProgrammableTester$main.coverage" NAME="main Coverage Results" MODIFIED="1515463848067" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="676">
-              <caret line="189" column="25" lean-forward="true" selection-start-line="189" selection-start-column="25" selection-end-line="189" selection-end-column="25" />
+            <state relative-caret-position="-1862">
+              <caret line="159" column="0" lean-forward="false" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
               <folding>
                 <element signature="e#69#79#0" expanded="true" />
+                <element signature="e#665#2302#0" expanded="false" />
+                <element signature="e#1651#1716#0" expanded="false" />
+                <element signature="e#1766#1834#0" expanded="false" />
+                <element signature="e#1885#1955#0" expanded="false" />
+                <element signature="e#2008#2080#0" expanded="false" />
+                <element signature="e#2127#2193#0" expanded="false" />
+                <element signature="e#2238#2302#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -47,53 +53,76 @@
       <file leaf-file-name="mainwindowui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ui/mainwindowui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="457">
-              <caret line="676" column="11" lean-forward="true" selection-start-line="676" selection-start-column="11" selection-end-line="676" selection-end-column="11" />
+            <state relative-caret-position="277">
+              <caret line="530" column="15" lean-forward="true" selection-start-line="530" selection-start-column="15" selection-end-line="530" selection-end-column="15" />
               <folding>
                 <element signature="e#70#88#0" expanded="true" />
-                <element signature="e#191#16775#0" expanded="false" />
-                <element signature="e#191#212#1" expanded="false" />
-                <element signature="e#1310#2148#0" expanded="false" />
-                <element signature="e#2201#2962#0" expanded="false" />
-                <element signature="e#3028#5176#0" expanded="false" />
-                <element signature="e#10664#12747#0" expanded="false" />
-                <element signature="e#12789#14709#0" expanded="false" />
-                <element signature="e#14745#14774#0" expanded="false" />
-                <element signature="e#14815#15197#0" expanded="false" />
-                <element signature="e#15233#15316#0" expanded="false" />
-                <element signature="e#15351#15478#0" expanded="false" />
-                <element signature="e#15515#15729#0" expanded="false" />
-                <element signature="e#15768#15969#0" expanded="false" />
-                <element signature="e#16026#16628#0" expanded="false" />
-                <element signature="e#21791#22185#0" expanded="false" />
-                <element signature="e#22232#22347#0" expanded="false" />
-                <element signature="e#22393#23079#0" expanded="false" />
-                <element signature="e#22949#22989#0" expanded="false" />
-                <element signature="e#23123#24997#0" expanded="false" />
-                <element signature="e#31164#31197#1" expanded="false" />
-                <element signature="e#34174#34826#0" expanded="false" />
-                <element signature="e#34174#34227#1" expanded="false" />
-                <element signature="e#34871#34904#1" expanded="false" />
+                <element signature="e#302#16886#0" expanded="false" />
+                <element signature="e#302#323#1" expanded="false" />
+                <element signature="e#1421#2259#0" expanded="false" />
+                <element signature="e#2312#3073#0" expanded="false" />
+                <element signature="e#3139#5287#0" expanded="false" />
+                <element signature="e#10775#12858#0" expanded="false" />
+                <element signature="e#12900#14820#0" expanded="false" />
+                <element signature="e#14856#14885#0" expanded="false" />
+                <element signature="e#14926#15308#0" expanded="false" />
+                <element signature="e#15344#15427#0" expanded="false" />
+                <element signature="e#15462#15589#0" expanded="false" />
+                <element signature="e#15626#15840#0" expanded="false" />
+                <element signature="e#15879#16080#0" expanded="false" />
+                <element signature="e#16137#16739#0" expanded="false" />
+                <element signature="e#21952#22346#0" expanded="false" />
+                <element signature="e#22393#22508#0" expanded="false" />
+                <element signature="e#22554#23240#0" expanded="false" />
+                <element signature="e#23110#23150#0" expanded="false" />
+                <element signature="e#23284#25158#0" expanded="false" />
+                <element signature="e#30090#31610#0" expanded="false" />
+                <element signature="e#31644#33135#0" expanded="false" />
+                <element signature="e#31644#31677#1" expanded="false" />
+                <element signature="e#33171#33260#0" expanded="false" />
+                <element signature="e#33301#33725#0" expanded="false" />
+                <element signature="e#33760#34317#0" expanded="false" />
+                <element signature="e#33815#33835#0" expanded="false" />
+                <element signature="e#34353#34422#0" expanded="false" />
+                <element signature="e#34457#34627#0" expanded="false" />
+                <element signature="e#34998#35238#0" expanded="false" />
+                <element signature="e#35291#35943#0" expanded="false" />
+                <element signature="e#35291#35344#1" expanded="false" />
+                <element signature="e#35988#36104#0" expanded="false" />
+                <element signature="e#35988#36021#1" expanded="false" />
+                <element signature="e#36152#36258#0" expanded="false" />
+                <element signature="e#36308#36417#0" expanded="false" />
+                <element signature="e#36473#36589#0" expanded="false" />
+                <element signature="e#36648#36847#0" expanded="false" />
+                <element signature="e#36911#37145#0" expanded="false" />
+                <element signature="e#37193#37395#0" expanded="false" />
+                <element signature="e#37436#38006#0" expanded="false" />
+                <element signature="e#37525#37536#0" expanded="false" />
+                <element signature="e#38043#38121#0" expanded="false" />
+                <element signature="e#38174#39062#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="QWidget.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QWidget.py">
+      <file leaf-file-name="controlmodesetui.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/controlmodesetui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="455">
-              <caret line="1133" column="8" lean-forward="false" selection-start-line="1133" selection-start-column="8" selection-end-line="1133" selection-end-column="8" />
-              <folding />
+            <state relative-caret-position="-1065">
+              <caret line="401" column="0" lean-forward="true" selection-start-line="401" selection-start-column="0" selection-end-line="401" selection-end-column="0" />
+              <folding>
+                <element signature="e#49#62#0" expanded="true" />
+                <element signature="e#16794#16873#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="QGridLayout.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QGridLayout.py">
+      <file leaf-file-name="currentdiagramui.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/currentdiagramui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="44" column="12" lean-forward="true" selection-start-line="44" selection-start-column="12" selection-end-line="44" selection-end-column="12" />
+            <state relative-caret-position="957">
+              <caret line="37" column="60" lean-forward="true" selection-start-line="37" selection-start-column="60" selection-end-line="37" selection-end-column="60" />
               <folding />
             </state>
           </provider>
@@ -102,38 +131,30 @@
       <file leaf-file-name="remotecontrolsetui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ui/remotecontrolsetui.py">
           <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="464">
+              <caret line="33" column="35" lean-forward="false" selection-start-line="33" selection-start-column="35" selection-end-line="33" selection-end-column="35" />
+              <folding>
+                <element signature="e#69#111#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="relaycheckui.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/relaycheckui.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="87">
+              <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="datacache.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/datacache.py">
+          <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="348">
-              <caret line="19" column="36" lean-forward="false" selection-start-line="19" selection-start-column="36" selection-end-line="19" selection-end-column="36" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="currentdiagramui.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/currentdiagramui.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1952">
-              <caret line="76" column="23" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="diagram.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ui/diagram.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="386">
-              <caret line="119" column="40" lean-forward="false" selection-start-line="119" selection-start-column="40" selection-end-line="119" selection-end-column="40" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="globalvariable.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/globalvariable.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3335">
-              <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
+              <caret line="12" column="22" lean-forward="false" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -161,7 +182,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="NEW" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="PUSH_TAGS">
@@ -169,11 +190,11 @@
     </option>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/ui/remotecontrolsetui.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/ui/powercalibrationui.py" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ui/currentdiagramui.py" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/ui/mainwindowui.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ui/controlmodesetui.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/ui/remotecontrolsetui.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/ui/mainwindowui.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ui/currentdiagramui.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -207,21 +228,23 @@
         <option value="$PROJECT_DIR$/src/globalvariable.py" />
         <option value="$PROJECT_DIR$/controlmodesetui.py" />
         <option value="$PROJECT_DIR$/ui/currentwindowui.py" />
-        <option value="$PROJECT_DIR$/ui/doubleslider.py" />
         <option value="$PROJECT_DIR$/network.py" />
-        <option value="$PROJECT_DIR$/tcpsocket.py" />
         <option value="$PROJECT_DIR$/netset.py" />
-        <option value="$PROJECT_DIR$/ui/controlmodesetui.py" />
-        <option value="$PROJECT_DIR$/ui/currentdiagramui.py" />
         <option value="$PROJECT_DIR$/useless.txt" />
         <option value="$PROJECT_DIR$/readme.md" />
         <option value="$PROJECT_DIR$/ui/powersetui.py" />
-        <option value="$PROJECT_DIR$/public/globalvariable.py" />
-        <option value="$PROJECT_DIR$/ui/remotecontrolsetui.py" />
-        <option value="$PROJECT_DIR$/ui/powercalibrationui.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/ui/diagram.py" />
+        <option value="$PROJECT_DIR$/tcpsocket.py" />
+        <option value="$PROJECT_DIR$/public/globalvariable.py" />
+        <option value="$PROJECT_DIR$/public/softwaredata.py" />
+        <option value="$PROJECT_DIR$/ui/remotecontrolsetui.py" />
+        <option value="$PROJECT_DIR$/ui/doubleslider.py" />
+        <option value="$PROJECT_DIR$/ui/powercalibrationui.py" />
+        <option value="$PROJECT_DIR$/public/datacache.py" />
+        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/ui/mainwindowui.py" />
+        <option value="$PROJECT_DIR$/ui/controlmodesetui.py" />
+        <option value="$PROJECT_DIR$/ui/currentdiagramui.py" />
       </list>
     </option>
   </component>
@@ -239,8 +262,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="295" />
-    <option name="y" value="3" />
+    <option name="x" value="532" />
+    <option name="y" value="139" />
     <option name="width" value="1100" />
     <option name="height" value="647" />
   </component>
@@ -257,7 +280,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>PyUnresolvedReferencesInspection</id>
+            <id>XML</id>
           </State>
         </selected-state>
       </profile-state>
@@ -279,23 +302,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="ProgrammableTester" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ProgrammableTester" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ProgrammableTester" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ProgrammableTester" type="462c0819:PsiDirectoryNode" />
-              <item name="ui" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="Scratches">
         <subPane>
           <expand>
@@ -312,16 +318,42 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="ProgrammableTester" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ProgrammableTester" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ProgrammableTester" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ProgrammableTester" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ProgrammableTester" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ProgrammableTester" type="462c0819:PsiDirectoryNode" />
+              <item name="ui" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MyPractics/tcpclient.py" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
+    <property name="last_opened_file_path" value="C:/PortableGit/cmd/git.exe" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Python" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="ChangesBrowser.SHOW_FLATTEN" value="false" />
     <property name="node.js.path.for.package.stylelint" value="project" />
     <property name="node.js.detected.package.stylelint" value="true" />
     <property name="node.js.selected.package.stylelint" value="" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+  </component>
+  <component name="PyCoverageOptionsProvider">
+    <option name="myUseBundledCoveragePy" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -364,6 +396,7 @@
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
     </configuration>
     <configuration name="tcpclient" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -382,6 +415,7 @@
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
     </configuration>
     <configuration name="tcpserver" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -400,6 +434,7 @@
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
     </configuration>
     <configuration name="tcpsocket" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -418,6 +453,7 @@
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
     </configuration>
     <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
@@ -560,7 +596,21 @@
       <option name="project" value="LOCAL" />
       <updated>1512811637434</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="校准$主界面">
+      <created>1514423571841</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1514423571841</updated>
+    </task>
+    <task id="LOCAL-00018" summary="anzhuang">
+      <created>1514873226557</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1514873226557</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -576,18 +626,19 @@
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298122" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16347238" sideWeight="0.5083333" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1632883" sideWeight="0.5125" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298122" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16347238" sideWeight="0.49166667" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1632883" sideWeight="0.4875" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298122" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.10989583" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14375" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32882884" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24972972" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39797068" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3975225" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -596,6 +647,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Concurrent Activities Diagram" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -630,7 +682,8 @@
     <MESSAGE value="设置" />
     <MESSAGE value="校准" />
     <MESSAGE value="校准$主界面" />
-    <option name="LAST_COMMIT_MESSAGE" value="校准$主界面" />
+    <MESSAGE value="anzhuang" />
+    <option name="LAST_COMMIT_MESSAGE" value="anzhuang" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -641,25 +694,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="16" />
+      <option name="time" value="18" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QMessageBox.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5359">
-          <caret line="331" column="8" lean-forward="false" selection-start-line="331" selection-start-column="8" selection-end-line="331" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python/Lib/site-packages/matplotlib/font_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="1315" column="0" lean-forward="false" selection-start-line="1315" selection-start-column="0" selection-end-line="1315" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Python/Lib/site-packages/matplotlib/backends/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="145">
@@ -719,78 +758,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.png" />
     <entry file="file://$PROJECT_DIR$/D.jpg" />
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QFileDialog.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="171" column="12" lean-forward="true" selection-start-line="171" selection-start-column="12" selection-end-line="171" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/nt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="207">
-          <caret line="548" column="8" lean-forward="true" selection-start-line="548" selection-start-column="8" selection-end-line="548" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tcpsocket.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1504">
-          <caret line="122" column="16" lean-forward="true" selection-start-line="122" selection-start-column="16" selection-end-line="122" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/_socket.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7750">
-          <caret line="450" column="31" lean-forward="false" selection-start-line="450" selection-start-column="31" selection-end-line="450" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QLineEdit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="420" column="31" lean-forward="true" selection-start-line="420" selection-start-column="31" selection-end-line="420" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QTabWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="265">
-          <caret line="227" column="23" lean-forward="true" selection-start-line="227" selection-start-column="23" selection-end-line="227" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QFileDialog.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/nt.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/_socket.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QLineEdit.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QTabWidget.py" />
     <entry file="file://$PROJECT_DIR$/ui/currentwindowui.py" />
-    <entry file="file://$PROJECT_DIR$/useless.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2651">
-          <caret line="133" column="0" lean-forward="true" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/readme.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pkl/data.json" />
-    <entry file="file://$PROJECT_DIR$/ui/controlmodesetui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="275" column="12" lean-forward="false" selection-start-line="275" selection-start-column="12" selection-end-line="275" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtGui/QDoubleValidator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1885">
-          <caret line="68" column="0" lean-forward="false" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtGui/QDoubleValidator.py" />
     <entry file="file://$PROJECT_DIR$/images/aca.png">
       <provider selected="true" editor-type-id="images">
         <state />
@@ -816,32 +791,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/doubleslider.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-493">
-          <caret line="11" column="47" lean-forward="true" selection-start-line="11" selection-start-column="47" selection-end-line="11" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="62">
-          <caret line="363" column="40" lean-forward="true" selection-start-line="363" selection-start-column="13" selection-end-line="363" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ui/powersetui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="39" column="55" lean-forward="true" selection-start-line="39" selection-start-column="55" selection-end-line="39" selection-end-column="55" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/builtins.py" />
     <entry file="file://C:/Python/Lib/json/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
@@ -849,164 +802,200 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/relaycheckui.py">
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QMenuBar.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QBoxLayout.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtCore/Qt.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QGridLayout.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QMainWindow.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QWidget.py" />
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QLayout.py" />
+    <entry file="file://$PROJECT_DIR$/tcpsocket.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="621">
+          <caret line="230" column="11" lean-forward="false" selection-start-line="230" selection-start-column="11" selection-end-line="230" selection-end-column="11" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/powercalibrationui.py">
+    <entry file="file://$PROJECT_DIR$/useless.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="333" column="39" lean-forward="true" selection-start-line="333" selection-start-column="39" selection-end-line="333" selection-end-column="39" />
-          <folding>
-            <element signature="e#69#82#0" expanded="false" />
-            <element signature="e#2805#2939#0" expanded="false" />
-            <element signature="e#2985#3198#0" expanded="false" />
-            <element signature="e#3229#3438#0" expanded="false" />
-            <element signature="e#3469#3689#0" expanded="false" />
-            <element signature="e#3720#3930#0" expanded="false" />
-            <element signature="e#10195#10238#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="2885">
+          <caret line="133" column="0" lean-forward="false" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/globalvariable.py">
+    <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3335">
-          <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QMenuBar.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="141" column="23" lean-forward="false" selection-start-line="141" selection-start-column="8" selection-end-line="141" selection-end-column="23" />
-          <folding />
+        <state relative-caret-position="203">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/netset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="17" column="18" lean-forward="true" selection-start-line="17" selection-start-column="18" selection-end-line="17" selection-end-column="18" />
+        <state relative-caret-position="650">
+          <caret line="25" column="13" lean-forward="false" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2854">
+          <caret line="1071" column="0" lean-forward="false" selection-start-line="1071" selection-start-column="0" selection-end-line="1071" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/diagram.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3451">
+          <caret line="119" column="40" lean-forward="false" selection-start-line="119" selection-start-column="40" selection-end-line="119" selection-end-column="40" />
+          <folding>
+            <element signature="e#66#146#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/doubleslider.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="464">
+          <caret line="16" column="0" lean-forward="true" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/powercalibrationui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7522">
+          <caret line="10" column="46" lean-forward="false" selection-start-line="10" selection-start-column="45" selection-end-line="10" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/powersetui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="246">
+          <caret line="49" column="6" lean-forward="false" selection-start-line="49" selection-start-column="6" selection-end-line="49" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/relaycheckui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="87">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/datacache.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="348">
+          <caret line="12" column="22" lean-forward="false" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ui/remotecontrolsetui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="348">
-          <caret line="19" column="36" lean-forward="false" selection-start-line="19" selection-start-column="36" selection-end-line="19" selection-end-column="36" />
-          <folding />
+        <state relative-caret-position="464">
+          <caret line="33" column="35" lean-forward="false" selection-start-line="33" selection-start-column="35" selection-end-line="33" selection-end-column="35" />
+          <folding>
+            <element signature="e#69#111#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QBoxLayout.py">
+    <entry file="file://$PROJECT_DIR$/ui/currentdiagramui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="439">
-          <caret line="46" column="64" lean-forward="false" selection-start-line="46" selection-start-column="55" selection-end-line="46" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtCore/Qt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="60" column="18" lean-forward="true" selection-start-line="60" selection-start-column="18" selection-end-line="60" selection-end-column="18" />
+        <state relative-caret-position="957">
+          <caret line="37" column="60" lean-forward="true" selection-start-line="37" selection-start-column="60" selection-end-line="37" selection-end-column="60" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="676">
-          <caret line="189" column="25" lean-forward="true" selection-start-line="189" selection-start-column="25" selection-end-line="189" selection-end-column="25" />
+        <state relative-caret-position="-1862">
+          <caret line="159" column="0" lean-forward="false" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
           <folding>
             <element signature="e#69#79#0" expanded="true" />
+            <element signature="e#665#2302#0" expanded="false" />
+            <element signature="e#1651#1716#0" expanded="false" />
+            <element signature="e#1766#1834#0" expanded="false" />
+            <element signature="e#1885#1955#0" expanded="false" />
+            <element signature="e#2008#2080#0" expanded="false" />
+            <element signature="e#2127#2193#0" expanded="false" />
+            <element signature="e#2238#2302#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QLayout.py">
+    <entry file="file://$PROJECT_DIR$/ui/controlmodesetui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="233" column="20" lean-forward="true" selection-start-line="233" selection-start-column="20" selection-end-line="233" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QGridLayout.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="44" column="12" lean-forward="true" selection-start-line="44" selection-start-column="12" selection-end-line="44" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ui/currentdiagramui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1952">
-          <caret line="76" column="23" lean-forward="false" selection-start-line="76" selection-start-column="13" selection-end-line="76" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ui/diagram.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="386">
-          <caret line="119" column="40" lean-forward="false" selection-start-line="119" selection-start-column="40" selection-end-line="119" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QMainWindow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="370" column="8" lean-forward="false" selection-start-line="370" selection-start-column="8" selection-end-line="370" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-234514117/PyQt5/QtWidgets/QWidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="455">
-          <caret line="1133" column="8" lean-forward="false" selection-start-line="1133" selection-start-column="8" selection-end-line="1133" selection-end-column="8" />
-          <folding />
+        <state relative-caret-position="-1065">
+          <caret line="401" column="0" lean-forward="true" selection-start-line="401" selection-start-column="0" selection-end-line="401" selection-end-column="0" />
+          <folding>
+            <element signature="e#49#62#0" expanded="true" />
+            <element signature="e#16794#16873#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ui/mainwindowui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="457">
-          <caret line="676" column="11" lean-forward="true" selection-start-line="676" selection-start-column="11" selection-end-line="676" selection-end-column="11" />
+        <state relative-caret-position="277">
+          <caret line="530" column="15" lean-forward="true" selection-start-line="530" selection-start-column="15" selection-end-line="530" selection-end-column="15" />
           <folding>
             <element signature="e#70#88#0" expanded="true" />
-            <element signature="e#191#16775#0" expanded="false" />
-            <element signature="e#191#212#1" expanded="false" />
-            <element signature="e#1310#2148#0" expanded="false" />
-            <element signature="e#2201#2962#0" expanded="false" />
-            <element signature="e#3028#5176#0" expanded="false" />
-            <element signature="e#10664#12747#0" expanded="false" />
-            <element signature="e#12789#14709#0" expanded="false" />
-            <element signature="e#14745#14774#0" expanded="false" />
-            <element signature="e#14815#15197#0" expanded="false" />
-            <element signature="e#15233#15316#0" expanded="false" />
-            <element signature="e#15351#15478#0" expanded="false" />
-            <element signature="e#15515#15729#0" expanded="false" />
-            <element signature="e#15768#15969#0" expanded="false" />
-            <element signature="e#16026#16628#0" expanded="false" />
-            <element signature="e#21791#22185#0" expanded="false" />
-            <element signature="e#22232#22347#0" expanded="false" />
-            <element signature="e#22393#23079#0" expanded="false" />
-            <element signature="e#22949#22989#0" expanded="false" />
-            <element signature="e#23123#24997#0" expanded="false" />
-            <element signature="e#31164#31197#1" expanded="false" />
-            <element signature="e#34174#34826#0" expanded="false" />
-            <element signature="e#34174#34227#1" expanded="false" />
-            <element signature="e#34871#34904#1" expanded="false" />
+            <element signature="e#302#16886#0" expanded="false" />
+            <element signature="e#302#323#1" expanded="false" />
+            <element signature="e#1421#2259#0" expanded="false" />
+            <element signature="e#2312#3073#0" expanded="false" />
+            <element signature="e#3139#5287#0" expanded="false" />
+            <element signature="e#10775#12858#0" expanded="false" />
+            <element signature="e#12900#14820#0" expanded="false" />
+            <element signature="e#14856#14885#0" expanded="false" />
+            <element signature="e#14926#15308#0" expanded="false" />
+            <element signature="e#15344#15427#0" expanded="false" />
+            <element signature="e#15462#15589#0" expanded="false" />
+            <element signature="e#15626#15840#0" expanded="false" />
+            <element signature="e#15879#16080#0" expanded="false" />
+            <element signature="e#16137#16739#0" expanded="false" />
+            <element signature="e#21952#22346#0" expanded="false" />
+            <element signature="e#22393#22508#0" expanded="false" />
+            <element signature="e#22554#23240#0" expanded="false" />
+            <element signature="e#23110#23150#0" expanded="false" />
+            <element signature="e#23284#25158#0" expanded="false" />
+            <element signature="e#30090#31610#0" expanded="false" />
+            <element signature="e#31644#33135#0" expanded="false" />
+            <element signature="e#31644#31677#1" expanded="false" />
+            <element signature="e#33171#33260#0" expanded="false" />
+            <element signature="e#33301#33725#0" expanded="false" />
+            <element signature="e#33760#34317#0" expanded="false" />
+            <element signature="e#33815#33835#0" expanded="false" />
+            <element signature="e#34353#34422#0" expanded="false" />
+            <element signature="e#34457#34627#0" expanded="false" />
+            <element signature="e#34998#35238#0" expanded="false" />
+            <element signature="e#35291#35943#0" expanded="false" />
+            <element signature="e#35291#35344#1" expanded="false" />
+            <element signature="e#35988#36104#0" expanded="false" />
+            <element signature="e#35988#36021#1" expanded="false" />
+            <element signature="e#36152#36258#0" expanded="false" />
+            <element signature="e#36308#36417#0" expanded="false" />
+            <element signature="e#36473#36589#0" expanded="false" />
+            <element signature="e#36648#36847#0" expanded="false" />
+            <element signature="e#36911#37145#0" expanded="false" />
+            <element signature="e#37193#37395#0" expanded="false" />
+            <element signature="e#37436#38006#0" expanded="false" />
+            <element signature="e#37525#37536#0" expanded="false" />
+            <element signature="e#38043#38121#0" expanded="false" />
+            <element signature="e#38174#39062#0" expanded="false" />
           </folding>
         </state>
       </provider>
