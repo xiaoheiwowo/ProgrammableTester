@@ -227,15 +227,11 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         print('load control mode')
         with open('pkl/controlmode.pkl', 'rb') as f:
             sw.control_mode = pickle.loads(f.read())
-
-        lst = []
-        for i in range(len(sw.control_mode)):
-            lst.append(sw.control_mode[i]['NAME'])
         self.CB_SelectControl.clear()
         self.CB_SelectControl.addItem('None')
-        lst2 = list(set(lst))
-        for i in range(len(lst2)):
-            self.CB_SelectControl.addItem(lst2[i])
+        lst = ['', 'DC', 'AC']
+        for i in range(len(sw.control_mode)):
+            self.CB_SelectControl.addItem(lst[sw.control_mode[i]['POWER']] + ' ' + sw.control_mode[i]['NAME'])
 
     def update_main_win(self):
         """

@@ -6,6 +6,7 @@ introduction
 
 import numpy as np
 import pickle
+import random
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import diagram
@@ -470,6 +471,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_FullScreen = QtWidgets.QPushButton()
         self.BT_Dynamic = QtWidgets.QPushButton()
         self.BT_Static = QtWidgets.QPushButton()
+        self.refresh_timer = QtCore.QTimer(self)
+
         self.init_current_curve()
 
         # 阀门控制部分
@@ -489,7 +492,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_control_mode = QtWidgets.QLabel()
         self.CB_SelectControl = QtWidgets.QComboBox()
         self.lb_power_choose = QtWidgets.QLabel()
-        self.CB_DCorAC = QtWidgets.QComboBox()
+        # self.CB_DCorAC = QtWidgets.QComboBox()
         self.SB_Voltage = QtWidgets.QDoubleSpinBox()
         self.lb_unit_v = QtWidgets.QLabel()
         self.BT_Lock = QtWidgets.QPushButton()
@@ -595,16 +598,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         Layout_LB.addStretch(1)
 
         self.main_window_fig.setMaximumHeight(180)
-        xx = np.arange(-10.0, 0, 0.05)
-        yy = (np.cos(2*np.pi*xx)+1)*10
-        self.main_window_fig.update_diagram(yy)
-        self.main_window_fig.myTable.remove()
-        self.main_window_fig.fig.subplots_adjust(0., 0., 1, 1)
-        self.main_window_fig.ax.xaxis.set_ticks_position('top')
-        self.main_window_fig.ax.yaxis.set_ticks_position('left')
-        self.main_window_fig.ax.spines['top'].set_position(('data', 0))
-        self.main_window_fig.ax.spines['left'].set_position(('data', 0))
-        self.main_window_fig.ax.set_title('')
+        # xx = np.arange(-10.0, 0, 0.05)
+        # yy = (np.cos(2*np.pi*xx)+1)*10
+        self.main_window_fig.update_diagram(sw.current_valve, myflag=0)
 
         self.BT_FullScreen.setFixedSize(50, 50)
         self.BT_FullScreen.setStyleSheet('''QPushButton {background-image: url("./images/zoomout.png")}''')
@@ -671,8 +667,11 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.left_list.currentRowChanged.connect(self.display)
         self.CB_SelectControl.currentIndexChanged.connect(self.select_control_mode)
         # self.CB_SelectControl.activated.connect(self.load_data)
-        self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
+        # self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
         self.SB_Voltage.valueChanged.connect(self.set_voltage)
+        self.refresh_timer.timeout.connect(self.draw_dynamic)
+        self.BT_Dynamic.clicked.connect(self.press_dynamic)
+        self.BT_Static.clicked.connect(self.press_static)
 
         # 自动复选框信号连接按钮禁用函数
         self.CK_Auto.clicked.connect(self.AutoTestDisable)
@@ -692,10 +691,10 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_control_mode.setText('      控制方式:')
         self.CB_SelectControl.setMinimumHeight(40)
         self.CB_SelectControl.addItem('None')
-        self.lb_power_choose.setText('        电源:')
-        self.CB_DCorAC.setMinimumHeight(40)
-        self.CB_DCorAC.addItem('DC')
-        self.CB_DCorAC.addItem('AC')
+        self.lb_power_choose.setText('        电压:')
+        # self.CB_DCorAC.setMinimumHeight(40)
+        # self.CB_DCorAC.addItem('DC')
+        # self.CB_DCorAC.addItem('AC')
         self.SB_Voltage.setMinimumHeight(40)
         self.SB_Voltage.setMinimumWidth(80)
         self.lb_unit_v.setText('V')
@@ -703,17 +702,18 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setMinimumWidth(120)
         self.BT_Lock.setText('长按锁定')
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
+        self.BT_Stop.setFixedSize(120, 40)
 
         no_use_wgt = QtWidgets.QWidget(flags=QtCore.Qt.Widget)
 
         self.Layout_Basic.addWidget(self.lb_control_mode, 1, 0)
         self.Layout_Basic.addWidget(self.CB_SelectControl, 1, 1)
         self.Layout_Basic.addWidget(self.lb_power_choose, 1, 2)
-        self.Layout_Basic.addWidget(self.CB_DCorAC, 1, 3)
-        self.Layout_Basic.addWidget(self.SB_Voltage, 1, 4)
-        self.Layout_Basic.addWidget(self.lb_unit_v, 1, 5)
-        self.Layout_Basic.addWidget(self.BT_Lock, 1, 6)
-        self.Layout_Basic.addWidget(no_use_wgt, 1, 7, 1, 2)
+        # self.Layout_Basic.addWidget(self.CB_DCorAC, 1, 3)
+        self.Layout_Basic.addWidget(self.SB_Voltage, 1, 3)
+        self.Layout_Basic.addWidget(self.lb_unit_v, 1, 4)
+        self.Layout_Basic.addWidget(self.BT_Lock, 1, 5)
+        self.Layout_Basic.addWidget(no_use_wgt, 1, 6, 1, 2)
 
         self.lb_open_valve.setText('        开阀:')
         self.SB_OpenTime.setMinimumHeight(40)
@@ -886,7 +886,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.valve_control_disabled(False)
         self.lock_state = True
 
-        print(hw.control_mode, hw.power)
+        print(hw.control_mode, hw.voltage)
 
     def UnlockControl(self):
         """
@@ -916,7 +916,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_ClearR.setDisabled(tof)
         self.BT_Send.setDisabled(tof)
         self.CB_SelectControl.setDisabled(not tof)
-        self.CB_DCorAC.setDisabled(not tof)
+        # self.CB_DCorAC.setDisabled(not tof)
         self.SB_Voltage.setDisabled(not tof)
 
     def adjust_input_change(self):
@@ -977,36 +977,33 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
         # print(self.CB_SelectControl.currentText(), i)
-        hw.control_mode = self.CB_SelectControl.currentText()
+        hw.control_mode[0] = self.CB_SelectControl.currentText()
+        hw.control_mode[1] = i
         # print(hw.control_mode)
-
-    def select_power(self, i):
-        """
-
-        :param i:
-        :return:
-        """
-        hw.power[0] = i + 1
-
-        # lst2 = []
-        # for i in range(len(sw.control_mode)):
-        #     if hw.power[0] == sw.control_mode[i]['POWER']:
-        #         lst2.append(sw.control_mode[i])
-        # print(hw.power)
-        # for i in range(len(lst2)):
-        #     if hw.control_mode == lst2[i]['NAME']:
-        #         break
-        #     else:
-        #         msgbox = QtWidgets.QMessageBox.warning(self, "Warning", "没有该控制方式",
-        #                               QtWidgets.QMessageBox.Ok)
 
     def set_voltage(self):
         """
 
         :return:
         """
-        hw.power[1] = self.SB_Voltage.text()
+        hw.voltage = self.SB_Voltage.text()
 
+    def draw_dynamic(self):
+
+        sw.current_valve.append(int(100 * random.random()))
+        del sw.current_valve[0]
+        yy = sw.current_valve
+        self.main_window_fig.update_diagram(yy, myflag=0)
+        # self.main_window_fig.myTable.remove()
+
+
+    def press_dynamic(self):
+        if not self.refresh_timer.isActive():
+            self.refresh_timer.start(300)
+
+    def press_static(self):
+        if self.refresh_timer.isActive():
+            self.refresh_timer.stop()
 
 class LongPressButton(QtWidgets.QPushButton):
     """

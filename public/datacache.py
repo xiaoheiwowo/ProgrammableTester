@@ -145,8 +145,8 @@ class HardwareData(object):
     spi_data = []
     uart_data = []
 
-    control_mode = ''
-    power = [0, 0]
+    control_mode = ['none', 0]
+    voltage = 'none'
 
     open_by_i2c = []
     close_by_i2c = []

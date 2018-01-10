@@ -1,6 +1,3 @@
-"""
-:keyword
-"""
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -75,10 +72,11 @@ class PlotWidget(FigureCanvas):
                                            )
         FigureCanvas.draw_idle(self)
 
-    def update_diagram(self, yy):
+    def update_diagram(self, yy, myflag=1):
         """
         更新曲线
         :param yy:
+        :param myflag=1:
         :return:
         """
         self.ar_data_show = yy
@@ -108,16 +106,24 @@ class PlotWidget(FigureCanvas):
         # 网格
         self.ax.grid()
         # 图表
-        rowLabels = ['Mod', 'Vol', 'Cur']
-        tableVal = [['BD3S'], ['DC5V'], ['200mA']]
-        self.myTable = self.ax.table(cellText=tableVal,
-                                     colWidths=[0.08] * 3,
-                                     rowLabels=rowLabels,
-                                     colLabels=['Valve'],
-                                     loc='upper right')
-        self.ax.legend(loc=2, ncol=1)
-        # Title & Label
-        self.ax.set_title('Current Curve')
+        if myflag:
+            rowLabels = ['Mod', 'Vol', 'Cur']
+            tableVal = [['BD3S'], ['DC5V'], ['200mA']]
+            self.myTable = self.ax.table(cellText=tableVal,
+                                         colWidths=[0.08] * 3,
+                                         rowLabels=rowLabels,
+                                         colLabels=['Valve'],
+                                         loc='upper right')
+
+            # Title & Label
+            self.ax.set_title('Current Curve')
+        else:
+            text1 = self.ax.text(-210, 3,
+                         'ms',
+                         fontsize=12,
+                         path_effects=[patheffects.withSimplePatchShadow()])
+            pass
+        # self.ax.legend(loc=2, ncol=1)
         self.ax.yaxis.set_label_position('right')
         self.ax.set_xlabel('T/s', fontsize=12, labelpad=3)
         self.ax.set_ylabel('I/mA', fontsize=12, labelpad=3)
