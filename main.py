@@ -28,6 +28,8 @@ from ui import mainwindowui
 from public.datacache import SoftwareData as sw
 
 import tcpsocket
+
+
 # import qdarkstyle
 
 
@@ -36,6 +38,7 @@ class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
     introduction
     useless
     """
+
     def __init__(self, parent=None):
         super(PT_MainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -116,6 +119,7 @@ class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_RemoteControlSet, self).__init__(parent)
 
@@ -124,6 +128,7 @@ class PT_CurrentDiagram(currentdiagramui.Ui_CurrentDiagram):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_CurrentDiagram, self).__init__(parent)
 
@@ -132,6 +137,7 @@ class PT_PowerCalibration(powercalibrationui.Ui_PowerCalibration):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_PowerCalibration, self).__init__(parent)
 
@@ -140,6 +146,7 @@ class PT_RelaySelfCheck(relaycheckui.Ui_RelaySelfCheck):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_RelaySelfCheck, self).__init__(parent)
 
@@ -148,6 +155,7 @@ class PT_PowerSet(powersetui.Ui_PowerSet):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_PowerSet, self).__init__(parent)
 
@@ -156,6 +164,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
     """
     introduction
     """
+
     def __init__(self, parent=None):
         super(PT_MainWin, self).__init__(parent)
 
@@ -250,11 +259,11 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             pass
 
 
-
 class TcpThread(QThread):
     """
     TCP线程，在此线程内接收请求并处理
     """
+
     def __init__(self):
         super(TcpThread, self).__init__()
         print('new thread init')
@@ -271,7 +280,7 @@ class TcpThread(QThread):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # 设置字体 在树莓派上使用注释下行
-    app.setFont(QFont('微软雅黑 Semilight', 9))
+    # app.setFont(QFont('微软雅黑 Semilight', 9))
     # 启动server线程
     # thread = TcpThread()
     # thread.start()
