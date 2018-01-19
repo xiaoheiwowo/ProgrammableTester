@@ -434,7 +434,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.resize(1024, 550)
         self.setMinimumSize(QtCore.QSize(800, 300))
         self.setWindowTitle('可编程测试仪')
-        self.setWindowIcon(QtGui.QIcon(":/qt.png"))
+        self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # self.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
         # 主窗口widget
         self.mainWidget = QtWidgets.QWidget(self, flags=QtCore.Qt.Widget)

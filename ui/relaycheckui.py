@@ -17,7 +17,7 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
         self.resize(1024, 550)
         self.setMinimumSize(600, 300)
         self.setWindowTitle('电源及采样校准')
-        self.setWindowIcon(QtGui.QIcon(":/entertainment_valve_72px_547701_easyicon.net.png"))
+        self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         # 保存、确定、取消按钮

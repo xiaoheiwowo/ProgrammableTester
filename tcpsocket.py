@@ -130,7 +130,7 @@ class TcpHandler(BaseRequestHandler):
         try:
             start = msgstr[2:6]
             lengh = msgstr[6:10]
-            data = gv.array[int(start):int(start)+int(lengh)]
+            data = gv.array[int(start):int(start) + int(lengh)]
             self.request.send(bytes(str(data), 'utf-8'))
         except:
             self.request.send(b'error 01')

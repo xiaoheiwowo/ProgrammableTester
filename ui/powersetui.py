@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -7,15 +7,15 @@ from ui import dialogbutton
 
 
 class Ui_PowerSet(QtWidgets.QDialog):
-    '''
-    电源设置窗口，
-    '''
+    """
+    电源设置窗口
+    """
     def __init__(self, parent = None):
         super(Ui_PowerSet, self).__init__(parent)
         self.resize(1024, 550)
         self.setMinimumSize(600, 300)
         self.setWindowTitle('电源设置')
-        self.setWindowIcon(QtGui.QIcon(":/qt.png"))
+        self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 

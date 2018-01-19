@@ -20,7 +20,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         self.resize(1024, 550)
         self.setMinimumSize(600, 300)
         self.setWindowTitle('电流曲线')
-        self.setWindowIcon(QtGui.QIcon(":/qt.png"))
+        self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 

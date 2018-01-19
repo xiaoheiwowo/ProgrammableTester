@@ -6,6 +6,7 @@ introduction
 import os
 import socket
 from socket import gethostbyname, gethostname
+
 host = gethostbyname(gethostname())
 # 命令行模式
 os.system('arp -a > net_temp.txt')
@@ -14,6 +15,7 @@ with open('net_temp.txt') as fp:
         line = line.split()[:2]
 
 socket.gethostbyaddr()
+
 
 def get_host_ip():
     try:
