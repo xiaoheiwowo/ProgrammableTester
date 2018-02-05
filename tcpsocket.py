@@ -1,5 +1,9 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+测试仪作为服务器等待客户端请求并作出相应的回复
+暂未实现自动连续向客户端发送数据
+"""
 
 from socketserver import BaseRequestHandler, TCPServer
 
@@ -17,7 +21,7 @@ class TcpHandler(BaseRequestHandler):
         :return:
         """
 
-        print('Got connection from', self.client_address)
+        print('Get connection from: ', self.client_address)
         while True:
             msg = self.request.recv(1024)
             if not msg:

@@ -17,12 +17,13 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
     """
     def __init__(self, parent=None):
         super(Ui_CurrentDiagram, self).__init__(parent)
-        self.resize(1024, 550)
+        self.resize(1024, 600)
         self.setMinimumSize(600, 300)
         self.setWindowTitle('电流曲线')
         self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
 
         self.BT_Dynamic = QtWidgets.QPushButton('动态')
         self.BT_Dynamic.setFixedSize(50, 50)

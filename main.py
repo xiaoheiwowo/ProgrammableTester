@@ -29,81 +29,10 @@ from public.datacache import SoftwareData as sw
 
 import tcpsocket
 
+import time
+
 
 # import qdarkstyle
-
-
-class PT_MainWindow(QMainWindow, mainwindowui.Ui_MainWindow):
-    """
-    introduction
-    useless
-    """
-
-    def __init__(self, parent=None):
-        super(PT_MainWindow, self).__init__(parent)
-        self.setupUi(self)
-
-        self.control_set = PT_ControlModeSet()
-        self.remote_control = PT_RemoteControlSet()
-        self.current_diagram = PT_CurrentDiagram()
-        self.power_calibration = PT_PowerCalibration()
-        self.relay_check = PT_RelaySelfCheck()
-        self.power_set = PT_PowerSet()
-
-        # SIGNAL
-        self.Action_ControlSet.triggered.connect(self.show_control_set_form)
-        self.Action_RemoteControl.triggered.connect(self.show_remote_control_form)
-        self.Action_Others.triggered.connect(self.show_power_set_form)
-        self.Action_PowerCalibration.triggered.connect(self.show_power_calibration_form)
-        self.Action_RelayCheck.triggered.connect(self.show_relay_check_form)
-
-        self.BT_FullScreen.clicked.connect(self.show_current_diagram_form)
-
-    def show_control_set_form(self):
-        """
-
-        :return:
-        """
-        self.control_set.show()
-
-    def show_remote_control_form(self):
-        """
-
-        :return:
-        """
-        self.remote_control.show()
-
-    def show_current_diagram_form(self):
-        """
-
-        :return:
-        """
-
-        self.current_diagram.show()
-
-    def show_power_calibration_form(self):
-        """
-
-        :return:
-        """
-
-        self.power_calibration.show()
-
-    def show_relay_check_form(self):
-        """
-
-        :return:
-        """
-
-        self.relay_check.show()
-
-    def show_power_set_form(self):
-        """
-
-        :return:
-        """
-
-        self.power_set.show()
 
 
 class PT_ControlModeSet(controlmodesetui.Ui_ControlModeSet):
@@ -176,6 +105,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         self.remote_control = PT_RemoteControlSet()
         self.power_calibration = PT_PowerCalibration()
         self.relay_check = PT_RelaySelfCheck()
+
         # SIGNAL
         self.Action_ControlSet.triggered.connect(self.show_control_set_form)
         self.Action_RemoteControl.triggered.connect(self.show_remote_control_form)
@@ -266,7 +196,7 @@ class TcpThread(QThread):
 
     def __init__(self):
         super(TcpThread, self).__init__()
-        print('new thread init')
+        print('TCP Thread Run ...')
 
     def run(self):
         """
@@ -277,22 +207,56 @@ class TcpThread(QThread):
         remote_control_server.serve_forever()
 
 
+class ControlThread(QThread):
+    """
+    控制线程
+    """
+
+    def __init__(self):
+        super(ControlThread, self).__init__()
+        print('Control Thread Run ...')
+        calibration_timer = QTimer(self)
+        calibration_timer.timeout.connect(self.read_ad)
+        calibration_timer.start(3000)
+
+    def run(self):
+        while True:
+        #     a = 1 # 断开所有继电器
+        #     if set_mode == 0:
+            print('time')
+            time.sleep(1)
+
+        pass
+
+    def read_ad(self):
+        time1 = time.time()
+
+        print('read ad ' + str(time1))
+        pass
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    # 设置字体 在树莓派上使用注释下行
-    # app.setFont(QFont('微软雅黑 Semilight', 9))
-    # 启动server线程
-    # thread = TcpThread()
-    # thread.start()
 
-    # win = PT_MainWindow()
+    # 设置字体 在树莓派上使用注释下行
+    app.setFont(QFont('微软雅黑 Semilight', 9))
+
+    # 启动server线程
+    # tcp_thread = TcpThread()
+    # tcp_thread.start()
+
+    # 启动控制线程
+    # control_thread = ControlThread()
+    # control_thread.start()
+
+    win = PT_MainWin()
     # win = PT_ControlModeSet()
     # win = PT_RemoteControlSet()
     # win = PT_CurrentDiagram()
     # win = PT_PowerCalibration()
     # win = PT_RelaySelfCheck()
     # win = PT_PowerSet()
-    win = PT_MainWin()
+
     # 全局黑色主题
     # win.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     win.show()

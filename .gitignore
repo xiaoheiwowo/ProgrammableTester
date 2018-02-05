@@ -116,7 +116,7 @@ venv.bak/
 *.csv
 .*
 
-useless.txt
+useless.md
 
 images/aca.png
 images/acv.png
@@ -131,5 +131,5 @@ images/lock_open_outline_128px_1158661_easyicon.net.png
 images/trouble_update_24px_2350_easyicon.net.png
 
 .idea/
-
+driver/wiringpi.py
 

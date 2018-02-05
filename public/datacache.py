@@ -113,17 +113,17 @@ class SoftwareData(object):
     control_set_bak = {'use_blank': True}
 
     # 电源采样校准数据
-    data_list = {'acv': [[0,   '0x0000', 0],
+    data_list = {'acv': [[0, '0x0000', 0],
                          [100, '0x5555', 101],
                          [200, '0xAAAA', 202],
                          [300, '0xFFFF', 303]],
 
-                 'aca': [[0,   '0x0000', 0],
+                 'aca': [[0, '0x0000', 0],
                          [100, '0x5555', 1],
                          [200, '0xAAAA', 2],
                          [300, '0xFFFF', 3]],
 
-                 'dcv': [[0,  '0x0000', 0],
+                 'dcv': [[0, '0x0000', 0],
                          [10, '0x5555', 11],
                          [20, '0xAAAA', 22],
                          [30, '0xFFFF', 33]],
@@ -136,34 +136,46 @@ class SoftwareData(object):
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_valve}
 
+    open_time = 0
+    close_time = 0
+
 
 class HardwareData(object):
     """
     硬件数据缓存区
     """
-    i2c_data = []
-    spi_data = []
-    uart_data = []
+    # i2c_data = []
+    # spi_data = []
+    # uart_data = []
+    #
+    # open_by_i2c = []
+    # close_by_i2c = []
+    # stop_by_i2c = []
+    # m3_by_i2c = []
+    # m4_by_i2c = []
+    #
+    # open_by_spi = []
+    # close_by_spi = []
+    # stop_by_spi = []
+    # m3_by_spi = []
+    # m4_by_spi = []
+    # control_by_spi = []
+    # return_from_valve = []
+    #
+    # open_by_uart = []
+    # close_by_uart = []
+    # stop_by_uart = []
+    # m3_by_uart = []
+    # m4_by_uart = []
 
-    control_mode = ['none', 0]
+    control_mode = {}
     voltage = 'none'
 
-    open_by_i2c = []
-    close_by_i2c = []
-    stop_by_i2c = []
-    m3_by_i2c = []
-    m4_by_i2c = []
+    bus_cmd = '01 06 00 04 00 00 C8 0B'
 
-    open_by_spi = []
-    close_by_spi = []
-    stop_by_spi = []
-    m3_by_spi = []
-    m4_by_spi = []
-    control_by_spi = []
-    return_from_valve = []
+    current_value = ''
+    voltage_value = ''
+    open_signal = ''
+    close_signal = ''
 
-    open_by_uart = []
-    close_by_uart = []
-    stop_by_uart = []
-    m3_by_uart = []
-    m4_by_uart = []
+    adjust_valve_back = ''
