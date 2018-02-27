@@ -1,5 +1,5 @@
 import time
-import wiringpi as wp
+from driver import wiringpi as wp
 import spidev
 
 
@@ -586,4 +586,4 @@ if __name__ == '__main__':
     while True:
         os.system('clear')
         print(ADS.ReadADC())
-        delay(50)
+        wp.delay(50)

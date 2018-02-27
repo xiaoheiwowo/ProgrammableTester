@@ -3,6 +3,7 @@
 """
 introduction
 """
+import random
 import sys
 import pickle
 from socketserver import TCPServer
@@ -11,6 +12,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 # 控制方式窗口Ui类
+from public.control import Digital
 from ui import controlmodesetui
 # 电流曲线窗口Ui类
 from ui import currentdiagramui
@@ -26,6 +28,7 @@ from ui import remotecontrolsetui
 from ui import mainwindowui
 
 from public.datacache import SoftwareData as sw
+from public.datacache import HardwareData as hw
 
 import tcpsocket
 
@@ -217,14 +220,23 @@ class ControlThread(QThread):
         print('Control Thread Run ...')
         calibration_timer = QTimer(self)
         calibration_timer.timeout.connect(self.read_ad)
-        calibration_timer.start(3000)
+        # calibration_timer.start(3000)
+
+        # self.digital = Digital()
 
     def run(self):
         while True:
-        #     a = 1 # 断开所有继电器
-        #     if set_mode == 0:
-            print('time')
-            time.sleep(1)
+            #     a = 1 # 断开所有继电器
+            #     if set_mode == 0:
+            #     print('controlth')
+            time.sleep(0.1)
+            cat = random.random()
+            vol = random.random()
+            hw.current_value = str(round(cat * 100, 2))
+            hw.voltage_value = str(round(vol * 100, 2))
+
+            # self.digital.read_digital()
+
 
         pass
 
@@ -246,8 +258,9 @@ if __name__ == '__main__':
     # tcp_thread.start()
 
     # 启动控制线程
-    # control_thread = ControlThread()
-    # control_thread.start()
+    control_thread = ControlThread()
+    control_thread.start()
+
 
     win = PT_MainWin()
     # win = PT_ControlModeSet()

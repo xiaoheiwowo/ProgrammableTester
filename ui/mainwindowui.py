@@ -6,6 +6,7 @@ introduction
 
 import random
 
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import diagram
@@ -70,7 +71,11 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_FullScreen = QtWidgets.QPushButton()
         self.BT_Dynamic = QtWidgets.QPushButton()
         self.BT_Static = QtWidgets.QPushButton()
-        self.refresh_timer = QtCore.QTimer(self)
+        self.timer_refresh = QtCore.QTimer(self)
+
+        self.timer_update = QtCore.QTimer(self)
+        self.timer_update.timeout.connect(self.window_update)
+        self.timer_update.start(500)
 
         self.init_current_curve()
 
@@ -271,8 +276,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.CB_SelectControl.activated.connect(self.load_data)
         # self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
         self.SB_Voltage.valueChanged.connect(self.set_voltage)
-        self.refresh_timer.timeout.connect(self.draw_dynamic)
-        self.refresh_timer.start(300)
+        self.timer_refresh.timeout.connect(self.draw_dynamic)
+        self.timer_refresh.start(300)
         self.BT_Dynamic.clicked.connect(self.press_dynamic)
         self.BT_Static.clicked.connect(self.press_static)
 
@@ -624,16 +629,16 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         :return:
         """
-        if not self.refresh_timer.isActive():
-            self.refresh_timer.start(300)
+        if not self.timer_refresh.isActive():
+            self.timer_refresh.start(300)
 
     def press_static(self):
         """
 
         :return:
         """
-        if self.refresh_timer.isActive():
-            self.refresh_timer.stop()
+        if self.timer_refresh.isActive():
+            self.timer_refresh.stop()
 
     def press_send(self):
         """
@@ -695,6 +700,11 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.auto_test_timer.timeout.connect(self.begin_auto_test)
         self.auto_test_timer.start(int(sw.close_time) * 1000)
 
+    def window_update(self):
+
+        # print(time.time())
+        self.change_va_valve(hw.current_value, hw.voltage_value)
+        self.change_position_signal(hw.open_signal, hw.close_signal)
 
 class LongPressButton(QtWidgets.QPushButton):
     """

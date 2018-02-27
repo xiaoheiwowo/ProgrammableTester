@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-import wiringpi as wp
+from driver import wiringpi as wp
 import spidev
 
 
