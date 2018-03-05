@@ -186,6 +186,10 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         pass
 
     def delete_dialog(self):
+        """
+
+        :return:
+        """
         try:
             self.current_diagram.deleteLater()
         except:
@@ -220,11 +224,15 @@ class ControlThread(QThread):
         print('Control Thread Run ...')
         calibration_timer = QTimer(self)
         calibration_timer.timeout.connect(self.read_ad)
-        # calibration_timer.start(3000)
+        # calibration_timer.start(3)
 
         # self.digital = Digital()
 
     def run(self):
+        """
+
+        :return:
+        """
         while True:
             #     a = 1 # 断开所有继电器
             #     if set_mode == 0:
@@ -236,7 +244,6 @@ class ControlThread(QThread):
             hw.voltage_value = str(round(vol * 100, 2))
 
             # self.digital.read_digital()
-
 
         pass
 
@@ -260,7 +267,6 @@ if __name__ == '__main__':
     # 启动控制线程
     control_thread = ControlThread()
     control_thread.start()
-
 
     win = PT_MainWin()
     # win = PT_ControlModeSet()

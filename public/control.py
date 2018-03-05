@@ -5,9 +5,26 @@
 阀门控制
 """
 from public.datacache import HardwareData as hw
-from public.function import *
-# from driver.gpio import *
+
 from driver.i2c import *
+
+from driver.spi import *
+
+try:
+    import wiringpi as wp
+except ImportError:
+    # from driver import wiringpi as wp
+    pass
+
+# 常量
+HIGH = 1
+LOW = 0
+
+PORT_ACP = 0
+PORT_DCP = 1
+PORT_AT = 2
+PORT_VT = 3
+PORT_CUTX = 4
 
 
 class ValveControl(object):
@@ -29,36 +46,62 @@ class ValveControl(object):
 
     @staticmethod
     def close_valve():
+        """
+
+        :return:
+        """
         debug_print('close valve ' + str(hw.control_mode['OFF']))
 
         pass
 
     @staticmethod
     def stop_valve():
+        """
+
+        :return:
+        """
         debug_print('stop valve ' + str(hw.control_mode['STOP']))
 
         pass
 
     @staticmethod
     def m3_valve():
+        """
+
+        :return:
+        """
         debug_print('m3 ' + str(hw.control_mode['M3']))
 
         pass
 
     @staticmethod
     def m4_valve():
+        """
+
+        :return:
+        """
         debug_print('m4 ' + str(hw.control_mode['M4']))
 
         pass
 
     @staticmethod
     def bus_control(cmd=''):
+        """
+
+        :param cmd:
+        :return:
+        """
         debug_print('发送: ' + cmd)
         debug_print('接收：' + cmd * 2)
         pass
 
     @staticmethod
     def adjust_control(signal):
+        """
+
+        :param signal:
+        :return:
+        """
         debug_print('调节阀输入信号: ' + str(signal))
         pass
 
@@ -69,204 +112,203 @@ class Analog(object):
     """
 
     def __init__(self):
+        self.spi_ = SPI_Driver()
+        self.spi_.spi_init()
+        self.spi_.ADS1256_Init()
+
         pass
 
     def output_dcp(self, u=0):
+        """
+
+        :param u:
+        :return:
+        """
         debug_print('调节直流电源 输出：' + str(u) + 'V')
+        self.spi_.output_dc_power(u)
         pass
 
     def output_acp(self, u=0):
+        """
+
+        :param u:
+        :return:
+        """
         debug_print('调节交流电源 输出：' + str(u) + 'V')
+        self.spi_.output_ac_power(u)
         pass
 
-    def output_20ma(self, i=0):
-        debug_print('调节阀控制信号 输出：' + str(i) + 'mA')
+    def output_20ma(self, i_=0):
+        """
+
+        :param i_:
+        :return:
+        """
+        debug_print('调节阀控制信号 输出：' + str(i_) + 'mA')
+        self.spi_.output_adjust_i(i_)
         pass
 
     def output_10v(self, u=0):
+        """
+
+        :param u:
+        :return:
+        """
         debug_print('调节阀控制信号 输出：' + str(u) + 'V')
+        self.spi_.output_adjust_v(u)
         pass
 
     def read_i_dc(self):
+        """
+
+        :return:
+        """
         debug_print('电流值：' + '100' + 'mA')
+        return self.spi_.read_channel(3)
         pass
 
     def read_u_dc(self):
+        """
+
+        :return:
+        """
         debug_print('电压值：' + '5' + 'V')
+        return self.spi_.read_channel(4)
         pass
 
     def read_i_ac(self):
+        """
+
+        :return:
+        """
         debug_print('电流值：' + '1' + 'mA')
+        return self.spi_.read_channel(1)
         pass
 
     def read_u_ac(self):
+        """
+
+        :return:
+        """
         debug_print('电压值：' + '220' + 'V')
+        return self.spi_.read_channel(2)
         pass
 
     def read_feedback(self):
+        """
+
+        :return:
+        """
         debug_print('反馈信号：' + '1' + 'mA')
+        return self.spi_.read_channel(0)
         pass
 
 
 class Digital(object):
     """
-    IO
+    数字信号控制
     """
+
     # 不能同时连接交流和直流电源
     # 不能同时连接电流和电压信号控制调节阀
-    POWER_SELECT = ''
-    ADJUST_SIGNAL = ''
 
     def __init__(self):
         self.i2c = I2C_Driver()
+        self.i2c.init_extend_io()
+        self.i2c.init_relay()
         pass
 
     def read_int(self):
+        """
+
+        :return:
+        """
         pass
 
-    @staticmethod
-    def output_reset():
+    def output_reset(self):
         """
         reset pca9548
         :return:
         """
         # reset_pca9548()
         debug_print('RESET PCA9548')
+        self.i2c.reset_pca9548()
         pass
 
     def connect_relay(self, index):
+        """
+
+        :param index:
+        :return:
+        """
         debug_print('CONNECT: ' + str(index) + '1')
+        self.i2c.connect_array_relay(index)
         pass
 
     def disconnect_relay(self, index):
+        """
+
+        :param index:
+        :return:
+        """
         debug_print('DISCONNECT: ' + str(index) + '0')
+        self.i2c.disconnect_array_relay(index)
         pass
 
-    def output_cutx(self, state):
+    def output_cut_x(self, relay_state):
         """
 
-        :param state: True 通电
+        :param relay_state: True 通电
         :return:
         """
 
-        if state:
-            hw.extend_out[0] |= 1 << 4
+        if relay_state:
+            self.i2c.change_port_state(PORT_CUTX, HIGH)
         else:
-            hw.extend_out[0] &= ~(1 << 4)
+            self.i2c.change_port_state(PORT_CUTX, LOW)
 
-        debug_print('CUTX')
-        pass
-
-    def output_vt(self, state):
-        """
-
-        :param state:
-        :return:
-        """
-        if state:
-            hw.extend_out[0] |= 1 << 3
-        else:
-            hw.extend_out[0] &= ~(1 << 3)
-        pass
-
-    def output_at(self, state):
-        """
-
-        :param state:
-        :return:
-        """
-        if state:
-            hw.extend_out[0] |= 1 << 2
-        else:
-            hw.extend_out[0] &= ~(1 << 2)
-        pass
-
-    def output_acp(self, state):
-        """
-
-        :param state:
-        :return:
-        """
-        if state:
-            hw.extend_out[0] |= 1 << 0
-        else:
-            hw.extend_out[0] &= ~(1 << 0)
-        pass
-
-    def output_dcp(self, state):
-        """
-
-        :param state:
-        :return:
-        """
-        if state:
-            hw.extend_out[0] |= 1 << 1
-        else:
-            hw.extend_out[0] &= ~(1 << 1)
+        debug_print('CUTX: ' + str(relay_state))
         pass
 
     def select_power(self, which):
+        """
+
+        :param which:
+        :return:
+        """
+        self.i2c.change_port_state(PORT_ACP, LOW)
+        self.i2c.change_port_state(PORT_DCP, LOW)
+        wp.delay(300)
         if which == 'DC':
-            self.output_acp(False)
-            self.output_dcp(True)
+            self.i2c.change_port_state(PORT_DCP, HIGH)
             debug_print('POWER: ' + 'DC')
             pass
         elif which == 'AC':
-            self.output_dcp(False)
-            self.output_acp(True)
+            self.i2c.change_port_state(PORT_ACP, HIGH)
             debug_print('POWER: ' + 'AC')
             pass
         else:
-            debug_print('NO POWER')
+            debug_print('NO this power')
 
     def select_signal(self, which):
+        """
+
+        :param which:
+        :return:
+        """
+        self.i2c.change_port_state(PORT_AT, LOW)
+        self.i2c.change_port_state(PORT_VT, LOW)
+        wp.delay(300)
         if which == '20mA':
             debug_print('SIGNAL: ' + '20mA')
+            self.i2c.change_port_state(PORT_AT, HIGH)
             pass
         elif which == '10V':
             debug_print('SIGNAL: ' + '10V')
+            self.i2c.change_port_state(PORT_VT, HIGH)
             pass
         else:
             debug_print('NO SIGNAL')
-        pass
-
-    def read_b3_open(self):
-        return hw.extend_in[5]
-        pass
-
-    def read_b3_close(self):
-        return hw.extend_in[6]
-        pass
-
-    def read_btn_outcontrol(self):
-        return hw.extend_in[15]
-        pass
-
-    def read_btn_stop(self):
-        return hw.extend_in[14]
-        pass
-
-    def read_btn_close(self):
-        return hw.extend_in[13]
-        pass
-
-    def read_btn_open(self):
-        return hw.extend_in[12]
-        pass
-
-    def read_on_signal(self):
-        return hw.extend_in[11]
-        pass
-
-    def read_off_signal(self):
-        return hw.extend_in[10]
-        pass
-
-    def set_signal_com(self):
-        pass
-
-    def read_test(self):
-        return hw.extend_in[8]
         pass
 
     def read_digital(self):
@@ -281,9 +323,9 @@ class Digital(object):
 
         list_io1 = list()
         list_io2 = list()
-        for i in range(8):
-            list_io1.append(bin(read_io[0])[2:].rjust(8, '0')[i])
-            list_io2.append(bin(read_io[1])[2:].rjust(8, '0')[i])
+        for j in range(8):
+            list_io1.append(bin(read_io[0])[2:].rjust(8, '0')[j])
+            list_io2.append(bin(read_io[1])[2:].rjust(8, '0')[j])
 
         list_io1.reverse()
         list_io2.reverse()
@@ -291,17 +333,107 @@ class Digital(object):
         pass
 
     @staticmethod
-    def num_to_array(num):
+    def read_b3_open():
+        """
+
+        :return:
+        """
+        return hw.extend_in[5]
+        pass
+
+    @staticmethod
+    def read_b3_close():
+        """
+
+        :return:
+        """
+
+        return hw.extend_in[6]
+        pass
+
+    @staticmethod
+    def read_btn_outcontrol():
+        """
+
+        :return:
+        """
+        return hw.extend_in[15]
+        pass
+
+    @staticmethod
+    def read_btn_stop():
+        """
+
+        :return:
+        """
+        return hw.extend_in[14]
+        pass
+
+    @staticmethod
+    def read_btn_close():
+        """
+
+        :return:
+        """
+        return hw.extend_in[13]
+        pass
+
+    @staticmethod
+    def read_btn_open():
+        """
+
+        :return:
+        """
+        return hw.extend_in[12]
+        pass
+
+    @staticmethod
+    def read_on_signal():
+        """
+
+        :return:
+        """
+        return hw.extend_in[11]
+        pass
+
+    @staticmethod
+    def read_off_signal():
+        """
+
+        :return:
+        """
+        return hw.extend_in[10]
+        pass
+
+    @staticmethod
+    def set_signal_com():
+        """
+
+        :return:
+        """
+        pass
+
+    @staticmethod
+    def read_test():
+        """
+
+        :return:
+        """
+        return hw.extend_in[8]
+        pass
+
+    @staticmethod
+    def num_to_array(relay_number):
         """
         程序中用0~159作为继电器阵列中的继电器序号，此函数将单个序号转入hw.delay_array。
-        :param num:
+        :param relay_number:
         :return:
         """
 
         # 行
-        row = int(str(num)[-1])
+        row = int(str(relay_number)[-1])
         # 列
-        column = int(str(num)[:-2])
+        column = int(str(relay_number)[:-2])
 
         if column <= 7:
             hw.delay_array[row][0] |= 1 << 7 - column
@@ -315,8 +447,8 @@ class Digital(object):
         :return:
         """
         tem = hw.delay_array[:]
-        for i in [0, 2, 4, 6, 8]:
-            tem[i][1], tem[i + 1][0] = tem[i + 1][0], tem[i][1]
+        for j in [0, 2, 4, 6, 8]:
+            tem[j][1], tem[j + 1][0] = tem[j + 1][0], tem[j][1]
         hw.register_port = tem[:]
         pass
 

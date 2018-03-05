@@ -17,8 +17,6 @@ from public.datacache import HardwareData as hw
 
 from public.control import ValveControl as vc
 
-from public.function import debug_print
-
 
 class Ui_MainWin(QtWidgets.QMainWindow):
     """

@@ -4,9 +4,15 @@
 introduction
 """
 
+# try:
+#     from driver import wiringpi as wp
+# except ImportError:
+#     try:
+#         import wiringpi as wp
+#     except ImportError:
+#         pass
 
-from driver import wiringpi as wp
-
+import wiringpi as wp
 #
 INPUT = 0
 OUTPUT = 1
@@ -17,6 +23,7 @@ HIGH = 1
 # 物理引脚
 INT_PIN = 36
 
+myflag = 0
 
 def init_gpio():
     """
@@ -31,7 +38,7 @@ def init_gpio():
     # wp.digitalWrite(CS_PIN, HIGH)
 
     # 中断注册
-    print('INT: ')
+    # print('INT: ')
     print(wp.wiringPiISR(INT_PIN, wp.INT_EDGE_FALLING, int_from_pca9535))
 
 
@@ -40,7 +47,8 @@ def int_from_pca9535():
     中断处理函数
     :return:
     """
-
+    flag = 1
+    print('int')
     pass
 
 
@@ -50,3 +58,6 @@ def reset_pca9548():
     :return:
     """
     pass
+
+
+

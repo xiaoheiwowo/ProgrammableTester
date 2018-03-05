@@ -1,26 +1,33 @@
 # !/usr/bin/evn python3
 # -*- coding: utf-8 -*-
 
+"""
+spi
+"""
+
+import os
 import time
+
 try:
     import spidev
     import wiringpi as wp
 except ImportError:
-    from driver import wiringpi as wp
+    # from driver import wiringpi as wp
+    pass
 
 
-def debug_print(string):
+def debug_print(string=None):
     """
-
+    DEBUG
     :param string:
     :return:
     """
     if True:
         pass
-        print("DEBUG: " + string)
+        # print("DEBUG: " + string)
 
 
-class ADS1256:
+class SPI_Driver:
     """ Wiring Diagram
      +-----+-----+---------+------+---+---Pi 2---+---+------+---------+-----+-----+
      | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
@@ -50,11 +57,194 @@ class ADS1256:
      +-----+-----+---------+------+---+---Pi 2---+---+------+---------+-----+-----+
     """
 
-    # These options can be adjusted to facilitate specific operation of the
-    # ADS1256, the defaults are designed to be compatible with the Waveforms
     # High Precision AD/DA board
     SPI_MODE = 1
     SPI_CHANNEL = 1
+    SPI_RATE = 100000
+
+    # The RPI GPIO to use for chip select and ready polling
+    CS_PIN_AD = 15
+    CS_PIN_DA = 18
+
+    POWER_DOWN = 0x03
+
+    # 通用定义
+    INPUT = 0
+    OUTPUT = 1
+    LOW = 0
+    HIGH = 1
+
+    DAC_A = 0b00100000
+    DAC_B = 0b01100000
+    DAC_C = 0b10100000
+    DAC_D = 0b11100000
+
+    # The RPI GPIO to use for chip select and ready polling
+    def __init__(self):
+        # Set up the wiringpi object to use physical pin numbers
+        wp.wiringPiSetupPhys()
+
+        # Initialize the DRDY pin
+        wp.pinMode(self.DRDY_PIN, self.INPUT)
+
+        # Initialize the reset pin
+        wp.pinMode(self.RESET_PIN, self.OUTPUT)
+        wp.digitalWrite(self.RESET_PIN, self.HIGH)
+
+        # Initialize PDWN pin
+        wp.pinMode(self.PDWN_PIN, self.OUTPUT)
+        wp.digitalWrite(self.PDWN_PIN, self.HIGH)
+
+        # Initialize CS pin for ADS1256
+        wp.pinMode(self.CS_PIN_AD, self.OUTPUT)
+        wp.digitalWrite(self.CS_PIN_AD, self.HIGH)
+
+        # Initialize CS pin for AD5314
+        wp.pinMode(self.CS_PIN_DA, self.OUTPUT)
+        wp.digitalWrite(self.CS_PIN_DA, self.HIGH)
+
+        # Initialize the spidev SPI setup
+        self.spi_bus = spidev.SpiDev()
+        self.spi_init()
+        debug_print("SPI success " + str(self.spi_bus))
+
+    def spi_init(self):
+        """
+        初始化spi
+        :return:
+        """
+        self.spi_bus.open(0, 0)
+        self.spi_bus.mode = self.SPI_MODE
+        self.spi_bus.max_speed_hz = self.SPI_RATE
+        self.spi_bus.cshigh = False
+
+    def spi_close(self):
+        """
+        关闭spi
+        :return:
+        """
+
+        self.spi_bus.close()
+
+    def chip_select_da(self):
+        """
+        使能芯片
+        :return:
+        """
+        wp.digitalWrite(self.CS_PIN, self.LOW)
+
+    def chip_release_da(self):
+        """
+        取消使能
+        :return:
+        """
+        wp.digitalWrite(self.CS_PIN, self.HIGH)
+
+    def SendWord(self, word):
+        """
+        Sends  byte to the SPI bus
+        """
+        debug_print("Sending: " + str(word) + " (hex: " + hex(word[0]) + " " + hex(word[1]) + ")")
+        # data = chr(byte)
+
+        result = self.spi_bus.xfer2(word)
+        debug_print("Read " + str(result[1]))
+
+    def send_to_ad5314(self, data):
+        """
+
+        :param data: list  [0x00, 0x00,...]
+        :return:
+        """
+        # Select the dac chip
+        self.chip_select_da()
+
+        # Send the data
+        self.SendWord(data)
+
+        # Release the dac chip
+        self.chip_release_da()
+
+    def output_ac_power(self, vol):
+        """
+
+        :param vol: 电压值0~5v
+        :return:
+        """
+        if 0 <= vol <= 5:
+            vol_2 = int(vol * 1023 / 5)
+            high_bit = self.DAC_A | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_dc_power(self, vol):
+        """
+
+        :param vol:0~5v
+        :return:
+        """
+
+        if 0 <= vol <= 5:
+            vol_2 = int(vol * 1023 / 5)
+            high_bit = self.DAC_B | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_adjust_i(self, current):
+        """
+
+        :param current:0~20ma
+        :return:
+        """
+        if 0 <= current <= 20:
+            vol_2 = int(current * 1023 / 20)
+            high_bit = self.DAC_C | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_adjust_v(self, vol):
+        """
+
+        :param vol:0~10v
+        :return:
+        """
+        if 0 <= vol <= 10:
+            vol_2 = int(vol * 1023 / 10)
+            high_bit = self.DAC_D | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_0(self):
+        """
+        all channel output 0
+        :return:
+        """
+
+        self.output_ac_power(0)
+        self.output_dc_power(0)
+        self.output_adjust_i(0)
+        self.output_adjust_v(0)
+
+    # These options can be adjusted to facilitate specific operation of the
+    # ADS1256, the defaults are designed to be compatible with the Waveforms
+    # High Precision AD/DA board
+
     SPI_FREQUENCY = 1000000  # The ADS1256 supports 768kHz to 1.92MHz
     DRDY_TIMEOUT = 0.5  # Seconds to wait for DRDY when communicating
     DATA_TIMEOUT = 0.00001  # 10uS delay for sending data
@@ -236,55 +426,30 @@ class ADS1256:
     AD_CLK_HALF = 0x40
     AD_CLK_FOURTH = 0x60
 
+    # CHANNEL select
+    AD_CHANNEL_0 = 0x0f
+    AD_CHANNEL_1 = 0x1f
+    AD_CHANNEL_2 = 0x2f
+    AD_CHANNEL_3 = 0x3f
+    AD_CHANNEL_4 = 0x4f
+
     #
-    INPUT = 0
-    OUTPUT = 1
-
-    LOW = 0
-    HIGH = 1
-
     PUD_OFF = 0
     PUD_DOWN = 1
     PUD_UP = 2
 
-    # The RPI GPIO to use for chip select and ready polling
-    def __init__(self):
-        # Set up the wiringpi object to use physical pin numbers
-        wp.wiringPiSetupPhys()
+    def chip_select_ad(self):
+        """
 
-        # Initialize the DRDY pin
-        wp.pinMode(self.DRDY_PIN, self.INPUT)
-
-        # Initialize the reset pin
-        wp.pinMode(self.RESET_PIN, self.OUTPUT)
-        wp.digitalWrite(self.RESET_PIN, self.HIGH)
-
-        # Initialize PDWN pin
-        wp.pinMode(self.PDWN_PIN, self.OUTPUT)
-        wp.digitalWrite(self.PDWN_PIN, self.HIGH)
-
-        # Initialize CS pin
-        wp.pinMode(self.CS_PIN, self.OUTPUT)
-        wp.digitalWrite(self.CS_PIN, self.HIGH)
-
-        # Initialize the wiringpi SPI setup
-        # spi_success = wp.wiringPiSPISetupMode(self.SPI_CHANNEL, self.SPI_FREQUENCY, self.SPI_MODE)
-        # debug_print("SPI success " + str(spi_success))
-
-    def init(self):
-        self.spi = spidev.SpiDev()
-        self.spi.open(0, 0)
-        self.spi.mode = 0b01
-        self.spi.max_speed_hz = 1000000
-        self.spi.cshigh = False
-
-    def spi_close(self):
-        self.spi.close()
-
-    def chip_select(self):
+        :return:
+        """
         wp.digitalWrite(self.CS_PIN, self.LOW)
 
-    def chip_release(self):
+    def chip_release_ad(self):
+        """
+
+        :return:
+        """
         wp.digitalWrite(self.CS_PIN, self.HIGH)
 
     def WaitDRDY(self):
@@ -306,43 +471,23 @@ class ADS1256:
     def SendByte(self, byte):
         """
         Sends a byte to the SPI bus
+        :param byte:
+        :return:
         """
-        debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
-        # data = chr(byte)
 
-        result = self.spi.xfer2([byte])
-        # debug_print("Read " + str(result[1]))
+        debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
+
+        result = self.spi_bus.xfer2([byte])
+        debug_print("Read " + str(result[0]))
 
     def ReadByte(self):
         """
         Reads a byte from the SPI bus
         :returns: byte read from the bus
         """
-        byte = self.spi.xfer2([0xff])
+        byte = self.spi_bus.xfer2([0xff])
         debug_print("ReadByte: byte[0]" + str(byte[0]) + " (hex " + hex(byte[0]) + ")")
         return byte[0]  # JKR
-
-    # def SendByte(self, data):
-    #     """
-    #     Sends a byte to the SPI bus
-    #     """
-    #     # debug_print("Entered SendByte")
-    #     # debug_print("Sending: " + str(data))
-    #     buf = bytes([data])
-    #     result = wp.wiringPiSPIDataRW(self.SPI_CHANNEL, buf)
-    #     # debug_print("Read " + str(result))
-    #     # print(buf)
-    #     return buf
-    #
-    # def ReadByte(self):
-    #     """
-    #     Reads a byte from the SPI bus
-    #     :returns: byte read from the bus
-    #     """
-    #     buf = bytes([0x00])
-    #     byte = wp.wiringPiSPIDataRW(self.SPI_CHANNEL, buf)
-    #     # print(byte)
-    #     return buf
 
     def DataDelay(self):
         """
@@ -355,7 +500,7 @@ class ADS1256:
         bus must be minimum 50x SCLK period, this function reads data after
         60 x SCLK period.
         """
-        timeout = (60 / self.SCLK_FREQUENCY)
+        # timeout = (60 / self.SCLK_FREQUENCY)
 
         start = time.time()
         elapsed = time.time() - start
@@ -364,7 +509,7 @@ class ADS1256:
         while elapsed < self.DATA_TIMEOUT:
             elapsed = time.time() - start
 
-    def ReadReg(self, start_reg, num_to_read=0):
+    def ReadReg(self, start_reg):
         """
         Read the provided register, implements:
 
@@ -385,7 +530,7 @@ class ADS1256:
         """
 
         # Pull the SPI bus low
-        self.chip_select()
+        self.chip_select_ad()
 
         # Send the byte command
         self.SendByte(self.CMD_RREG | start_reg)
@@ -399,7 +544,7 @@ class ADS1256:
         debug_print("idreturn: " + str(idreturn) + " (hex " + hex(idreturn) + ")")
 
         # Release the SPI bus
-        self.chip_release()
+        self.chip_release_ad()
 
         return idreturn
 
@@ -420,11 +565,11 @@ class ADS1256:
         2nd Command Byte: 0000 nnnn where nnnn is the number of bytes-1 to be
         written
 
-        TODO: Implement multiple register write
+        DO Implement multiple register write
         """
 
         # Select the ADS chip
-        self.chip_select()
+        self.chip_select_ad()
 
         # Tell the ADS chip which register to start writing at
         self.SendByte(self.CMD_WREG | register)
@@ -436,7 +581,7 @@ class ADS1256:
         self.SendByte(data)
 
         # Release the ADS chip
-        self.chip_release()
+        self.chip_release_ad()
 
     def ReadADC(self):
         """
@@ -453,7 +598,7 @@ class ADS1256:
         """
 
         # Pull the SPI bus low
-        self.chip_select()
+        self.chip_select_ad()
 
         # Wait for data to be ready
         self.WaitDRDY()
@@ -468,10 +613,10 @@ class ADS1256:
         result1 = self.ReadByte()
         result2 = self.ReadByte()
         result3 = self.ReadByte()
-        print('ReadADC result bytes: ' + hex(result1) + ' ' + hex(result2) + ' ' + hex(result3))
+        debug_print('ReadADC result bytes: ' + hex(result1) + ' ' + hex(result2) + ' ' + hex(result3))
 
         # Release the SPI bus
-        self.chip_release()
+        self.chip_release_ad()
 
         # Concatenate the bytes
         total = (result1 << 16) + (result2 << 8) + result3
@@ -484,8 +629,8 @@ class ADS1256:
         :returns: numeric identifier of the ADS chip
         """
         self.WaitDRDY()
-        myid = self.ReadReg(self.REG_STATUS, 1)
-        return (myid >> 4)
+        myid = self.ReadReg(self.REG_STATUS)
+        return myid >> 4
 
     def read_all_reg(self):
         """
@@ -497,15 +642,6 @@ class ADS1256:
             print('REG: 0' + str(hex(i)[-1]) + 'H   ' + str(hex(self.ReadReg(i))))
 
         print('++++++++++++++++++++++++++++++++++++')
-
-    def SetInputMux(self, possel, negsel):
-        debug_print("setting mux position")
-
-        self.chip_select()
-        self.SendByte(self.CMD_WREG | 0x01)
-        self.SendByte(0x00)
-        self.SendByte((possel << 4) | (negsel << 0))
-        self.chip_release()
 
     def ADS1256_Init(self):
         """
@@ -521,78 +657,66 @@ class ADS1256:
         # 放大倍数1
         self.WriteReg(self.REG_ADCON, 0X00)
 
-    def read_adc(self):
-        """
-        Reads ADC data, implements:
-
-        RDATA: Read Data
-
-        Description: Issue this command after DRDY goes low to read a single
-        conversion result. After all 24 bits have been shifted out on DOUT,
-        DRDY goes high. It is not necessary to read back all 24 bits, but DRDY
-        will then not return high until new data is being updated. See the
-        Timing Characteristics for the required delay between the end of the
-        RDATA command and the beginning of shifting data on DOUT: t6
+    def select_channel(self, index):
         """
 
-        # Pull the SPI bus low
-        self.chip_select()
+        :param index: int 0~4 ---- ad0~ad4
+        :return:
+        """
+        channel_list = [0x0f, 0x1f, 0x2f, 0x3f, 0x4f]
+        self.chip_select_ad()
+        self.SendByte(self.CMD_WREG | 0x01)
+        self.SendByte(0x00)
+        self.SendByte(channel_list[index])
+        self.chip_release_ad()
 
-        # Wait for data to be ready
-        self.WaitDRDY()
+    def read_channel(self, index):
+        """
 
-        # Send the read command
-        # self.SendByte(ADS1256.CMD_RDATA)
-        buf = bytes([0x01])
-        ret = wp.wiringPiSPIDataRW(self.SPI_CHANNEL, buf)
-        print(ret)
-
-        # Wait through the data pause
-        self.DataDelay()
-
-        # The result is 24 bits
-        # result = []
-        # result.append(self.ReadByte())
-        # result.append(self.ReadByte())
-        # result.append(self.ReadByte())
-
-        # Release the SPI bus
-        self.chip_release()
-
-        # Concatenate the bytes
-        # total = (result[0] << 16)
-        # total |= (result[1] << 8)
-        # total |= result[2]
-
-        # return result
-
-        return buf
-
-
-import os
-
-speed = 1000000
-channel = 0
-mode = 1
+        :return:
+        """
+        self.select_channel(index)
+        ad_value = self.ReadADC()
+        return round(ad_value * 5 / 2 ** 23, 3)
+        pass
 
 
 if __name__ == '__main__':
-
-    ADS = ADS1256()
-
-    ADS.init()
-
-    ADS.read_all_reg()
-
-    ADS.ADS1256_Init()
-
-    ADS.read_all_reg()
-
-    print(ADS.ReadADC())
-
-    # ADS.spi_close()
+    ad_da = SPI_Driver()
+    ad_da.spi_init()
+    ad_da.ADS1256_Init()
 
     while True:
-        os.system('clear')
-        print(ADS.ReadADC())
-        wp.delay(50)
+        # try:
+        #     print('Choose a channel...\n'
+        #           '1 ACPOWER 0~5V\n'
+        #           '2 DCPOWER 0~5V\n'
+        #           '3 ADJUST VALVE 0~20mA\n'
+        #           '4 ADJUST VALVE 0~10V\n'
+        #           '5 AD\n')
+        #     channel = input()
+        #     value = input('Input a value\n')
+        #     if channel == '1':
+        #         ad_da.output_ac_power(float(value))
+        #     elif channel == '2':
+        #         ad_da.output_dc_power(float(value))
+        #     elif channel == '3':
+        #         ad_da.output_adjust_i(float(value))
+        #     elif channel == '4':
+        #         ad_da.output_adjust_v(float(value))
+        #     elif channel == '5':
+        try:
+            if not input(''):
+                os.system('clear')
+                for i in range(5):
+                    print('AD ' + str(i) + ': ' + str(ad_da.read_channel(i)))
+                    print(time.time())
+                    # wp.delay(5)
+            else:
+                pass
+        except KeyboardInterrupt:
+            ad_da.output_0()
+            ad_da.spi_close()
+            os.system('clear')
+            debug_print('[spi close]')
+            break
