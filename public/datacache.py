@@ -57,7 +57,7 @@ class SoftwareData(object):
                        0]
 
     # 电流数据
-    current_valve = [75, 59, 10, 34, 6, 0, 1, 6, 49, 74, 17, 47, 89, 24, 41, 27, 6, 37, 61, 64,
+    current_value = [75, 59, 10, 34, 6, 0, 1, 6, 49, 74, 17, 47, 89, 24, 41, 27, 6, 37, 61, 64,
                      88, 63, 4, 90, 95, 28, 24, 2, 21, 41, 53, 74, 40, 51, 10, 95, 23, 74, 58,
                      1, 28, 82, 65, 56, 42, 96, 65, 9, 61, 49, 14, 69, 33, 5, 88, 40, 15, 87,
                      28, 25, 36, 49, 80, 19, 35, 4, 2, 96, 63, 18, 94, 93, 72, 2, 16, 98, 34,
@@ -134,10 +134,12 @@ class SoftwareData(object):
                          [3, '0xFFFF', 3]]}
 
     data = {'control_set_bak': {'use_blank': True},
-            'current_valve': current_valve}
+            'current_valve': current_value}
 
     open_time = 0
     close_time = 0
+
+    begin_ad = 0
 
 
 class HardwareData(object):
@@ -173,10 +175,10 @@ class HardwareData(object):
 
     bus_cmd = '01 06 00 04 00 00 C8 0B'
 
-    current_value = ''
-    voltage_value = ''
-    open_signal = 'OK'
-    close_signal = 'NG'
+    current_value_show = '  '
+    voltage_value_show = '  '
+    open_signal = 'YES'
+    close_signal = 'NO'
 
     adjust_valve_back = ''
 
@@ -199,8 +201,6 @@ class HardwareData(object):
     # 扩展io口
     extend_in = []
     extend_out = [0x00, 0x00]
-
-
 
     # [SX00-SX09:[p0, p1] ]
     # 按照芯片排序 第一个列表中的两字节数据分别对应芯片SX00的P0和P1
@@ -229,3 +229,4 @@ class HardwareData(object):
 
     ZJ00 = [0x00, 0x00]
     ZJ01 = [0x00, 0x00]
+

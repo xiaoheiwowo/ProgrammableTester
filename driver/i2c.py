@@ -3,7 +3,7 @@
 """
 introduction
 """
-
+import time
 try:
     # from public.datacache import HardwareData as hw
     pass
@@ -113,7 +113,10 @@ class I2C_Driver(object):
 
         :return:
         """
-        data = self.i2c_bus.read_byte(addr_pca9548)
+        try:
+            data = self.i2c_bus.read_byte(addr_pca9548)
+        except IOError:
+            pass
         return data
 
     def write_pca9548(self, dat):
@@ -122,7 +125,10 @@ class I2C_Driver(object):
         :param dat:
         :return:
         """
-        self.i2c_bus.write_byte(addr_pca9548, dat)
+        try:
+            self.i2c_bus.write_byte(addr_pca9548, dat)
+        except IOError:
+            pass
 
     def select_i2c_channel(self, channel=0):
         """
@@ -228,7 +234,7 @@ class I2C_Driver(object):
             self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p0, 0x00)
             self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p1, 0x00)
         pass
-
+        time.sleep(0.05)
     # def set_delay_array(self):
     #     """
     #
@@ -447,28 +453,6 @@ class I2C_Driver(object):
         :return:
         """
         self.i2c_bus.close()
-
-
-class I2C_DRIVER(object):
-    """
-    introduction
-    """
-
-    @staticmethod
-    def init_i2c():
-        """
-
-        :return:
-        """
-        pass
-
-    @staticmethod
-    def init_pca9535():
-        """
-
-        :return:
-        """
-        pass
 
 
 try:

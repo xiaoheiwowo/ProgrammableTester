@@ -24,6 +24,13 @@ class Ui_MainWin(QtWidgets.QMainWindow):
     """
     lock_state = True
 
+    # MY SIGNAL
+    # open_valve = QtCore.pyqtSignal()
+    # close_valve = QtCore.pyqtSignal()
+    # stop_valve = QtCore.pyqtSignal()
+    # m3_valve = QtCore.pyqtSignal()
+    # m4_valve = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(Ui_MainWin, self).__init__(parent, flags=QtCore.Qt.Window)
 
@@ -205,7 +212,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.main_window_fig.setMaximumHeight(180)
         # xx = np.arange(-10.0, 0, 0.05)
         # yy = (np.cos(2*np.pi*xx)+1)*10
-        self.main_window_fig.update_diagram(sw.current_valve, myflag=0)
+        self.main_window_fig.update_diagram(sw.current_value[-200:], myflag=0)
 
         self.BT_FullScreen.setFixedSize(50, 50)
         self.BT_FullScreen.setStyleSheet('''QPushButton {background-image: url("./images/zoomout.png")}''')
@@ -506,6 +513,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setText('长按解锁')
         self.valve_control_disabled(False)
         self.lock_state = True
+        sw.begin_ad = 1
 
         print(hw.control_mode, hw.voltage)
 
@@ -518,6 +526,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setText('长按锁定')
         self.valve_control_disabled(True)
         self.lock_state = False
+        sw.begin_ad = 0
 
     def valve_control_disabled(self, tof):
         """
@@ -613,14 +622,14 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
 
-        sw.current_valve.append(int(100 * random.random()))
-        del sw.current_valve[0]
-        yy = sw.current_valve
+        # sw.current_valve.append(int(100 * random.random()))
+        # del sw.current_valve[0]
+        yy = sw.current_value[-200:]
         self.main_window_fig.update_diagram(yy, myflag=0)
         # self.main_window_fig.myTable.remove()
 
         self.change_position_signal(hw.open_signal, hw.close_signal)
-        self.change_va_valve(hw.current_value, hw.voltage_value)
+        self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
 
     def press_dynamic(self):
         """
@@ -701,8 +710,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
     def window_update(self):
 
         # print(time.time())
-        self.change_va_valve(hw.current_value, hw.voltage_value)
+        self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
         self.change_position_signal(hw.open_signal, hw.close_signal)
+
 
 class LongPressButton(QtWidgets.QPushButton):
     """

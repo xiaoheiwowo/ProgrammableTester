@@ -89,7 +89,7 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
 
         :return:
         """
-        sw.static_current_valve = sw.current_valve
+        sw.static_current_valve = sw.current_value[:]
         self.GB_Diagram.setTitle('静态曲线')
         self.DS_DataSlider.set_handle_disabled(False, False)
         self.mycid = self.BigDiagram.turn_on_cid()
@@ -117,20 +117,23 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         :return:
         """
         if self.GB_Diagram.title() == '动态曲线':
-            sw.current_valve.append(int(100 * random.random()))
-            del sw.current_valve[0]
+            # sw.current_valve.append(int(100 * random.random()))
+            # del sw.current_valve[0]
+            pass
         else:
             pass
-        yy = sw.current_valve[2 * self.val1: 2 * self.val2]
-        self.BigDiagram.update_diagram(yy*2)
+        # yy = sw.current_valve[2 * self.val1: 2 * self.val2]
+        yy = sw.current_value[-200:]
+        self.BigDiagram.update_diagram(yy)
 
     def draw_static(self):
         """
 
         :return:
         """
-        yy = sw.static_current_valve[2 * self.val1: 2 * self.val2]
-        self.BigDiagram.update_diagram(yy * 2)
+        # yy = sw.static_current_valve[2 * self.val1: 2 * self.val2]
+        yy = sw.static_current_valve[-200:]
+        self.BigDiagram.update_diagram(yy)
 
     def get_dataslider_valve(self, a, b):
         """

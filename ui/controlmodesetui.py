@@ -510,7 +510,6 @@ class ControlModeWiring(QtWidgets.QWidget):
         self.drawback = DrawBackground(self.WgtDraw)
         self.draw_wiring()
 
-
         # 变量
         self.PressedXNum = None
         self.PressedYNum = None

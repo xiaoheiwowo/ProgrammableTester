@@ -96,8 +96,8 @@ class PlotWidget(FigureCanvas):
                                    mec='r',
                                    mfc='r',
                                    ms=6,
-                                   path_effects=[patheffects.SimpleLineShadow(),
-                                                  patheffects.Normal()]
+                                   # path_effects=[patheffects.SimpleLineShadow(),
+                                   #                patheffects.Normal()]
                                    )
         # 设置坐标轴限值
         self.ax.set_xlim(right=0)

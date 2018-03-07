@@ -3,7 +3,7 @@
 """
 introduction
 """
-import random
+# import random
 import sys
 import pickle
 from socketserver import TCPServer
@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 # 控制方式窗口Ui类
-from public.control import Digital
 from ui import controlmodesetui
 # 电流曲线窗口Ui类
 from ui import currentdiagramui
@@ -29,6 +28,7 @@ from ui import mainwindowui
 
 from public.datacache import SoftwareData as sw
 from public.datacache import HardwareData as hw
+from public.control import Digital, Analog
 
 import tcpsocket
 
@@ -97,6 +97,13 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
     introduction
     """
 
+    # MY SIGNAL
+    # open_valve = pyqtSignal()
+    # close_valve = pyqtSignal()
+    # stop_valve = pyqtSignal()
+    # m3_valve = pyqtSignal()
+    # m4_valve = pyqtSignal()
+
     def __init__(self, parent=None):
         super(PT_MainWin, self).__init__(parent)
 
@@ -118,6 +125,20 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         self.BT_FullScreen.clicked.connect(self.show_current_diagram_form)
         self.control_set.confirm.connect(self.update_main_win)
+
+        # 启动tcp server线程
+        # tcp_thread = TcpThread()
+        # tcp_thread.start()
+
+        # 启动控制线程
+        self.control_thread = ControlThread()
+        self.control_thread.start()
+
+        self.BT_ValveOpen.clicked.connect(self.control_thread.digital.open_valve)
+        self.BT_ValveClose.clicked.connect(self.control_thread.digital.close_valve)
+        self.BT_ValveStop.clicked.connect(self.control_thread.digital.stop_valve)
+        self.BT_M3.clicked.connect(self.control_thread.digital.m3_valve)
+        self.BT_M4.clicked.connect(self.control_thread.digital.m4_valve)
 
     def show_control_set_form(self):
         """
@@ -222,35 +243,101 @@ class ControlThread(QThread):
     def __init__(self):
         super(ControlThread, self).__init__()
         print('Control Thread Run ...')
-        calibration_timer = QTimer(self)
-        calibration_timer.timeout.connect(self.read_ad)
-        # calibration_timer.start(3)
+        self.calibration_timer = QTimer(self)
+        self.calibration_timer.timeout.connect(self.read_io)
 
-        # self.digital = Digital()
+        # 硬件
+        self.digital = Digital()
+        self.analog = Analog()
+
+        self.calibration_timer.start(100)
 
     def run(self):
         """
 
         :return:
         """
+        # hw.current_value.clear()
+        sw.current_value = [0 for j in range(65535)]
+        print('1')
         while True:
-            #     a = 1 # 断开所有继电器
-            #     if set_mode == 0:
-            #     print('controlth')
-            time.sleep(0.1)
-            cat = random.random()
-            vol = random.random()
-            hw.current_value = str(round(cat * 100, 2))
-            hw.voltage_value = str(round(vol * 100, 2))
+            if sw.begin_ad == 1:
+                time.sleep(0.003)
+                self.read_hard()
+            else:
+                sw.current_value = [0 for j in range(65535)]
+                pass
 
-            # self.digital.read_digital()
+    def read_hard(self):
+        """
 
+        :return:
+        """
+        sw.current_value.pop(0)
+        sw.current_value.append(self.read_current())
+        hw.current_value_show = str(sw.current_value[-1])
+        # time1 = time.time()
+        # print('read ad ' + str(time1))
         pass
 
-    def read_ad(self):
-        time1 = time.time()
+    def read_current(self):
+        """
 
-        print('read ad ' + str(time1))
+        :return:
+        """
+        if hw.voltage == 'DC':
+            return self.analog.read_i_dc()
+        elif hw.voltage == 'AC':
+            return self.analog.read_i_ac()
+        else:
+            return self.analog.read_i_ac()
+            pass
+
+    def read_voltage(self):
+        """
+
+        :return:
+        """
+        if hw.voltage == 'DC':
+            return self.analog.read_u_dc()
+        elif hw.voltage == 'AC':
+            return self.analog.read_u_ac()
+        else:
+            return self.analog.read_u_ac()
+            pass
+
+    def read_io(self):
+        """
+
+        :return:
+        """
+        self.digital.read_digital()
+        hw.voltage_value_show = str(self.read_voltage())
+        self.read_current()
+        if self.digital.read_on_signal() == 1:
+            hw.open_signal = 'YES'
+        else:
+            hw.open_signal = 'NO'
+        if self.digital.read_off_signal() == 1:
+            hw.close_signal = 'YES'
+        else:
+            hw.close_signal = 'NO'
+
+
+class ADThread(QThread):
+    """
+    电流采样
+    """
+
+    def __init__(self):
+        super(ADThread, self).__init__()
+        print('AD Thread Run ...')
+
+    def run(self):
+        """
+
+        :return:
+        """
         pass
 
 
@@ -259,14 +346,6 @@ if __name__ == '__main__':
 
     # 设置字体 在树莓派上使用注释下行
     app.setFont(QFont('微软雅黑 Semilight', 9))
-
-    # 启动server线程
-    # tcp_thread = TcpThread()
-    # tcp_thread.start()
-
-    # 启动控制线程
-    control_thread = ControlThread()
-    control_thread.start()
 
     win = PT_MainWin()
     # win = PT_ControlModeSet()

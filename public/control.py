@@ -5,15 +5,14 @@
 阀门控制
 """
 from public.datacache import HardwareData as hw
-
 from driver.i2c import *
-
 from driver.spi import *
 
 try:
+
     import wiringpi as wp
 except ImportError:
-    # from driver import wiringpi as wp
+    from driver import wiringpi as wp
     pass
 
 # 常量
@@ -201,6 +200,16 @@ class Analog(object):
         """
         debug_print('反馈信号：' + '1' + 'mA')
         return self.spi_.read_channel(0)
+        pass
+
+    @staticmethod
+    def adjust_control(signal):
+        """
+
+        :param signal:
+        :return:
+        """
+        debug_print('调节阀输入信号: ' + str(signal))
         pass
 
 
@@ -452,7 +461,77 @@ class Digital(object):
         hw.register_port = tem[:]
         pass
 
+    def open_valve(self):
+        """
+
+        :return:
+        """
+        debug_print('open valve ' + str(hw.control_mode['ON']))
+        group = hw.control_mode['ON']
+        self.i2c.init_relay()
+        for j in group:
+            self.connect_relay(j)
+        pass
+
+    def close_valve(self):
+        """
+
+        :return:
+        """
+        print('close valve ' + str(hw.control_mode['OFF']))
+        group = hw.control_mode['OFF']
+        self.i2c.init_relay()
+        for j in group:
+            self.connect_relay(j)
+        pass
+
+    def stop_valve(self):
+        """
+
+        :return:
+        """
+        debug_print('stop valve ' + str(hw.control_mode['STOP']))
+        group = hw.control_mode['STOP']
+        self.i2c.init_relay()
+        for j in group:
+            self.connect_relay(j)
+        pass
+
+    def m3_valve(self):
+        """
+
+        :return:
+        """
+        debug_print('m3 ' + str(hw.control_mode['M3']))
+        group = hw.control_mode['M3']
+        self.i2c.init_relay()
+        for j in group:
+            self.connect_relay(j)
+        pass
+
+    def m4_valve(self):
+        """
+
+        :return:
+        """
+        debug_print('m4 ' + str(hw.control_mode['M4']))
+        group = hw.control_mode['M4']
+        self.i2c.init_relay()
+        for j in group:
+            self.connect_relay(j)
+        pass
+
 
 if __name__ == '__main__':
-    test = Digital()
+    digital = Digital()
+    analog = Analog()
+    current = [0 for i in range(65535)]
+
+    while True:
+        # current.pop(0)
+        # current.append(analog.read_i_ac())
+
+        print(analog.read_i_ac())
+        wp.delay(5)
+
     pass

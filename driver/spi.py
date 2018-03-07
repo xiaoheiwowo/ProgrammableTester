@@ -10,6 +10,7 @@ import time
 
 try:
     import spidev
+    from libbcm2835._bcm2835 import *
     import wiringpi as wp
 except ImportError:
     # from driver import wiringpi as wp
@@ -60,7 +61,7 @@ class SPI_Driver:
     # High Precision AD/DA board
     SPI_MODE = 1
     SPI_CHANNEL = 1
-    SPI_RATE = 100000
+    SPI_RATE = 1000000
 
     # The RPI GPIO to use for chip select and ready polling
     CS_PIN_AD = 15
@@ -461,10 +462,10 @@ class SPI_Driver:
 
         # Waits for DRDY to go to zero or TIMEOUT seconds to pass
         drdy_level = wp.digitalRead(self.DRDY_PIN)
+
         while (drdy_level == self.HIGH) and (elapsed < self.DRDY_TIMEOUT):
             elapsed = time.time() - start
             drdy_level = wp.digitalRead(self.DRDY_PIN)
-
         if elapsed >= self.DRDY_TIMEOUT:
             print("WaitDRDY() Timeout\r\n")
 
@@ -487,6 +488,7 @@ class SPI_Driver:
         """
         byte = self.spi_bus.xfer2([0xff])
         debug_print("ReadByte: byte[0]" + str(byte[0]) + " (hex " + hex(byte[0]) + ")")
+        # print(byte)
         return byte[0]  # JKR
 
     def DataDelay(self):
@@ -648,7 +650,7 @@ class SPI_Driver:
 
         :return:
         """
-        # 高位在前、校准、使用缓冲
+        # 高位在前、校准、缓冲
         self.WriteReg(self.REG_STATUS, 0x06)
 
         # 初始化端口A0为‘+’，AINCOM位‘-’
@@ -656,6 +658,9 @@ class SPI_Driver:
 
         # 放大倍数1
         self.WriteReg(self.REG_ADCON, 0X00)
+
+        # SPS 1000
+        # self.WriteReg(self.REG_DRATE, self.DRATE_1000)
 
     def select_channel(self, index):
         """
@@ -685,6 +690,7 @@ if __name__ == '__main__':
     ad_da = SPI_Driver()
     ad_da.spi_init()
     ad_da.ADS1256_Init()
+    ad_da.read_all_reg()
 
     while True:
         # try:
@@ -709,9 +715,11 @@ if __name__ == '__main__':
             if not input(''):
                 os.system('clear')
                 for i in range(5):
-                    print('AD ' + str(i) + ': ' + str(ad_da.read_channel(i)))
-                    print(time.time())
-                    # wp.delay(5)
+                    # ad_da.read_all_reg()
+                    ad_da.read_channel(i)
+                    print('AD' + str(i) + ': ' + str(ad_da.read_channel(i)))
+                    # print(time.time())
+                    wp.delay(5)
             else:
                 pass
         except KeyboardInterrupt:
