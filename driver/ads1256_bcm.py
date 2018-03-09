@@ -1,30 +1,42 @@
 # !/usr/bin/evn python3
 # -*- coding: utf-8 -*-
 
-"""
-spi
-"""
-
-import os
 import time
-
+import os
 try:
-    import spidev
-    import wiringpi as wp
+    from libbcm2835._bcm2835 import *
 except ImportError:
-    # from driver import wiringpi as wp
+    from driver._bcm2835 import *
     pass
 
 
-def debug_print(string=None):
+def debug_print(string):
     """
-    DEBUG
+
     :param string:
     :return:
     """
     if True:
         pass
         # print("DEBUG: " + string)
+
+
+# command definition
+CMD = {'CMD_WAKEUP': 0x00,  # Completes SYNC and Exits Standby Mode 0000  0000 (00h)
+       'CMD_RDATA': 0x01,  # Read Data 0000  0001 (01h)
+       'CMD_RDATAC': 0x03,  # Read Data Continuously 0000   0011 (03h)
+       'CMD_SDATAC': 0x0F,  # Stop Read Data Continuously 0000   1111 (0Fh)
+       'CMD_RREG': 0x10,  # Read from REG rrr 0001 rrrr (1xh)
+       'CMD_WREG': 0x50,  # Write to REG rrr 0101 rrrr (5xh)
+       'CMD_SELFCAL': 0xF0,  # Offset and Gain Self-Calibration 1111    0000 (F0h)
+       'CMD_SELFOCAL': 0xF1,  # Offset Self-Calibration 1111    0001 (F1h)
+       'CMD_SELFGCAL': 0xF2,  # Gain Self-Calibration 1111    0010 (F2h)
+       'CMD_SYSOCAL': 0xF3,  # System Offset Calibration 1111   0011 (F3h)
+       'CMD_SYSGCAL': 0xF4,  # System Gain Calibration 1111    0100 (F4h)
+       'CMD_SYNC': 0xFC,  # Synchronize the A/D Conversion 1111   1100 (FCh)
+       'CMD_STANDBY': 0xFD,  # Begin Standby Mode 1111   1101 (FDh)
+       'CMD_RESET': 0xFE,  # Reset to Power-Up Values 1111   1110 (FEh)
+       }
 
 
 class SPI_Driver:
@@ -57,10 +69,15 @@ class SPI_Driver:
      +-----+-----+---------+------+---+---Pi 2---+---+------+---------+-----+-----+
     """
 
+    # These options can be adjusted to facilitate specific operation of the
+    # ADS1256, the defaults are designed to be compatible with the Waveforms
     # High Precision AD/DA board
-    SPI_MODE = 1
+    SPI_MODE = BCM2835_SPI_MODE1
     SPI_CHANNEL = 1
-    SPI_RATE = 1000000
+    SPI_FREQUENCY = BCM2835_SPI_CLOCK_DIVIDER_4096  # The ADS1256 supports 768kHz to 1.92MHz
+    DRDY_TIMEOUT = 0.5  # Seconds to wait for DRDY when communicating
+    DATA_TIMEOUT = 0.00001  # 10uS delay for sending data
+    SCLK_FREQUENCY = 7680000  # default clock rate is 7.68MHz
 
     # The RPI GPIO to use for chip select and ready polling
     CS_PIN_AD = 15
@@ -68,32 +85,6 @@ class SPI_Driver:
     DRDY_PIN = 11
     RESET_PIN = 12
     PDWN_PIN = 13
-
-    POWER_DOWN = 0x03
-
-    # 通用定义
-    INPUT = 0
-    OUTPUT = 1
-    LOW = 0
-    HIGH = 1
-
-    PUD_OFF = 0
-    PUD_DOWN = 1
-    PUD_UP = 2
-
-    DAC_A = 0b00100000
-    DAC_B = 0b01100000
-    DAC_C = 0b10100000
-    DAC_D = 0b11100000
-
-    # These options can be adjusted to facilitate specific operation of the
-    # ADS1256, the defaults are designed to be compatible with the Waveforms
-    # High Precision AD/DA board
-
-    SPI_FREQUENCY = 1000000  # The ADS1256 supports 768kHz to 1.92MHz
-    DRDY_TIMEOUT = 0.5  # Seconds to wait for DRDY when communicating
-    DATA_TIMEOUT = 0.00001  # 10uS delay for sending data
-    SCLK_FREQUENCY = 7680000  # default clock rate is 7.68MHz
 
     # Register addresses
     REG_STATUS = 0x00
@@ -265,204 +256,240 @@ class SPI_Driver:
     AD_CLK_HALF = 0x40
     AD_CLK_FOURTH = 0x60
 
-    # CHANNEL select
-    AD_CHANNEL_0 = 0x0f
-    AD_CHANNEL_1 = 0x1f
-    AD_CHANNEL_2 = 0x2f
-    AD_CHANNEL_3 = 0x3f
-    AD_CHANNEL_4 = 0x4f
+    #
+    INPUT = 0
+    OUTPUT = 1
+    LOW = 0
+    HIGH = 1
+    PUD_OFF = 0
+    PUD_DOWN = 1
+    PUD_UP = 2
+
+    DAC_A = 0b00100000
+    DAC_B = 0b01100000
+    DAC_C = 0b10100000
+    DAC_D = 0b11100000
 
     # The RPI GPIO to use for chip select and ready polling
     def __init__(self):
         # Set up the wiringpi object to use physical pin numbers
-        wp.wiringPiSetupPhys()
-
+        if not bcm2835_init():
+            print('bcm2835_init失败，你是否以root身份运行？\n')
+        self.bcm_spi_init()
         # Initialize the DRDY pin
-        wp.pinMode(self.DRDY_PIN, self.INPUT)
+        bcm2835_gpio_fsel(self.DRDY_PIN, self.INPUT)
+        bcm2835_gpio_set_pud(self.DRDY_PIN, BCM2835_GPIO_PUD_UP)
 
         # Initialize the reset pin
-        wp.pinMode(self.RESET_PIN, self.OUTPUT)
-        wp.digitalWrite(self.RESET_PIN, self.HIGH)
+        bcm2835_gpio_fsel(self.RESET_PIN, self.OUTPUT)
+        bcm2835_gpio_write(self.RESET_PIN, self.HIGH)
 
         # Initialize PDWN pin
-        wp.pinMode(self.PDWN_PIN, self.OUTPUT)
-        wp.digitalWrite(self.PDWN_PIN, self.HIGH)
+        bcm2835_gpio_fsel(self.PDWN_PIN, self.OUTPUT)
+        bcm2835_gpio_write(self.PDWN_PIN, self.HIGH)
 
         # Initialize CS pin for ADS1256
-        wp.pinMode(self.CS_PIN_AD, self.OUTPUT)
-        wp.digitalWrite(self.CS_PIN_AD, self.HIGH)
+        bcm2835_gpio_fsel(self.CS_PIN_AD, self.OUTPUT)
+        bcm2835_gpio_write(self.CS_PIN_AD, self.HIGH)
 
         # Initialize CS pin for AD5314
-        wp.pinMode(self.CS_PIN_DA, self.OUTPUT)
-        wp.digitalWrite(self.CS_PIN_DA, self.HIGH)
+        bcm2835_gpio_fsel(self.CS_PIN_DA, self.OUTPUT)
+        bcm2835_gpio_write(self.CS_PIN_DA, self.HIGH)
 
         # Initialize the spidev SPI setup
-        self.spi_bus = spidev.SpiDev()
-        self.spi_init()
-        debug_print("SPI success " + str(self.spi_bus))
 
-    def spi_init(self):
+
+    def bcm_spi_init(self):
         """
-        初始化spi
+
         :return:
         """
-        self.spi_bus.open(0, 0)
-        self.spi_bus.mode = self.SPI_MODE
-        self.spi_bus.max_speed_hz = self.SPI_RATE
-        self.spi_bus.cshigh = False
+        if not bcm2835_spi_begin():
+            print('SPI begin error')
+        bcm2835_spi_begin()
+        # 高位在前
+        bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST)
 
-    def spi_close(self):
+        # SPI工作模式
+        bcm2835_spi_setDataMode(BCM2835_SPI_MODE1)
+
+        # SPI时钟
+        bcm2835_spi_setClockDivider(self.SPI_FREQUENCY)
+
+        # SPI片选
+        bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE)
+
+
+    @staticmethod
+    def spi_close():
         """
         关闭spi
         :return:
         """
-        self.spi_bus.close()
+        try:
+            bcm2835_spi_end()
+        except:
+            pass
 
     def chip_select_da(self):
         """
         使能芯片
         :return:
         """
-        wp.digitalWrite(self.CS_PIN_DA, self.LOW)
+        bcm2835_gpio_write(self.CS_PIN_DA, self.LOW)
+        self.delay_us(5)
 
     def chip_release_da(self):
         """
         取消使能
         :return:
         """
-        wp.digitalWrite(self.CS_PIN_DA, self.HIGH)
+        bcm2835_gpio_write(self.CS_PIN_DA, self.HIGH)
+        self.delay_us(5)
 
-    def SendWord(self, word):
-        """
-        Sends  byte to the SPI bus
-        """
-        debug_print("Sending: " + str(word) + " (hex: " + hex(word[0]) + " " + hex(word[1]) + ")")
-        # data = chr(byte)
+    # def SendWord(self, word):
+    #     """
+    #     Sends  byte to the SPI bus
+    #     """
+    #     debug_print("Sending: " + str(word) + " (hex: " + hex(word[0]) + " " + hex(word[1]) + ")")
+    #     # data = chr(byte)
+    #
+    #     result = self.spi_bus.xfer2(word)
+    #     # result = bcm2835_spi_transfer(word)
+    #     debug_print("Read " + str(result[1]))
+    #
+    # def send_to_ad5314(self, data):
+    #     """
+    #
+    #     :param data: list  [0x00, 0x00,...]
+    #     :return:
+    #     """
+    #     # Select the dac chip
+    #     self.chip_select_da()
+    #
+    #     # Send the data
+    #     self.SendWord(data)
+    #
+    #     # Release the dac chip
+    #     self.chip_release_da()
+    #
+    # def output_ac_power(self, vol):
+    #     """
+    #
+    #     :param vol: 电压值0~5v
+    #     :return:
+    #     """
+    #     if 0 <= vol <= 5:
+    #         vol_2 = int(vol * 1023 / 5)
+    #         high_bit = self.DAC_A | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_dc_power(self, vol):
+    #     """
+    #
+    #     :param vol:0~5v
+    #     :return:
+    #     """
+    #
+    #     if 0 <= vol <= 5:
+    #         vol_2 = int(vol * 1023 / 5)
+    #         high_bit = self.DAC_B | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_adjust_i(self, current):
+    #     """
+    #
+    #     :param current:0~20ma
+    #     :return:
+    #     """
+    #     if 0 <= current <= 20:
+    #         vol_2 = int(current * 1023 / 20)
+    #         high_bit = self.DAC_C | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_adjust_v(self, vol):
+    #     """
+    #
+    #     :param vol:0~10v
+    #     :return:
+    #     """
+    #     if 0 <= vol <= 10:
+    #         vol_2 = int(vol * 1023 / 10)
+    #         high_bit = self.DAC_D | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_0(self):
+    #     """
+    #     all channel output 0
+    #     :return:
+    #     """
+    #
+    #     self.output_ac_power(0)
+    #     self.output_dc_power(0)
+    #     self.output_adjust_i(0)
+    #     self.output_adjust_v(0)
 
-        result = self.spi_bus.xfer2(word)
-        debug_print("Read " + str(result[1]))
-
-    def send_to_ad5314(self, data):
-        """
-
-        :param data: list  [0x00, 0x00,...]
-        :return:
-        """
-        # Select the dac chip
-        self.chip_select_da()
-
-        # Send the data
-        self.SendWord(data)
-
-        # Release the dac chip
-        self.chip_release_da()
-
-    def output_ac_power(self, vol):
-        """
-
-        :param vol: 电压值0~5v
-        :return:
-        """
-        if 0 <= vol <= 5:
-            vol_2 = int(vol * 1023 / 5)
-            high_bit = self.DAC_A | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_dc_power(self, vol):
-        """
-
-        :param vol:0~5v
-        :return:
-        """
-
-        if 0 <= vol <= 5:
-            vol_2 = int(vol * 1023 / 5)
-            high_bit = self.DAC_B | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_adjust_i(self, current):
-        """
-
-        :param current:0~20ma
-        :return:
-        """
-        if 0 <= current <= 20:
-            vol_2 = int(current * 1023 / 20)
-            high_bit = self.DAC_C | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_adjust_v(self, vol):
-        """
-
-        :param vol:0~10v
-        :return:
-        """
-        if 0 <= vol <= 10:
-            vol_2 = int(vol * 1023 / 10)
-            high_bit = self.DAC_D | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_0(self):
-        """
-        all channel output 0
-        :return:
-        """
-
-        self.output_ac_power(0)
-        self.output_dc_power(0)
-        self.output_adjust_i(0)
-        self.output_adjust_v(0)
-
-    # ADS1256
     def chip_select_ad(self):
         """
 
         :return:
         """
-        wp.digitalWrite(self.CS_PIN_AD, self.LOW)
+        bcm2835_gpio_write(self.CS_PIN_AD, self.LOW)
+        self.delay_us(5)
 
     def chip_release_ad(self):
         """
 
         :return:
         """
-        wp.digitalWrite(self.CS_PIN_AD, self.HIGH)
+        bcm2835_gpio_write(self.CS_PIN_AD, self.HIGH)
+        self.delay_us(5)
+
+    def dataReady_is_Low(self):
+        """
+        check if data is ready
+        :return:
+        """
+        return bcm2835_gpio_lev(self.DRDY_PIN) == 0
 
     def WaitDRDY(self):
         """
         Delays until DRDY line goes low, allowing for automatic calibration
         """
-        start = time.time()
-        elapsed = time.time() - start
-
-        # Waits for DRDY to go to zero or TIMEOUT seconds to pass
-        drdy_level = wp.digitalRead(self.DRDY_PIN)
-
-        while (drdy_level == self.HIGH) and (elapsed < self.DRDY_TIMEOUT):
-            elapsed = time.time() - start
-            drdy_level = wp.digitalRead(self.DRDY_PIN)
-        if elapsed >= self.DRDY_TIMEOUT:
-            print("WaitDRDY() Timeout\r\n")
+        for i in range(40000):
+            if self.dataReady_is_Low():
+                break
+        # start = time.time()
+        # elapsed = time.time() - start
+        #
+        # # Waits for DRDY to go to zero or TIMEOUT seconds to pass
+        # drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
+        #
+        # while (drdy_level == self.HIGH) and (elapsed < self.DRDY_TIMEOUT):
+        #     elapsed = time.time() - start
+        #     drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
+        # if elapsed >= self.DRDY_TIMEOUT:
+        #     print("WaitDRDY() Timeout\r\n")
 
     def SendByte(self, byte):
         """
@@ -470,23 +497,20 @@ class SPI_Driver:
         :param byte:
         :return:
         """
-
+        self.delay_us(2)
         debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
-
-        # result = bcm2835_spi_transfer(byte)
-        result = self.spi_bus.xfer2([byte])
-        debug_print("Read " + str(result[0]))
+        result = bcm2835_spi_transfer(byte)
+        debug_print("Read " + str(result))
 
     def ReadByte(self):
         """
         Reads a byte from the SPI bus
         :returns: byte read from the bus
         """
-        byte = self.spi_bus.xfer2([0xff])
-        # byte = bcm2835_spi_transfer(0xff)
-        debug_print("ReadByte: byte[0]" + str(byte[0]) + " (hex " + hex(byte[0]) + ")")
-        # print(byte)
-        return byte[0]  # JKR
+        self.delay_us(2)
+        byte = bcm2835_spi_transfer(0xff)
+        debug_print("ReadByte: byte[0]" + str(byte) + " (hex " + hex(byte) + ")")
+        return byte
 
     def DataDelay(self):
         """
@@ -637,8 +661,8 @@ class SPI_Driver:
         :return:
         """
         print('++++++++++++++++++++++++++++++++++++')
-        for j in range(11):
-            print('REG: 0' + str(hex(j)[-1]) + 'H   ' + str(hex(self.ReadReg(j))))
+        for i in range(11):
+            print('REG: 0' + str(hex(i)[-1]) + 'H   ' + str(hex(self.ReadReg(i))))
 
         print('++++++++++++++++++++++++++++++++++++')
 
@@ -651,7 +675,7 @@ class SPI_Driver:
         self.WriteReg(self.REG_STATUS, 0x00)
 
         # 初始化端口A0为‘+’，AINCOM位‘-’
-        self.WriteReg(self.REG_MUX, 0x08)
+        self.WriteReg(self.REG_MUX, 0x18)
 
         # 放大倍数1
         self.WriteReg(self.REG_ADCON, 0X00)
@@ -681,54 +705,67 @@ class SPI_Driver:
         ad_value = self.ReadADC()
         return round(ad_value * 5 / 2 ** 23, 3)
         # return hex(ad_value)
-        # return ad_value
         pass
+
+    @staticmethod
+    def delay_us(_time=1):
+        """
+
+        :param _time:
+        :return:
+        """
+        bcm2835_delayMicroseconds(_time)
+
+    @staticmethod
+    def delay_ms(_time=1):
+        """
+
+        :param _time:
+        :return:
+        """
+        bcm2835_delayMicroseconds(1000*_time)
 
 
 if __name__ == '__main__':
     ad_da = SPI_Driver()
-    ad_da.spi_init()
+    bcm2835_init()
+    # ad_da.spi_init()
     ad_da.ADS1256_Init()
     ad_da.read_all_reg()
 
     while True:
+        # try:
+        #     print('Choose a channel...\n'
+        #           '1 ACPOWER 0~5V\n'
+        #           '2 DCPOWER 0~5V\n'
+        #           '3 ADJUST VALVE 0~20mA\n'
+        #           '4 ADJUST VALVE 0~10V\n'
+        #           '5 AD\n')
+        #     channel = input()
+        #     value = input('Input a value\n')
+        #     if channel == '1':
+        #         ad_da.output_ac_power(float(value))
+        #     elif channel == '2':
+        #         ad_da.output_dc_power(float(value))
+        #     elif channel == '3':
+        #         ad_da.output_adjust_i(float(value))
+        #     elif channel == '4':
+        #         ad_da.output_adjust_v(float(value))
+        #     elif channel == '5':
         try:
-            print('Choose a channel...\n'
-                  '1 ACPOWER 0~5V\n'
-                  '2 DCPOWER 0~5V\n'
-                  '3 ADJUST VALVE 0~20mA\n'
-                  '4 ADJUST VALVE 0~10V\n'
-                  '5 AD TEST\n')
-            channel = input()
-            value = input('Input a value\n')
-            if channel == '1':
-                ad_da.output_ac_power(float(value))
-            elif channel == '2':
-                ad_da.output_dc_power(float(value))
-            elif channel == '3':
-                ad_da.output_adjust_i(float(value))
-            elif channel == '4':
-                ad_da.output_adjust_v(float(value))
-            elif channel == '5':
-                while True:
-                    try:
-                        # if not input(''):
-                        os.system('clear')
-                        for i in range(5):
-                            ad_da.ADS1256_Init()
-
-                            # ad_da.read_channel(i)
-                            print('AD' + str(i) + ': ' + str(ad_da.read_channel(i)))
-                            # ad_da.read_all_reg()
-                            # print(time.time())
-                            time.sleep(0.005)
-                        time.sleep(1)
-                        # else:
-                        #     pass
-                    except KeyboardInterrupt:
-                        break
+            if not input(''):
+                os.system('clear')
+                for i in range(5):
+                    # ad_da.ADS1256_Init()
+                    # ad_da.read_channel(i)
+                    print('AD' + str(i) + ': ' + str(ad_da.read_channel(i)))
+                    # ad_da.read_all_reg()
+                    # print(time.time())
+                    ad_da.delay_us(5)
+            else:
+                pass
         except KeyboardInterrupt:
-            ad_da.output_0()
+            # ad_da.output_0()
             ad_da.spi_close()
             os.system('clear')
             debug_print('[spi close]')

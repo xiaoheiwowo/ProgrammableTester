@@ -4,11 +4,7 @@
 introduction
 """
 import time
-try:
-    # from public.datacache import HardwareData as hw
-    pass
-except ImportError:
-    pass
+import os
 
 try:
     import smbus2 as i2c2
@@ -19,13 +15,15 @@ try:
 except ImportError:
     pass
 
-# wiringpi 的中断注册函数使用有问题
-# try:
-#     from driver.gpio import *
-# except:
-#     from gpio import *
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    pass
 
-import os
+# wiringpi 的中断注册函数使用有问题
+
+
+FG_READ_IO = 0
 
 addr_pca9548 = 0x70
 addr_pca9535 = 0x21
@@ -56,7 +54,7 @@ def debug_print(string):
     :param string:
     :return:
     """
-    print('DEBUG [ ' + string + ' ]')
+    # print('DEBUG [ ' + string + ' ]')
     pass
 
 
@@ -106,7 +104,7 @@ class I2C_Driver(object):
 
         :return:
         """
-        self.i2c_bus.write_byte_data(addr_pca9548, 0x00)
+        self.i2c_bus.write_byte_data(addr_pca9548, 0x00, 0x00)
 
     def read_pca9548(self):
         """
@@ -114,10 +112,10 @@ class I2C_Driver(object):
         :return:
         """
         try:
-            data = self.i2c_bus.read_byte(addr_pca9548)
+            _data = self.i2c_bus.read_byte(addr_pca9548)
+            return _data
         except IOError:
             pass
-        return data
 
     def write_pca9548(self, dat):
         """
@@ -455,14 +453,6 @@ class I2C_Driver(object):
         self.i2c_bus.close()
 
 
-try:
-    import RPi.GPIO as GPIO
-except ImportError:
-    pass
-
-FG_READ_IO = 0
-
-
 def int_from_pca9535(pin_number):
     """
 
@@ -476,16 +466,25 @@ def int_from_pca9535(pin_number):
     FG_READ_IO = 1
 
 
+def init_gpio_int():
+    """
+
+    :return:
+    """
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(36, GPIO.IN)
+
+    # 中断注册
+    GPIO.add_event_detect(36, GPIO.FALLING, callback=int_from_pca9535, bouncetime=15)
+
+
 if __name__ == "__main__":
     i2c = I2C_Driver()
     i2c.init_extend_io()
     i2c.init_relay()
 
-    # init_gpio()
-
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(36, GPIO.IN)
-    GPIO.add_event_detect(36, GPIO.FALLING, callback=int_from_pca9535, bouncetime=15)
+    # 中断
+    init_gpio_int()
 
     try:
         i2c.write_extend_io([0xff, 0xff])

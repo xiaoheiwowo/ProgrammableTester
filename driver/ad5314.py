@@ -65,7 +65,7 @@ class AD5314:
     SPI_RATE = 20000
 
     # The RPI GPIO to use for chip select and ready polling
-    CS_PIN = 16
+    CS_PIN = 18
 
     POWER_DOWN = 0x03
 

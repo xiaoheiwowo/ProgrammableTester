@@ -5,7 +5,6 @@ introduction
 """
 
 import random
-
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -17,19 +16,14 @@ from public.datacache import HardwareData as hw
 
 from public.control import ValveControl as vc
 
+fg_update_diagram = 1
+
 
 class Ui_MainWin(QtWidgets.QMainWindow):
     """
     IN
     """
     lock_state = True
-
-    # MY SIGNAL
-    # open_valve = QtCore.pyqtSignal()
-    # close_valve = QtCore.pyqtSignal()
-    # stop_valve = QtCore.pyqtSignal()
-    # m3_valve = QtCore.pyqtSignal()
-    # m4_valve = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(Ui_MainWin, self).__init__(parent, flags=QtCore.Qt.Window)
@@ -76,13 +70,18 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_FullScreen = QtWidgets.QPushButton()
         self.BT_Dynamic = QtWidgets.QPushButton()
         self.BT_Static = QtWidgets.QPushButton()
-        self.timer_refresh = QtCore.QTimer(self)
 
-        self.timer_update = QtCore.QTimer(self)
-        self.timer_update.timeout.connect(self.window_update)
-        self.timer_update.start(500)
+        # self.timer_refresh = QtCore.QTimer(self)
+
+        # 停用定时器
+        # self.timer_update = QtCore.QTimer(self)
+        # self.timer_update.timeout.connect(self.window_update)
+        # self.timer_update.start(500)
 
         self.init_current_curve()
+
+        self.diathread = UpdateThread(self)
+        self.diathread.start()
 
         # 阀门控制部分
         self.GB_ValveControl = QtWidgets.QGroupBox(self.mainWidget)
@@ -210,8 +209,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         Layout_LB.addStretch(1)
 
         self.main_window_fig.setMaximumHeight(180)
-        # xx = np.arange(-10.0, 0, 0.05)
-        # yy = (np.cos(2*np.pi*xx)+1)*10
         self.main_window_fig.update_diagram(sw.current_value[-200:], myflag=0)
 
         self.BT_FullScreen.setFixedSize(50, 50)
@@ -281,8 +278,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.CB_SelectControl.activated.connect(self.load_data)
         # self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
         self.SB_Voltage.valueChanged.connect(self.set_voltage)
-        self.timer_refresh.timeout.connect(self.draw_dynamic)
-        self.timer_refresh.start(300)
+        # self.timer_refresh.timeout.connect(self.draw_dynamic)
+        # self.timer_refresh.start(300)
         self.BT_Dynamic.clicked.connect(self.press_dynamic)
         self.BT_Static.clicked.connect(self.press_static)
 
@@ -303,8 +300,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         # 自动复选框信号连接按钮禁用函数
         self.CK_Auto.clicked.connect(self.AutoTestDisable)
-        self.BT_Lock.pressed.connect(self.TimerStart)
-        self.BT_Lock.released.connect(self.QTimerLock.stop)
+        # self.BT_Lock.pressed.connect(self.TimerStart)
+        # self.BT_Lock.released.connect(self.QTimerLock.stop)
+        self.BT_Lock.clicked.connect(self.JudgeLock)
         # self.QTimerLock.timeout.connect(self.LockControl)
 
         # 滑动条设置调节阀控制信号
@@ -498,11 +496,15 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         :return:
         """
-        self.QTimerLock.stop()
-        if self.lock_state:
+        if self.BT_M4.isEnabled():
             self.UnlockControl()
         else:
             self.LockControl()
+        # self.QTimerLock.stop()
+        # if self.lock_state:
+        #     self.UnlockControl()
+        # else:
+        #     self.LockControl()
 
     def LockControl(self):
         """
@@ -510,7 +512,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_closed_outline_105.8691588785px_1158659_easyicon.net.png'))
-        self.BT_Lock.setText('长按解锁')
+        self.BT_Lock.setText('单击解锁')
         self.valve_control_disabled(False)
         self.lock_state = True
         sw.begin_ad = 1
@@ -523,7 +525,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
-        self.BT_Lock.setText('长按锁定')
+        self.BT_Lock.setText('单击锁定')
         self.valve_control_disabled(True)
         self.lock_state = False
         sw.begin_ad = 0
@@ -622,10 +624,11 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
 
-        # sw.current_valve.append(int(100 * random.random()))
-        # del sw.current_valve[0]
+        # sw.current_value.append(int(100 * random.random()))
+        # del sw.current_value[0]
         yy = sw.current_value[-200:]
         self.main_window_fig.update_diagram(yy, myflag=0)
+
         # self.main_window_fig.myTable.remove()
 
         self.change_position_signal(hw.open_signal, hw.close_signal)
@@ -636,16 +639,21 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         :return:
         """
-        if not self.timer_refresh.isActive():
-            self.timer_refresh.start(300)
+        global fg_update_diagram
+        fg_update_diagram = 1
+        # if not self.timer_refresh.isActive():
+        #     pass
+            # self.timer_refresh.start(500)
 
     def press_static(self):
         """
 
         :return:
         """
-        if self.timer_refresh.isActive():
-            self.timer_refresh.stop()
+        global fg_update_diagram
+        fg_update_diagram = 0
+        # if self.timer_refresh.isActive():
+        #     self.timer_refresh.stop()
 
     def press_send(self):
         """
@@ -766,3 +774,37 @@ class LongPressButton(QtWidgets.QPushButton):
         :return:
         """
         pass
+
+
+class UpdateThread(QtCore.QThread):
+    """
+    更新界面数据和曲线
+    """
+    def __init__(self, _obj):
+
+        super(UpdateThread, self).__init__()
+        self.win = _obj
+
+    def run(self):
+        """
+
+        :return:
+        """
+
+        window_update_time = time.time()
+        while True:
+            now_time = time.time()
+            if now_time - window_update_time > 0.5:
+                self.win.change_va_valve(hw.current_value_show, hw.voltage_value_show)
+                self.win.change_position_signal(hw.open_signal, hw.close_signal)
+                window_update_time = time.time()
+
+            if fg_update_diagram == 1:
+
+                # sw.current_value.append(int(100 * random.random()))
+                # del sw.current_value[0]
+                yy = sw.current_value[-200:]
+                self.win.main_window_fig.update_diagram(yy, myflag=0)
+                time.sleep(0.5)
+            else:
+                pass

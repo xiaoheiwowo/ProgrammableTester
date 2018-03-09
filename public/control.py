@@ -4,15 +4,20 @@
 """
 阀门控制
 """
+
+import sys
+sys.path.append("..")
 from public.datacache import HardwareData as hw
 from driver.i2c import *
 from driver.spi import *
+
 
 try:
 
     import wiringpi as wp
 except ImportError:
-    from driver import wiringpi as wp
+    # from driver import wiringpi as wp
+
     pass
 
 # 常量
@@ -157,13 +162,34 @@ class Analog(object):
         self.spi_.output_adjust_v(u)
         pass
 
+    def sampling_for_average(self, index):
+        """
+        采样10次去掉1个最大值1个最小值求平均值
+        :param index:
+        :return:
+        """
+        ad_list = list()
+        for i in range(10):
+            ad_list.append(self.spi_.read_channel(index))
+
+        ad_max = max(ad_list)
+        ad_min = min(ad_list)
+
+        ad_list.pop(ad_list.index(ad_max))
+        ad_list.pop(ad_list.index(ad_min))
+
+        ad_average = sum(ad_list) / len(ad_list)
+        return ad_average
+
     def read_i_dc(self):
         """
 
         :return:
         """
         debug_print('电流值：' + '100' + 'mA')
+        self.spi_.ADS1256_Init()
         return self.spi_.read_channel(3)
+        # return self.sampling_for_average(3)
         pass
 
     def read_u_dc(self):
@@ -172,6 +198,7 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '5' + 'V')
+        self.spi_.ADS1256_Init()
         return self.spi_.read_channel(4)
         pass
 
@@ -181,6 +208,8 @@ class Analog(object):
         :return:
         """
         debug_print('电流值：' + '1' + 'mA')
+        # return self.sampling_for_average(1)
+        self.spi_.ADS1256_Init()
         return self.spi_.read_channel(1)
         pass
 
@@ -190,6 +219,7 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '220' + 'V')
+        self.spi_.ADS1256_Init()
         return self.spi_.read_channel(2)
         pass
 
@@ -199,6 +229,7 @@ class Analog(object):
         :return:
         """
         debug_print('反馈信号：' + '1' + 'mA')
+        self.spi_.ADS1256_Init()
         return self.spi_.read_channel(0)
         pass
 
@@ -528,10 +559,13 @@ if __name__ == '__main__':
     current = [0 for i in range(65535)]
 
     while True:
-        # current.pop(0)
-        # current.append(analog.read_i_ac())
-
-        print(analog.read_i_ac())
-        wp.delay(5)
+        try:
+            current.pop(0)
+            analog.spi_.ADS1256_Init()
+            current.append(analog.read_i_ac())
+            print(current[-10:])
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
     pass

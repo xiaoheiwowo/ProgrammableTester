@@ -127,8 +127,8 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         self.control_set.confirm.connect(self.update_main_win)
 
         # 启动tcp server线程
-        # tcp_thread = TcpThread()
-        # tcp_thread.start()
+        self.tcp_thread = TcpThread()
+        self.tcp_thread.start()
 
         # 启动控制线程
         self.control_thread = ControlThread()
@@ -246,11 +246,11 @@ class ControlThread(QThread):
         self.calibration_timer = QTimer(self)
         self.calibration_timer.timeout.connect(self.read_io)
 
-        # 硬件
+        # # 硬件
         self.digital = Digital()
         self.analog = Analog()
 
-        self.calibration_timer.start(100)
+        self.calibration_timer.start(1000)
 
     def run(self):
         """
@@ -261,12 +261,15 @@ class ControlThread(QThread):
         sw.current_value = [0 for j in range(65535)]
         print('1')
         while True:
-            if sw.begin_ad == 1:
-                time.sleep(0.003)
-                self.read_hard()
-            else:
-                sw.current_value = [0 for j in range(65535)]
-                pass
+            self.read_hard()
+            print(time.time())
+            time.sleep(0.01)
+            # if sw.begin_ad == 1:
+            #     time.sleep(0.01)
+            #     self.read_hard()
+            # else:
+            #     sw.current_value = [0 for j in range(65535)]
+            #     pass
 
     def read_hard(self):
         """
@@ -322,23 +325,6 @@ class ControlThread(QThread):
             hw.close_signal = 'YES'
         else:
             hw.close_signal = 'NO'
-
-
-class ADThread(QThread):
-    """
-    电流采样
-    """
-
-    def __init__(self):
-        super(ADThread, self).__init__()
-        print('AD Thread Run ...')
-
-    def run(self):
-        """
-
-        :return:
-        """
-        pass
 
 
 if __name__ == '__main__':
