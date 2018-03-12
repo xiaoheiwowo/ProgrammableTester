@@ -262,7 +262,6 @@ class ControlThread(QThread):
         print('1')
         while True:
             self.read_hard()
-            print(time.time())
             time.sleep(0.01)
             # if sw.begin_ad == 1:
             #     time.sleep(0.01)

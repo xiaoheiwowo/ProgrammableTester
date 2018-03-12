@@ -780,10 +780,10 @@ class UpdateThread(QtCore.QThread):
     """
     更新界面数据和曲线
     """
-    def __init__(self, _obj):
+    def __init__(self, _win):
 
         super(UpdateThread, self).__init__()
-        self.win = _obj
+        self.win = _win
 
     def run(self):
         """
@@ -805,6 +805,6 @@ class UpdateThread(QtCore.QThread):
                 # del sw.current_value[0]
                 yy = sw.current_value[-200:]
                 self.win.main_window_fig.update_diagram(yy, myflag=0)
-                time.sleep(0.5)
+                time.sleep(0.2)
             else:
                 pass

@@ -118,7 +118,7 @@ class Analog(object):
     def __init__(self):
         self.spi_ = SPI_Driver()
         self.spi_.spi_init()
-        self.spi_.ADS1256_Init()
+        self.spi_.ads1256_cfg()
 
         pass
 
@@ -187,8 +187,9 @@ class Analog(object):
         :return:
         """
         debug_print('电流值：' + '100' + 'mA')
-        self.spi_.ADS1256_Init()
-        return self.spi_.read_channel(3)
+        # self.spi_.ADS1256_Init()
+        self.spi_.ads1256_one_shot(3)
+        return self.spi_.ReadADC()
         # return self.sampling_for_average(3)
         pass
 
@@ -198,8 +199,9 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '5' + 'V')
-        self.spi_.ADS1256_Init()
-        return self.spi_.read_channel(4)
+        # self.spi_.ADS1256_Init()
+        self.spi_.ads1256_one_shot(4)
+        return self.spi_.ReadADC()
         pass
 
     def read_i_ac(self):
@@ -209,8 +211,9 @@ class Analog(object):
         """
         debug_print('电流值：' + '1' + 'mA')
         # return self.sampling_for_average(1)
-        self.spi_.ADS1256_Init()
-        return self.spi_.read_channel(1)
+        # self.spi_.ADS1256_Init()
+        self.spi_.ads1256_one_shot(1)
+        return self.spi_.ReadADC()
         pass
 
     def read_u_ac(self):
@@ -219,8 +222,9 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '220' + 'V')
-        self.spi_.ADS1256_Init()
-        return self.spi_.read_channel(2)
+        # self.spi_.ADS1256_Init()
+        self.spi_.ads1256_one_shot(2)
+        return self.spi_.ReadADC()
         pass
 
     def read_feedback(self):
@@ -229,8 +233,9 @@ class Analog(object):
         :return:
         """
         debug_print('反馈信号：' + '1' + 'mA')
-        self.spi_.ADS1256_Init()
-        return self.spi_.read_channel(0)
+        # self.spi_.ADS1256_Init()
+        self.spi_.ads1256_one_shot(0)
+        return self.spi_.ReadADC()
         pass
 
     @staticmethod
@@ -561,7 +566,7 @@ if __name__ == '__main__':
     while True:
         try:
             current.pop(0)
-            analog.spi_.ADS1256_Init()
+            analog.spi_.ads1256_cfg()
             current.append(analog.read_i_ac())
             print(current[-10:])
             time.sleep(1)

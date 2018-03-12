@@ -1,12 +1,16 @@
 # !/usr/bin/evn python3
 # -*- coding: utf-8 -*-
-
+"""
+title:
+"""
 import time
 import os
+import numpy as np
 try:
     from libbcm2835._bcm2835 import *
 except ImportError:
     from driver._bcm2835 import *
+
     pass
 
 
@@ -22,22 +26,6 @@ def debug_print(string):
 
 
 # command definition
-CMD = {'CMD_WAKEUP': 0x00,  # Completes SYNC and Exits Standby Mode 0000  0000 (00h)
-       'CMD_RDATA': 0x01,  # Read Data 0000  0001 (01h)
-       'CMD_RDATAC': 0x03,  # Read Data Continuously 0000   0011 (03h)
-       'CMD_SDATAC': 0x0F,  # Stop Read Data Continuously 0000   1111 (0Fh)
-       'CMD_RREG': 0x10,  # Read from REG rrr 0001 rrrr (1xh)
-       'CMD_WREG': 0x50,  # Write to REG rrr 0101 rrrr (5xh)
-       'CMD_SELFCAL': 0xF0,  # Offset and Gain Self-Calibration 1111    0000 (F0h)
-       'CMD_SELFOCAL': 0xF1,  # Offset Self-Calibration 1111    0001 (F1h)
-       'CMD_SELFGCAL': 0xF2,  # Gain Self-Calibration 1111    0010 (F2h)
-       'CMD_SYSOCAL': 0xF3,  # System Offset Calibration 1111   0011 (F3h)
-       'CMD_SYSGCAL': 0xF4,  # System Gain Calibration 1111    0100 (F4h)
-       'CMD_SYNC': 0xFC,  # Synchronize the A/D Conversion 1111   1100 (FCh)
-       'CMD_STANDBY': 0xFD,  # Begin Standby Mode 1111   1101 (FDh)
-       'CMD_RESET': 0xFE,  # Reset to Power-Up Values 1111   1110 (FEh)
-       }
-
 
 class SPI_Driver:
     """ Wiring Diagram
@@ -74,10 +62,20 @@ class SPI_Driver:
     # High Precision AD/DA board
     SPI_MODE = BCM2835_SPI_MODE1
     SPI_CHANNEL = 1
-    SPI_FREQUENCY = BCM2835_SPI_CLOCK_DIVIDER_4096  # The ADS1256 supports 768kHz to 1.92MHz
+    SPI_FREQUENCY = BCM2835_SPI_CLOCK_DIVIDER_1024  # The ADS1256 supports 768kHz to 1.92MHz
     DRDY_TIMEOUT = 0.5  # Seconds to wait for DRDY when communicating
     DATA_TIMEOUT = 0.00001  # 10uS delay for sending data
     SCLK_FREQUENCY = 7680000  # default clock rate is 7.68MHz
+
+    # 通用定义
+    INPUT = 0
+    OUTPUT = 1
+    LOW = 0
+    HIGH = 1
+
+    PUD_OFF = 0
+    PUD_DOWN = 1
+    PUD_UP = 2
 
     # The RPI GPIO to use for chip select and ready polling
     CS_PIN_AD = 15
@@ -256,26 +254,24 @@ class SPI_Driver:
     AD_CLK_HALF = 0x40
     AD_CLK_FOURTH = 0x60
 
-    #
-    INPUT = 0
-    OUTPUT = 1
-    LOW = 0
-    HIGH = 1
-    PUD_OFF = 0
-    PUD_DOWN = 1
-    PUD_UP = 2
-
+    # DA CHANNEL
     DAC_A = 0b00100000
     DAC_B = 0b01100000
     DAC_C = 0b10100000
     DAC_D = 0b11100000
+
+    # AD CHANNEL select
+    AD_CHANNEL_0 = 0x0f
+    AD_CHANNEL_1 = 0x1f
+    AD_CHANNEL_2 = 0x2f
+    AD_CHANNEL_3 = 0x3f
+    AD_CHANNEL_4 = 0x4f
 
     # The RPI GPIO to use for chip select and ready polling
     def __init__(self):
         # Set up the wiringpi object to use physical pin numbers
         if not bcm2835_init():
             print('bcm2835_init失败，你是否以root身份运行？\n')
-        self.bcm_spi_init()
         # Initialize the DRDY pin
         bcm2835_gpio_fsel(self.DRDY_PIN, self.INPUT)
         bcm2835_gpio_set_pud(self.DRDY_PIN, BCM2835_GPIO_PUD_UP)
@@ -297,16 +293,15 @@ class SPI_Driver:
         bcm2835_gpio_write(self.CS_PIN_DA, self.HIGH)
 
         # Initialize the spidev SPI setup
-
+        self.bcm_spi_init()
 
     def bcm_spi_init(self):
         """
 
         :return:
         """
-        if not bcm2835_spi_begin():
-            print('SPI begin error')
         bcm2835_spi_begin()
+
         # 高位在前
         bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST)
 
@@ -317,8 +312,7 @@ class SPI_Driver:
         bcm2835_spi_setClockDivider(self.SPI_FREQUENCY)
 
         # SPI片选
-        bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE)
-
+        # bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE)
 
     @staticmethod
     def spi_close():
@@ -326,26 +320,23 @@ class SPI_Driver:
         关闭spi
         :return:
         """
-        try:
-            bcm2835_spi_end()
-        except:
-            pass
+        bcm2835_spi_end()
 
-    def chip_select_da(self):
-        """
-        使能芯片
-        :return:
-        """
-        bcm2835_gpio_write(self.CS_PIN_DA, self.LOW)
-        self.delay_us(5)
-
-    def chip_release_da(self):
-        """
-        取消使能
-        :return:
-        """
-        bcm2835_gpio_write(self.CS_PIN_DA, self.HIGH)
-        self.delay_us(5)
+    # def chip_select_da(self):
+    #     """
+    #     使能芯片
+    #     :return:
+    #     """
+    #     bcm2835_gpio_write(self.CS_PIN_DA, self.LOW)
+    #     # self.delay_us(5)
+    #
+    # def chip_release_da(self):
+    #     """
+    #     取消使能
+    #     :return:
+    #     """
+    #     bcm2835_gpio_write(self.CS_PIN_DA, self.HIGH)
+    #     # self.delay_us(5)
 
     # def SendWord(self, word):
     #     """
@@ -465,52 +456,49 @@ class SPI_Driver:
         bcm2835_gpio_write(self.CS_PIN_AD, self.HIGH)
         self.delay_us(5)
 
-    def dataReady_is_Low(self):
-        """
-        check if data is ready
-        :return:
-        """
-        return bcm2835_gpio_lev(self.DRDY_PIN) == 0
+    def ads1256_reset(self):
+        # bcm2835_gpio_write(self.RESET_PIN, self.LOW)
+        # self.delay_us(1)
+        # bcm2835_gpio_write(self.RESET_PIN, self.HIGH)
+        self.SendByte(self.CMD_RESET)
 
     def WaitDRDY(self):
         """
         Delays until DRDY line goes low, allowing for automatic calibration
         """
-        for i in range(40000):
-            if self.dataReady_is_Low():
-                break
-        # start = time.time()
-        # elapsed = time.time() - start
-        #
-        # # Waits for DRDY to go to zero or TIMEOUT seconds to pass
-        # drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
-        #
-        # while (drdy_level == self.HIGH) and (elapsed < self.DRDY_TIMEOUT):
-        #     elapsed = time.time() - start
-        #     drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
-        # if elapsed >= self.DRDY_TIMEOUT:
-        #     print("WaitDRDY() Timeout\r\n")
+        start = time.time()
+        elapsed = time.time() - start
 
-    def SendByte(self, byte):
+        # Waits for DRDY to go to zero or TIMEOUT seconds to pass
+        drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
+
+        while (drdy_level == self.HIGH) and (elapsed < self.DRDY_TIMEOUT):
+            elapsed = time.time() - start
+            drdy_level = bcm2835_gpio_lev(self.DRDY_PIN)
+        if elapsed >= self.DRDY_TIMEOUT:
+            print("WaitDRDY() Timeout\r\n")
+
+    @staticmethod
+    def SendByte(byte):
         """
         Sends a byte to the SPI bus
         :param byte:
         :return:
         """
-        self.delay_us(2)
-        debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
-        result = bcm2835_spi_transfer(byte)
-        debug_print("Read " + str(result))
+        # debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
+        bcm2835_spi_transfer(byte)
+        # debug_print("Read " + str(result))
 
-    def ReadByte(self):
+    @staticmethod
+    def ReadByte():
         """
-        Reads a byte from the SPI bus
-        :returns: byte read from the bus
+        Receive 8 bit
+        :return:
         """
-        self.delay_us(2)
-        byte = bcm2835_spi_transfer(0xff)
-        debug_print("ReadByte: byte[0]" + str(byte) + " (hex " + hex(byte) + ")")
-        return byte
+        return bcm2835_spi_transfer(0xff)
+        # byte = bcm2835_spi_transfer(0xff)
+        # debug_print("ReadByte: byte[0]" + str(byte) + " (hex " + hex(byte) + ")")
+        # return byte
 
     def DataDelay(self):
         """
@@ -524,7 +512,6 @@ class SPI_Driver:
         60 x SCLK period.
         """
         # timeout = (60 / self.SCLK_FREQUENCY)
-
         start = time.time()
         elapsed = time.time() - start
 
@@ -560,7 +547,8 @@ class SPI_Driver:
         self.SendByte(0x00)
 
         # Wait for appropriate data delay
-        self.DataDelay()
+        # self.DataDelay()
+        self.delay_us(10)
 
         # Read the register contents
         idreturn = self.ReadByte()
@@ -661,8 +649,9 @@ class SPI_Driver:
         :return:
         """
         print('++++++++++++++++++++++++++++++++++++')
-        for i in range(11):
-            print('REG: 0' + str(hex(i)[-1]) + 'H   ' + str(hex(self.ReadReg(i))))
+        for j in range(11):
+            print('REG: 0' + str(hex(j)[-1]) + 'H   ' + str(hex(self.ReadReg(j))))
+            self.delay_us(50)
 
         print('++++++++++++++++++++++++++++++++++++')
 
@@ -683,29 +672,53 @@ class SPI_Driver:
         # SPS 1000
         self.WriteReg(self.REG_DRATE, self.DRATE_1000)
 
-    def select_channel(self, index):
+    def ads1256_cfg(self):
+        """
+
+        :return:
+        """
+
+        buf = [0x00, 0x08, 0x00, 0xf0]
+        self.chip_select_ad()
+        self.WaitDRDY()
+        self.SendByte(self.CMD_WREG)
+        self.SendByte(0x03)
+        self.SendByte(buf[0])
+        self.SendByte(buf[1])
+        self.SendByte(buf[2])
+        self.SendByte(buf[3])
+        self.chip_release_ad()
+        self.delay_us(50)
+
+    def ADS1256_OneShot(self, index):
         """
 
         :param index: int 0~4 ---- ad0~ad4
         :return:
         """
-        channel_list = [0x0f, 0x1f, 0x2f, 0x3f, 0x4f]
+        channel_list = [0x0f, 0x1f, 0x2f, 0x3f, 0x4f, 0x5f, 0x6f, 0x7f]
         self.chip_select_ad()
+        self.WaitDRDY()
         self.SendByte(self.CMD_WREG | 0x01)
         self.SendByte(0x00)
         self.SendByte(channel_list[index])
+        self.delay_us(15)
+        self.SendByte(self.CMD_SYNC)
+        self.delay_us(5)
+        self.SendByte(self.CMD_WAKEUP)
+        self.delay_us(25)
+        ad_value = self.ReadADC()
+
         self.chip_release_ad()
 
-    def read_channel(self, index):
-        """
-
-        :return:
-        """
-        self.select_channel(index)
-        ad_value = self.ReadADC()
         return round(ad_value * 5 / 2 ** 23, 3)
         # return hex(ad_value)
-        pass
+
+    def DRDY_is_low(self):
+        if bcm2835_gpio_lev(self.DRDY_PIN, LOW):
+            return 1
+        else:
+            return 0
 
     @staticmethod
     def delay_us(_time=1):
@@ -723,15 +736,20 @@ class SPI_Driver:
         :param _time:
         :return:
         """
-        bcm2835_delayMicroseconds(1000*_time)
+        bcm2835_delayMicroseconds(1000 * _time)
 
 
 if __name__ == '__main__':
+
     ad_da = SPI_Driver()
-    bcm2835_init()
-    # ad_da.spi_init()
-    ad_da.ADS1256_Init()
-    ad_da.read_all_reg()
+    # ad_da.ads1256_reset()
+    # ad_da.delay_us(50)
+    # ad_da.ads1256_reset()
+    # ad_da.ADS1256_Init()
+    # ad_da.ADS1256_OneShot(0)
+    # ad_da.ads1256_cfg()
+    # ad_da.WriteReg(0,4)
+    # print(ad_da.ReadReg(0))
 
     while True:
         # try:
@@ -755,18 +773,26 @@ if __name__ == '__main__':
         try:
             if not input(''):
                 os.system('clear')
-                for i in range(5):
-                    # ad_da.ADS1256_Init()
-                    # ad_da.read_channel(i)
-                    print('AD' + str(i) + ': ' + str(ad_da.read_channel(i)))
-                    # ad_da.read_all_reg()
-                    # print(time.time())
-                    ad_da.delay_us(5)
+                for i in range(8):
+                    ad_da.ADS1256_OneShot(i)
+                    print('AD' + str(i) + ': ' + str(ad_da.ADS1256_OneShot(i)))
+                ad_da.ADS1256_OneShot(0)
+                # print('AD' + str(0) + ': ' + str(ad_da.ADS1256_OneShot(0)))
+                print(ad_da.ReadADC())
+                # ad_da.read_all_reg()
+                # print(time.time())
+                #     ad_da.delay_us(5)
+                #     ad_da.delay_us(300)
+
             else:
                 pass
         except KeyboardInterrupt:
             # ad_da.output_0()
+            # ad_da.ads1256_reset()
+            # ad_da.delay_us(50)
+            # ad_da.read_all_reg()
             ad_da.spi_close()
-            os.system('clear')
+            # bcm2835_close()
+            # os.system('clear')
             debug_print('[spi close]')
             break

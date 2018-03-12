@@ -324,6 +324,7 @@ class SPI_Driver:
         :return:
         """
         wp.digitalWrite(self.CS_PIN_DA, self.LOW)
+        self.delay_us(5)
 
     def chip_release_da(self):
         """
@@ -331,6 +332,7 @@ class SPI_Driver:
         :return:
         """
         wp.digitalWrite(self.CS_PIN_DA, self.HIGH)
+        self.delay_us(5)
 
     def SendWord(self, word):
         """
@@ -440,6 +442,7 @@ class SPI_Driver:
         :return:
         """
         wp.digitalWrite(self.CS_PIN_AD, self.LOW)
+        self.delay_us(5)
 
     def chip_release_ad(self):
         """
@@ -447,6 +450,7 @@ class SPI_Driver:
         :return:
         """
         wp.digitalWrite(self.CS_PIN_AD, self.HIGH)
+        self.delay_us(5)
 
     def WaitDRDY(self):
         """
@@ -473,7 +477,6 @@ class SPI_Driver:
 
         debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
 
-        # result = bcm2835_spi_transfer(byte)
         result = self.spi_bus.xfer2([byte])
         debug_print("Read " + str(result[0]))
 
@@ -483,7 +486,6 @@ class SPI_Driver:
         :returns: byte read from the bus
         """
         byte = self.spi_bus.xfer2([0xff])
-        # byte = bcm2835_spi_transfer(0xff)
         debug_print("ReadByte: byte[0]" + str(byte[0]) + " (hex " + hex(byte[0]) + ")")
         # print(byte)
         return byte[0]  # JKR
@@ -620,7 +622,8 @@ class SPI_Driver:
         # Concatenate the bytes
         total = (result1 << 16) + (result2 << 8) + result3
 
-        return total
+        # return total
+        return round(total * 5 / 2 ** 23, 3)
 
     def ReadID(self):
         """
@@ -644,7 +647,7 @@ class SPI_Driver:
 
     def ADS1256_Init(self):
         """
-
+        不用
         :return:
         """
         # 高位在前、不使用校准、不使用缓冲
@@ -659,7 +662,34 @@ class SPI_Driver:
         # SPS 1000
         self.WriteReg(self.REG_DRATE, self.DRATE_1000)
 
-    def select_channel(self, index):
+    def ads1256_cfg(self):
+        """
+        ADS1256初始化
+        :return:
+        """
+        """
+        buf[0]:高位在前、不使用校准、不使用缓冲
+        buf[1]:初始化端口A0为‘+’，AINCOM位‘-’
+        buf[2]:放大倍数1
+        buf[3]:SPS 1000
+        """
+        buf = [0x00, 0x08, 0x00, self.DRATE_1000]
+        self.WaitDRDY()
+        self.chip_select_ad()
+
+        # reset
+        self.SendByte(self.CMD_RESET)
+        self.delay_us(50)
+        self.SendByte(self.CMD_WREG)
+        self.SendByte(0x03)
+        self.SendByte(buf[0])
+        self.SendByte(buf[1])
+        self.SendByte(buf[2])
+        self.SendByte(buf[3])
+        self.chip_release_ad()
+        self.delay_us(50)
+
+    def ads1256_one_shot(self, index):
         """
 
         :param index: int 0~4 ---- ad0~ad4
@@ -670,26 +700,41 @@ class SPI_Driver:
         self.SendByte(self.CMD_WREG | 0x01)
         self.SendByte(0x00)
         self.SendByte(channel_list[index])
+        self.delay_us(15)
+        self.SendByte(self.CMD_SYNC)
+        self.delay_us(5)
+        self.SendByte(self.CMD_WAKEUP)
+        self.delay_us(25)
         self.chip_release_ad()
 
-    def read_channel(self, index):
+    @staticmethod
+    def delay_us(_us):
         """
 
+        :param _us:
         :return:
         """
-        self.select_channel(index)
-        ad_value = self.ReadADC()
-        return round(ad_value * 5 / 2 ** 23, 3)
-        # return hex(ad_value)
-        # return ad_value
-        pass
+        wp.delayMicroseconds(_us)
+
+    @staticmethod
+    def delay_ms(_ms):
+        """
+
+        :param _ms:
+        :return:
+        """
+        start = time.time()
+        end = time.time()
+
+        while end - start < 0.001 * _ms:
+            end = time.time()
 
 
 if __name__ == '__main__':
     ad_da = SPI_Driver()
-    ad_da.spi_init()
-    ad_da.ADS1256_Init()
-    ad_da.read_all_reg()
+    # ad_da.ADS1256_Init()
+    # ad_da.read_all_reg()
+    ad_da.ads1256_cfg()
 
     while True:
         try:
@@ -712,19 +757,16 @@ if __name__ == '__main__':
             elif channel == '5':
                 while True:
                     try:
-                        # if not input(''):
-                        os.system('clear')
-                        for i in range(5):
-                            ad_da.ADS1256_Init()
-
-                            # ad_da.read_channel(i)
-                            print('AD' + str(i) + ': ' + str(ad_da.read_channel(i)))
-                            # ad_da.read_all_reg()
-                            # print(time.time())
-                            time.sleep(0.005)
-                        time.sleep(1)
-                        # else:
-                        #     pass
+                        if not input(''):
+                            os.system('clear')
+                            for i in range(5):
+                                ad_da.ads1256_one_shot(i)
+                                print('AD' + str(i) + ': ' + str(ad_da.ReadADC()))
+                                # ad_da.read_all_reg()
+                                time.sleep(0.005)
+                            time.sleep(1)
+                        else:
+                            pass
                     except KeyboardInterrupt:
                         break
         except KeyboardInterrupt:
