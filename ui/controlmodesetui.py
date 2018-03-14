@@ -11,6 +11,17 @@ from ui import remotecontrolsetui, dialogbutton
 
 import images.images_rc
 
+def debug_print(*string):
+    """
+    DEBUG
+    :param string:
+    :return:
+    """
+    if True:
+        pass
+        # print("DEBUG: " + string)
+
+
 class Ui_ControlModeSet(QtWidgets.QDialog):
     """
     控制方式设置窗口，
@@ -348,7 +359,7 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             del self.CK_VList
         self.update_control_list()
         self.load_control_list()
-        print('delate')
+        debug_print('delate')
 
     def save_control_mode(self):
         if sw.select_line:
@@ -392,10 +403,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
                 f.write(pickle.dumps(sw.control_mode))
 
             self.confirm.emit()
-            print('save')
+            debug_print('save')
 
     def save_and_close(self):
-        print('save and close')
+        debug_print('save and close')
         # self.save_control_mode()
         self.close()
 
@@ -417,7 +428,6 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.CB_ControlMode2.setDisabled(True)
             self.CB_ActionMode.setCurrentIndex(0)
             self.CB_ActionMode.setDisabled(True)
-
     def setBusValve(self):
         if self.CK_isBusValve.isChecked():
             self.BT_Advanced.setDisabled(False)
@@ -575,13 +585,13 @@ class ControlModeWiring(QtWidgets.QWidget):
         # self.XMapper.mapped(str).connect(self.XisPressed(str))
 
     def x_is_pressed(self, a):
-        print('X', a)
+        debug_print('X', a)
         self.PressedXNum = a
         self.XMark = True
         try:
             num = self.PressedXNum * 10 + self.PressedYNum
         except:
-            print('buttonerror')
+            debug_print('buttonerror')
         for i in range(16):
             if i != a:
                 self.BT_x[i].setChecked(False)
@@ -604,13 +614,13 @@ class ControlModeWiring(QtWidgets.QWidget):
             self.YMark = False
 
     def y_is_pressed(self, a):
-        print('Y', a)
+        debug_print('Y', a)
         self.YMark = True
         self.PressedYNum = a
         try:
             num = self.PressedXNum * 10 + self.PressedYNum
         except:
-            print('buttonerror')
+            debug_print('buttonerror')
         for i in range(10):
             if i != a:
                 self.BT_y[i].setChecked(False)

@@ -69,7 +69,8 @@ class SoftwareData(object):
                      91, 44, 31, 27, 56, 96, 84, 24, 17, 34, 4, 91, 46, 61, 34, 31, 94, 78, 53,
                      91, 63, 57, 90, 59, 95, 88, 28, 4]
 
-    static_current_valve = []
+    # 静态电流曲线的列表
+    static_current_value = []
 
     # doubleslider 最小滑块间距
     sliders_interval_min = 40
@@ -82,9 +83,9 @@ class SoftwareData(object):
              80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
 
     # 电流曲线设置
-    current_set = {'data_depth': 100,
+    current_set = {'data_depth': 10000,
                    'data_interval': 10,
-                   'data_time': 100.555,
+                   'data_time': 1000,
                    'small_win_show_time': 20}
 
     # 本机&上位机
@@ -96,13 +97,13 @@ class SoftwareData(object):
                'dns': '192.168.10.222',
                'upper_name': 'upper',
                'upper_ip': '192.168.10.8'}
-
+    # 上位机ip
     upper_ip_list = ['192.168.10.101',
                      '192.168.10.102',
                      '192.168.10.103',
                      '192.168.10.104',
                      '192.168.10.105']
-
+    # 上位机名称
     upper_name_list = ['Valve Test 1',
                        'Valve Test 2',
                        'Valve Test 3',
@@ -136,6 +137,7 @@ class SoftwareData(object):
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_value}
 
+    # 自动测试设定的开阀时间和关阀时间
     open_time = 0
     close_time = 0
 
@@ -170,16 +172,20 @@ class HardwareData(object):
     # m3_by_uart = []
     # m4_by_uart = []
 
+    # 主界面上选择的控制方式和电压值
     control_mode = {}
     voltage = 'none'
 
+    # 总线阀的命令
     bus_cmd = '01 06 00 04 00 00 C8 0B'
 
+    # 主界面上显示的电压值和电流值以及到位信号
     current_value_show = '  '
     voltage_value_show = '  '
     open_signal = 'YES'
     close_signal = 'NO'
 
+    # 主界面上调节阀选项卡中显示的反馈信号
     adjust_valve_back = ''
 
     delay_array_state = ['0000000000000000',
@@ -192,7 +198,6 @@ class HardwareData(object):
                          '0000000000000000',
                          '0000000000000000',
                          '0000000000000000']
-
     delay_test_state = ['0000000000000000'
                         '0000000000']
 
@@ -227,6 +232,15 @@ class HardwareData(object):
                    [0x00, 0x00],
                    [0x00, 0x00]]
 
+    # 自检继电器的
     ZJ00 = [0x00, 0x00]
     ZJ01 = [0x00, 0x00]
 
+
+class Flag_Of(object):
+    """
+    标志位
+    """
+
+    # 继电器自检标志位
+    relay_check = 0

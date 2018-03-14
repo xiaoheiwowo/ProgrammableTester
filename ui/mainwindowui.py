@@ -30,6 +30,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         self.setObjectName("MainWindow")
         self.resize(1024, 550)
+        # self.move(0,0)
         self.setMinimumSize(QtCore.QSize(800, 300))
         self.setWindowTitle('可编程测试仪')
         self.setWindowIcon(QtGui.QIcon(":/logo.png"))
@@ -80,8 +81,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         self.init_current_curve()
 
-        self.diathread = UpdateThread(self)
-        self.diathread.start()
+        self.update_thread = UpdateThread(self)
+        self.update_thread.start()
 
         # 阀门控制部分
         self.GB_ValveControl = QtWidgets.QGroupBox(self.mainWidget)
@@ -326,7 +327,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_unit_v.setText('V')
         self.BT_Lock.setMinimumHeight(40)
         self.BT_Lock.setMinimumWidth(120)
-        self.BT_Lock.setText('长按锁定')
+        self.BT_Lock.setText('点击锁定')
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
         self.BT_Stop.setFixedSize(120, 40)
 
@@ -634,7 +635,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.change_position_signal(hw.open_signal, hw.close_signal)
         self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
 
-    def press_dynamic(self):
+    @staticmethod
+    def press_dynamic():
         """
 
         :return:
@@ -643,9 +645,10 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         fg_update_diagram = 1
         # if not self.timer_refresh.isActive():
         #     pass
-            # self.timer_refresh.start(500)
+        # self.timer_refresh.start(500)
 
-    def press_static(self):
+    @staticmethod
+    def press_static():
         """
 
         :return:
@@ -675,15 +678,27 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         pass
 
     def get_open_time(self):
+        """
+        获取自动测试开阀时间
+        :return:
+        """
         sw.open_time = self.SB_OpenTime.text()
 
     def get_close_time(self):
+        """
+        获取自动测试关阀时间
+        :return:
+        """
         sw.close_time = self.SB_CloseTime.text()
 
     def begin_auto_test(self):
+        """
+        开始自动测试
+        :return:
+        """
         self.BT_Begin.setDisabled(True)
         self.BT_Stop.setDisabled(False)
-        vc.open_valve()
+        self.open_valve()
         if self.auto_test_timer.isActive():
             self.auto_test_timer.stop()
         try:
@@ -696,16 +711,21 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         pass
 
     def stop_auto_test(self):
+        """
+        结束自动测试
+        :return:
+        """
         self.BT_Begin.setDisabled(False)
         self.BT_Stop.setDisabled(True)
         self.auto_test_timer.stop()
 
-    def auto_test(self):
-        pass
-
     def loop_open_close(self):
+        """
+        自动循环测试
+        :return:
+        """
 
-        vc.close_valve()
+        self.close_valve()
         if self.auto_test_timer.isActive():
             self.auto_test_timer.stop()
         try:
@@ -716,10 +736,30 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.auto_test_timer.start(int(sw.close_time) * 1000)
 
     def window_update(self):
+        """
+        更新窗口电流电压以及到位信号
+        :return:
+        """
 
         # print(time.time())
         self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
         self.change_position_signal(hw.open_signal, hw.close_signal)
+
+    @staticmethod
+    def open_valve():
+        """
+        开阀, 区分不同种类阀门的不同控制方式
+        :return:
+        """
+        vc.open_valve()
+
+    @staticmethod
+    def close_valve():
+        """
+        关阀
+        :return:
+        """
+        vc.close_valve()
 
 
 class LongPressButton(QtWidgets.QPushButton):
@@ -780,6 +820,7 @@ class UpdateThread(QtCore.QThread):
     """
     更新界面数据和曲线
     """
+
     def __init__(self, _win):
 
         super(UpdateThread, self).__init__()
@@ -803,7 +844,12 @@ class UpdateThread(QtCore.QThread):
 
                 # sw.current_value.append(int(100 * random.random()))
                 # del sw.current_value[0]
-                yy = sw.current_value[-200:]
+                try:
+                    yy = sw.current_value[
+                         -(int(sw.current_set['small_win_show_time'] * 1000 / sw.current_set['data_interval'])):]
+                except:
+                    yy = sw.current_value[-1000:]
+                    print('3')
                 self.win.main_window_fig.update_diagram(yy, myflag=0)
                 time.sleep(0.2)
             else:

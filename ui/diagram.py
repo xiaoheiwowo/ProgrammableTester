@@ -7,22 +7,25 @@ from matplotlib.figure import Figure
 
 from matplotlib import patheffects
 
+from public.datacache import SoftwareData as sw
+
 
 class PlotWidget(FigureCanvas):
     """
     绘图
     """
+
     def __init__(self, parent=None):
-        self.fig = Figure(figsize=(8, 5), dpi=80, facecolor='gray')
+        self.fig = Figure(figsize=(8, 5), dpi=80, facecolor='none')
         self.cvs = FigureCanvas(self.fig)
         self.ax = self.fig.add_axes([0.02, 0.12, 0.92, 0.8])
         # 设置图标内背景颜色
         self.ax.set_facecolor('none')
 
         # 设置图表边框颜色，位置
-        self.ax.spines['left'].set_color('none')
+        self.ax.spines['left'].set_color('black')
         self.ax.spines['right'].set_position(('data', 0))
-        self.ax.spines['top'].set_color('none')
+        self.ax.spines['top'].set_color('black')
         self.ax.spines['bottom'].set_position(('data', 0))
         # 坐标轴数值位置
         self.ax.xaxis.set_ticks_position('bottom')
@@ -53,22 +56,22 @@ class PlotWidget(FigureCanvas):
         if self.v_line:
             self.v_line.remove()
         # 添加线
-        self.v_line = self.ax.axvline(int(event.xdata), color='w', ls='--')
+        self.v_line = self.ax.axvline(event.xdata, color='lime', ls='--')
         # 注解
-        for i in range(len(self.ar_data_show)):
-            if event.xdata > -i:
+        for i in range(len(self.ar_data_show_x)):
+            if event.xdata < self.ar_data_show_x[i]:
                 break
 
-        self.line_valve = self.ax.annotate(str(round(self.ar_data_show[len(self.ar_data_show) - i], 2)) + 'mA',
-                                           (int(event.xdata), self.ar_data_show[len(self.ar_data_show) - i]),
+        self.line_valve = self.ax.annotate(str(self.ar_data_show[i]) + 'mA',
+                                           (event.xdata, max(self.ar_data_show)),
                                            xycoords='data',
                                            xytext=(20, 0),
                                            textcoords='offset points',
                                            fontsize=16,
                                            color='lime',
                                            arrowprops=dict(arrowstyle='-|>',
-                                                              connectionstyle="arc3,rad=.2",
-                                                              color='lime')
+                                                           connectionstyle="arc3,rad=.2",
+                                                           color='lime')
                                            )
         FigureCanvas.draw_idle(self)
 
@@ -76,15 +79,16 @@ class PlotWidget(FigureCanvas):
         """
         更新曲线
         :param yy:
-        :param myflag=1:
+        :param myflag=1: myflag = 0 主界面小窗口
         :return:
         """
+        self.interval = sw.current_set['data_interval'] / 1000
         self.ar_data_show = yy
         self.ax.clear()
-        list = []
+        xx = []
         for i in range(len(yy)):
-            list.append(-1 * len(yy) + 1 + i)
-        xx = list
+            xx.append((-1 * len(yy) + 1 + i) * self.interval)
+        self.ar_data_show_x = xx
         # 绘制线，设置属性
         self.line2d = self.ax.plot(xx,
                                    yy,
@@ -101,10 +105,10 @@ class PlotWidget(FigureCanvas):
                                    )
         # 设置坐标轴限值
         self.ax.set_xlim(right=0)
-        self.ax.set_ylim(bottom=0, top=max(yy)*1.2)
+        self.ax.set_ylim(bottom=0, top=max(yy) * 1.2 + 0.00001)
         self.ax.yaxis.tick_right()
         # 网格
-        self.ax.grid()
+        # self.ax.grid()
         # 图表
         if myflag:
             rowLabels = ['Mod', 'Vol', 'Cur']
@@ -118,10 +122,11 @@ class PlotWidget(FigureCanvas):
             # Title & Label
             self.ax.set_title('Current Curve')
         else:
-            text1 = self.ax.text(-210, 3,
-                         'ms',
-                         fontsize=12,
-                         path_effects=[patheffects.withSimplePatchShadow()])
+            # limit_x = sw.current_set['small_win_show_time'] * 1000 / sw.current_set['data_interval']
+            # text1 = self.ax.text(-limit_x, 0,
+            #                      'ms',
+            #                      fontsize=12,
+            #                      path_effects=[patheffects.withSimplePatchShadow()])
             pass
         # self.ax.legend(loc=2, ncol=1)
         self.ax.yaxis.set_label_position('right')
@@ -147,7 +152,6 @@ class PlotWidget(FigureCanvas):
 
         self.cid = self.fig.canvas.mpl_connect('button_press_event', self.fig_press)
         return self.cid
-
 
     def turn_off_cid(self, cid):
         """

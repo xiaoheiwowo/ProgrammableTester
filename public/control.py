@@ -10,15 +10,23 @@ sys.path.append("..")
 from public.datacache import HardwareData as hw
 from driver.i2c import *
 from driver.spi import *
-
-
 try:
-
     import wiringpi as wp
 except ImportError:
     # from driver import wiringpi as wp
-
     pass
+
+
+def debug_print(string=None):
+    """
+    DEBUG
+    :param string:
+    :return:
+    """
+    if True:
+        pass
+        # print("DEBUG: " + string)
+
 
 # 常量
 HIGH = 1
@@ -514,7 +522,7 @@ class Digital(object):
 
         :return:
         """
-        print('close valve ' + str(hw.control_mode['OFF']))
+        debug_print('close valve ' + str(hw.control_mode['OFF']))
         group = hw.control_mode['OFF']
         self.i2c.init_relay()
         for j in group:

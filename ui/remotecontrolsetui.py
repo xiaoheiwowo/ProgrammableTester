@@ -353,7 +353,6 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         # Json
         # with open('json/data.json', 'w') as f:
             # json.dump(gv.data, f, ensure_ascii=False, indent=10)
-        print('save')
 
     def load_all(self):
         """
@@ -366,7 +365,6 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
             sw.net_set = pickle.loads(f2.read())
         with open('pkl/buscontrol.pkl', 'rb') as f3:
             sw.bus_control = pickle.loads(f3.read())
-        print('readall')
 
         self.LE_LocalName.setText(sw.net_set['host_name'])
         self.LE_LocalIP.setText(sw.net_set['host_ip'])
