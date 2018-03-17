@@ -16,14 +16,17 @@ from public.datacache import HardwareData as hw
 
 from public.control import ValveControl as vc
 
-fg_update_diagram = 1
+from public.datacache import Flag_Of as flag
 
+fg_update_diagram = 1
 
 class Ui_MainWin(QtWidgets.QMainWindow):
     """
     IN
     """
     lock_state = True
+    # 设置电压信号
+    voltage_set = QtCore.pyqtSignal(float)
 
     def __init__(self, parent=None):
         super(Ui_MainWin, self).__init__(parent, flags=QtCore.Qt.Window)
@@ -47,8 +50,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.fault_number.setDisabled(True)
         self.Action_ControlSet = QtWidgets.QAction('控制方式设置', self)
         self.Action_PowerCalibration = QtWidgets.QAction('电源及采样校准', self)
-        self.Action_RemoteControl = QtWidgets.QAction('外控设置', self)
-        self.Action_Others = QtWidgets.QAction('其他设置', self)
+        self.Action_RemoteControl = QtWidgets.QAction('外控及其他设置', self)
+        self.Power_Set = QtWidgets.QAction('电源设置', self)
         self.Action_RelayCheck = QtWidgets.QAction('继电器自检', self)
 
         self.init_menubar()
@@ -63,21 +66,14 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         # 电流曲线部分
         self.GB_CurrentCurve = QtWidgets.QGroupBox(self.mainWidget)
-        self.lb_current_valve = QtWidgets.QLabel('电流值: 100mA')
-        self.lb_voltage_valve = QtWidgets.QLabel('电压值: 5V')
+        self.lb_current_value = QtWidgets.QLabel('电流值: 100mA')
+        self.lb_voltage_value = QtWidgets.QLabel('电压值: 5V')
         self.lb_open_completely = QtWidgets.QLabel('开到位: Yes')
         self.lb_close_completely = QtWidgets.QLabel('关到位: No')
         self.main_window_fig = diagram.PlotWidget(self)
         self.BT_FullScreen = QtWidgets.QPushButton()
         self.BT_Dynamic = QtWidgets.QPushButton()
         self.BT_Static = QtWidgets.QPushButton()
-
-        # self.timer_refresh = QtCore.QTimer(self)
-
-        # 停用定时器
-        # self.timer_update = QtCore.QTimer(self)
-        # self.timer_update.timeout.connect(self.window_update)
-        # self.timer_update.start(500)
 
         self.init_current_curve()
 
@@ -106,7 +102,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.SB_Voltage = QtWidgets.QDoubleSpinBox()
         self.lb_unit_v = QtWidgets.QLabel()
         self.BT_Lock = QtWidgets.QPushButton()
-        self.QTimerLock = QtCore.QTimer(self)
         self.CK_Auto = QtWidgets.QCheckBox('自动')
         self.lb_open_valve = QtWidgets.QLabel()
         self.SB_OpenTime = QtWidgets.QSpinBox()
@@ -158,10 +153,10 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.SetMenu.addAction(self.Action_ControlSet)
         # 电源及采样校准
         self.SetMenu.addAction(self.Action_PowerCalibration)
-        # 外控设置
+        # 外控及其他设置
         self.SetMenu.addAction(self.Action_RemoteControl)
-        # 其他设置
-        self.SetMenu.addAction(self.Action_Others)
+        # 电源设置
+        self.SetMenu.addAction(self.Power_Set)
         # 继电器自检
         self.SetMenu.addAction(self.Action_RelayCheck)
 
@@ -203,8 +198,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         Wgt_LB = QtWidgets.QWidget()
         Wgt_LB.setMaximumWidth(140)
         Layout_LB = QtWidgets.QVBoxLayout(Wgt_LB)
-        Layout_LB.addWidget(self.lb_current_valve)
-        Layout_LB.addWidget(self.lb_voltage_valve)
+        Layout_LB.addWidget(self.lb_current_value)
+        Layout_LB.addWidget(self.lb_voltage_value)
         Layout_LB.addWidget(self.lb_open_completely)
         Layout_LB.addWidget(self.lb_close_completely)
         Layout_LB.addStretch(1)
@@ -278,9 +273,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.CB_SelectControl.currentIndexChanged.connect(self.select_control_mode)
         # self.CB_SelectControl.activated.connect(self.load_data)
         # self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
-        self.SB_Voltage.valueChanged.connect(self.set_voltage)
-        # self.timer_refresh.timeout.connect(self.draw_dynamic)
-        # self.timer_refresh.start(300)
+        # self.SB_Voltage.valueChanged.connect(self.set_voltage)
         self.BT_Dynamic.clicked.connect(self.press_dynamic)
         self.BT_Static.clicked.connect(self.press_static)
 
@@ -304,11 +297,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.BT_Lock.pressed.connect(self.TimerStart)
         # self.BT_Lock.released.connect(self.QTimerLock.stop)
         self.BT_Lock.clicked.connect(self.JudgeLock)
-        # self.QTimerLock.timeout.connect(self.LockControl)
 
         # 滑动条设置调节阀控制信号
         self.slider_adjust_input.valueChanged.connect(self.adjust_input_change)
-        self.QTimerLock.timeout.connect(self.JudgeLock)
 
     def stack1Ui(self):
         """
@@ -324,6 +315,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.CB_DCorAC.addItem('AC')
         self.SB_Voltage.setMinimumHeight(40)
         self.SB_Voltage.setMinimumWidth(80)
+        self.SB_Voltage.setMaximum(300.00)
         self.lb_unit_v.setText('V')
         self.BT_Lock.setMinimumHeight(40)
         self.BT_Lock.setMinimumWidth(120)
@@ -494,18 +486,13 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
     def JudgeLock(self):
         """
-
+        判断是否锁定控制方式和电压
         :return:
         """
         if self.BT_M4.isEnabled():
             self.UnlockControl()
         else:
             self.LockControl()
-        # self.QTimerLock.stop()
-        # if self.lock_state:
-        #     self.UnlockControl()
-        # else:
-        #     self.LockControl()
 
     def LockControl(self):
         """
@@ -515,9 +502,12 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_closed_outline_105.8691588785px_1158659_easyicon.net.png'))
         self.BT_Lock.setText('单击解锁')
         self.valve_control_disabled(False)
-        self.lock_state = True
-        sw.begin_ad = 1
+        hw.control_mode = sw.control_mode_selected
+        hw.voltage = float(self.SB_Voltage.text())
+        flag.control_mode_lock = 1
 
+        # 发送信号
+        self.voltage_set.emit(hw.voltage)
         print(hw.control_mode, hw.voltage)
 
     def UnlockControl(self):
@@ -528,8 +518,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
         self.BT_Lock.setText('单击锁定')
         self.valve_control_disabled(True)
-        self.lock_state = False
-        sw.begin_ad = 0
+        flag.control_mode_lock = 0
 
     def valve_control_disabled(self, tof):
         """
@@ -583,15 +572,15 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         """
         self.lb_connection_state.setText('连接状态：' + state)
 
-    def change_va_valve(self, current, voltage):
+    def change_va_value(self, current, voltage):
         """
 
         :param current:str
         :param voltage:str
         :return:
         """
-        self.lb_current_valve.setText('电流值：' + current)
-        self.lb_voltage_valve.setText('电压值：' + voltage)
+        self.lb_current_value.setText('电流值：' + current)
+        self.lb_voltage_value.setText('电压值：' + voltage)
 
     def change_position_signal(self, opened, closed):
         """
@@ -606,18 +595,16 @@ class Ui_MainWin(QtWidgets.QMainWindow):
     @staticmethod
     def select_control_mode(i):
         """
-
+        选择一种控制方式
         :param i:
         :return:
         """
-        hw.control_mode = sw.control_mode[i - 1]
-
-    def set_voltage(self):
-        """
-
-        :return:
-        """
-        hw.voltage = self.SB_Voltage.text()
+        if i:
+            sw.control_mode_selected = sw.control_mode[i - 1]
+        else:
+            sw.control_mode_selected = sw.ControlForm.copy()
+            pass
+        # hw.control_mode = sw.control_mode[i - 1]
 
     def draw_dynamic(self):
         """
@@ -625,15 +612,13 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
 
-        # sw.current_value.append(int(100 * random.random()))
-        # del sw.current_value[0]
         yy = sw.current_value[-200:]
         self.main_window_fig.update_diagram(yy, myflag=0)
 
         # self.main_window_fig.myTable.remove()
 
         self.change_position_signal(hw.open_signal, hw.close_signal)
-        self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
+        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
 
     @staticmethod
     def press_dynamic():
@@ -643,9 +628,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         """
         global fg_update_diagram
         fg_update_diagram = 1
-        # if not self.timer_refresh.isActive():
-        #     pass
-        # self.timer_refresh.start(500)
 
     @staticmethod
     def press_static():
@@ -655,8 +637,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         """
         global fg_update_diagram
         fg_update_diagram = 0
-        # if self.timer_refresh.isActive():
-        #     self.timer_refresh.stop()
 
     def press_send(self):
         """
@@ -742,7 +722,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         """
 
         # print(time.time())
-        self.change_va_valve(hw.current_value_show, hw.voltage_value_show)
+        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
         self.change_position_signal(hw.open_signal, hw.close_signal)
 
     @staticmethod
@@ -836,7 +816,7 @@ class UpdateThread(QtCore.QThread):
         while True:
             now_time = time.time()
             if now_time - window_update_time > 0.5:
-                self.win.change_va_valve(hw.current_value_show, hw.voltage_value_show)
+                self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
                 self.win.change_position_signal(hw.open_signal, hw.close_signal)
                 window_update_time = time.time()
 
@@ -851,6 +831,6 @@ class UpdateThread(QtCore.QThread):
                     yy = sw.current_value[-1000:]
                     print('3')
                 self.win.main_window_fig.update_diagram(yy, myflag=0)
-                time.sleep(0.2)
+                time.sleep(1)
             else:
                 pass

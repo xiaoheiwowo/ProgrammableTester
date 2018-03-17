@@ -3,7 +3,7 @@
 ## 环境
 python3.6.1 + PyQt5 + matplotlib
 
-## GPIO口驱动
+## GPIO驱动
 
     spidev
     smbus

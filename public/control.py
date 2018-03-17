@@ -6,10 +6,12 @@
 """
 
 import sys
+
 sys.path.append("..")
 from public.datacache import HardwareData as hw
 from driver.i2c import *
 from driver.spi import *
+
 try:
     import wiringpi as wp
 except ImportError:
@@ -195,10 +197,8 @@ class Analog(object):
         :return:
         """
         debug_print('电流值：' + '100' + 'mA')
-        # self.spi_.ADS1256_Init()
         self.spi_.ads1256_one_shot(3)
         return self.spi_.ReadADC()
-        # return self.sampling_for_average(3)
         pass
 
     def read_u_dc(self):
@@ -207,7 +207,6 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '5' + 'V')
-        # self.spi_.ADS1256_Init()
         self.spi_.ads1256_one_shot(4)
         return self.spi_.ReadADC()
         pass
@@ -218,8 +217,6 @@ class Analog(object):
         :return:
         """
         debug_print('电流值：' + '1' + 'mA')
-        # return self.sampling_for_average(1)
-        # self.spi_.ADS1256_Init()
         self.spi_.ads1256_one_shot(1)
         return self.spi_.ReadADC()
         pass
@@ -230,7 +227,6 @@ class Analog(object):
         :return:
         """
         debug_print('电压值：' + '220' + 'V')
-        # self.spi_.ADS1256_Init()
         self.spi_.ads1256_one_shot(2)
         return self.spi_.ReadADC()
         pass
@@ -241,9 +237,12 @@ class Analog(object):
         :return:
         """
         debug_print('反馈信号：' + '1' + 'mA')
-        # self.spi_.ADS1256_Init()
         self.spi_.ads1256_one_shot(0)
-        return self.spi_.ReadADC()
+        # 电压信号
+        vol = self.spi_.ReadADC()
+        # 转换为0~20mA
+        cur = vol * 4
+        return cur
         pass
 
     @staticmethod
@@ -308,6 +307,37 @@ class Digital(object):
         self.i2c.disconnect_array_relay(index)
         pass
 
+    def connect_check_relay(self, index):
+        """
+        连接2个自检继电器
+        :param index:
+        :return:
+        """
+        debug_print('TEST: ' + str(index) + '1')
+        # 行
+        row = index % 10
+        # 列
+        column = index // 10
+
+        self.i2c.connect_check_relay(column)
+        self.i2c.connect_check_relay(row + 16)
+
+    def disconnect_check_relay(self, index):
+        """
+        断开2个自检继电器
+        :param index:1~159
+        :return:
+        """
+        debug_print('TEST: ' + str(index) + '1')
+
+        # 行
+        row = index % 10
+        # 列
+        column = index // 10
+
+        self.i2c.disconnect_check_relay(column)
+        self.i2c.disconnect_check_relay(row + 15)
+
     def output_cut_x(self, relay_state):
         """
 
@@ -326,17 +356,17 @@ class Digital(object):
     def select_power(self, which):
         """
 
-        :param which:
+        :param which:int 1 DC, 2 AC, 0 NONE
         :return:
         """
         self.i2c.change_port_state(PORT_ACP, LOW)
         self.i2c.change_port_state(PORT_DCP, LOW)
         wp.delay(300)
-        if which == 'DC':
+        if which == 1:
             self.i2c.change_port_state(PORT_DCP, HIGH)
             debug_print('POWER: ' + 'DC')
             pass
-        elif which == 'AC':
+        elif which == 2:
             self.i2c.change_port_state(PORT_ACP, HIGH)
             debug_print('POWER: ' + 'AC')
             pass
@@ -377,12 +407,15 @@ class Digital(object):
         list_io1 = list()
         list_io2 = list()
         for j in range(8):
-            list_io1.append(bin(read_io[0])[2:].rjust(8, '0')[j])
-            list_io2.append(bin(read_io[1])[2:].rjust(8, '0')[j])
+            list_io1.append(int(bin(read_io[0])[2:].rjust(8, '0')[j]))
+            list_io2.append(int(bin(read_io[1])[2:].rjust(8, '0')[j]))
 
         list_io1.reverse()
         list_io2.reverse()
         hw.extend_in = list_io1 + list_io2
+        # for i in hw.extend_in:
+        #     hw.extend_in[i] = int(hw.extend_in[i])
+        return hw.extend_in
         pass
 
     @staticmethod

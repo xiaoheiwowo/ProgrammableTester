@@ -39,6 +39,7 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
         # 信号
         self.DB_DialogButton.BT_Save1.clicked.connect(self.CheckBegin)
         self.DB_DialogButton.BT_OK1.clicked.connect(self.CheckStop)
+        # self.close.connect(self.CheckStop)
 
         TabWgt = QtWidgets.QTabWidget(self)
         # TabWgt.setFixedSize(1000, 450)
@@ -68,9 +69,6 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
         self.array_off = []
         self.Init_TabON()
         self.Init_TabOFF()
-
-        global flag_relay_check
-        flag_relay_check = 1
 
     def Init_TabON(self):
         """
@@ -105,18 +103,21 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
 
         :return:
         """
-        for i in range(160):
-            if random.random() > 0.95:
-                self.array_on[i].setStyleSheet('background-color:red')
-                self.array_off[i].setStyleSheet('background-color:red')
+        # for i in range(160):
+        #     if random.random() > 0.95:
+        #         self.array_on[i].setStyleSheet('background-color:red')
+        #         self.array_off[i].setStyleSheet('background-color:red')
+        #
+        #     else:
+        #         self.array_on[i].setStyleSheet('background-color:green')
+        #         self.array_off[i].setStyleSheet('background-color:green')
+        #
+        #     if self.StopMark == 1:
+        #         self.StopMark = 0
+        #         break
 
-            else:
-                self.array_on[i].setStyleSheet('background-color:green')
-                self.array_off[i].setStyleSheet('background-color:green')
-
-            if self.StopMark == 1:
-                self.StopMark = 0
-                break
+        self.Init_TabOFF()
+        self.Init_TabON()
         flag.relay_check = 1
 
     def CheckStop(self):
@@ -124,32 +125,29 @@ class Ui_RelaySelfCheck(QtWidgets.QDialog):
 
         :return:
         """
-        self.StopMark = 1
+        # self.StopMark = 1
         flag.relay_check = 0
 
-    @staticmethod
-    def get_value(_index, _on, _off):
+    def get_check_result(self, _index, _on, _off):
         """
         获取值槽函数
         :return:
         """
-        print(_index, _on, _off)
+        # print(_index, _on, _off)
+        if _on:
+            self.array_on[_index].setStyleSheet('background-color:green')
+        else:
+            self.array_on[_index].setStyleSheet('background-color:red')
+        if _off:
+            self.array_off[_index].setStyleSheet('background-color:green')
+        else:
+            self.array_off[_index].setStyleSheet('background-color:red')
 
-
-class CheckThread(QtCore.QThread):
-    """
-    自检继电器线程
-    """
-
-    def __init__(self, _win):
-        super(CheckThread, self).__init__()
-        self.win = _win
-
-    def run(self):
+    def closeEvent(self, QCloseEvent):
         """
-        运行函数
+        重新实现关闭事件
+        :param QCloseEvent:
         :return:
         """
-        while True:
-            time.sleep(0.5)
-            pass
+        self.CheckStop()
+        self.close()

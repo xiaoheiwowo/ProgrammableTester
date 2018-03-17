@@ -19,11 +19,17 @@ try:
     import RPi.GPIO as GPIO
 except ImportError:
     pass
+try:
+    from public.datacache import Flag_Of as flag
+except:
+    pass
+
+
+# class flag(object):
+#     button_int = 0
+
 
 # wiringpi 的中断注册函数使用有问题
-
-
-FG_READ_IO = 0
 
 addr_pca9548 = 0x70
 addr_pca9535 = 0x21
@@ -233,6 +239,7 @@ class I2C_Driver(object):
             self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p1, 0x00)
         pass
         time.sleep(0.05)
+
     # def set_delay_array(self):
     #     """
     #
@@ -462,8 +469,11 @@ def int_from_pca9535(pin_number):
     # print(pin_number)
     debug_print(str(pin_number) + 'Int from pca9535-1.')
     # print(i2c.read_extend_io())
-    global FG_READ_IO
-    FG_READ_IO = 1
+
+    flag.button_int = 1
+
+    # global FG_READ_IO
+    # FG_READ_IO = 1
 
 
 def init_gpio_int():
@@ -544,10 +554,10 @@ if __name__ == "__main__":
                     try:
                         i2c.read_extend_io()
                         # i2c.i2c_bus.read_byte_data(addr_pca9535, cmd_input_p1)
-                        if FG_READ_IO == 1:
+                        if flag.button_int == 1:
                             print('read port:')
                             print(i2c.read_extend_io())
-                            FG_READ_IO = 0
+                            flag.button_int = 0
                         else:
                             pass
                     except KeyboardInterrupt:

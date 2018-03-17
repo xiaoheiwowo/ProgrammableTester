@@ -133,8 +133,8 @@ class Ui_CurrentDiagram(QtWidgets.QDialog):
         """
         if self.GB_Diagram.title() == '动态曲线':
             # 接通采样注释下面两行
-            sw.current_value.append(round(5 * random.random(), 3))
-            sw.current_value.pop(0)
+            # sw.current_value.append(round(5 * random.random(), 3))
+            # sw.current_value.pop(0)
             pass
         else:
             pass
@@ -206,7 +206,7 @@ class RefreshThread(QtCore.QThread):
         :return:
         """
         while True:
-            time.sleep(0.01)
+            time.sleep(1)
             if not self.win.fg_static:
                 # self.win.dynamic_diagram()
                 self.win.draw_dynamic()

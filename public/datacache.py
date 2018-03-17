@@ -27,6 +27,7 @@ class SoftwareData(object):
 
     # 控制方式数据
     control_mode = []
+    control_mode_selected = {}
 
     # 总线阀
     cmd_on = '01 06 00 04 00 00 C8 0B'
@@ -141,8 +142,6 @@ class SoftwareData(object):
     open_time = 0
     close_time = 0
 
-    begin_ad = 0
-
 
 class HardwareData(object):
     """
@@ -236,6 +235,10 @@ class HardwareData(object):
     ZJ00 = [0x00, 0x00]
     ZJ01 = [0x00, 0x00]
 
+    # 电源调节修正参数
+    correct_ac = 5 / 5.11
+    correct_dc = 5 / 5.08
+
 
 class Flag_Of(object):
     """
@@ -244,3 +247,13 @@ class Flag_Of(object):
 
     # 继电器自检标志位
     relay_check = 0
+
+    # 按键中断标志位
+    button_int = 0
+
+    # 控制方式和电压锁定标志位
+    control_mode_lock = 0
+
+    # 更新主界面电压电流值及到位信号标志位
+    update_va_value = 0
+
