@@ -7,7 +7,7 @@
 
 from socketserver import BaseRequestHandler, TCPServer
 
-from public.datacache import SoftwareData as gv
+from public.datacache import SoftwareData as sw
 
 
 class TcpHandler(BaseRequestHandler):
@@ -42,22 +42,22 @@ class TcpHandler(BaseRequestHandler):
             # 连续读取最新数据
             elif msgstr[:2] == '02':
                 print('RDATAC')
-                self.RDContinue(msgstr)
+                self.read_data_continue(msgstr)
                 pass
             # 停止连续读取最新数据
             elif msgstr[:2] == '03':
                 print('SRDATAC')
-                self.StopRDContinue(msgstr)
+                self.stop_read_data_continue(msgstr)
                 pass
             # 停止向测试数据数组写入数据
             elif msgstr[:2] == '04':
                 print('ARRAYF')
-                self.ArrayFixed(msgstr)
+                self.array_fixed(msgstr)
                 pass
             # 开始向测试数据数组写入数据
             elif msgstr[:2] == '05':
                 print('ARRAYR')
-                self.ArrayRecovery(msgstr)
+                self.array_recovery(msgstr)
                 pass
             # 读取状态字节
             elif msgstr[:2] == '06':
@@ -134,46 +134,46 @@ class TcpHandler(BaseRequestHandler):
         try:
             start = msgstr[2:6]
             lengh = msgstr[6:10]
-            data = gv.array[int(start):int(start) + int(lengh)]
+            data = sw.current_value[int(start):int(start) + int(lengh)]
             self.request.send(bytes(str(data), 'utf-8'))
         except:
             self.request.send(b'error 01')
         pass
 
-    def RDContinue(self, msgstr):
+    def read_data_continue(self, msgstr):
         """
 
         :param msgstr:
         :return:
         """
-        self.request.send(b'02')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
-    def StopRDContinue(self, msgstr):
+    def stop_read_data_continue(self, msgstr):
         """
 
         :param msgstr:
         :return:
         """
-        self.request.send(b'03')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
-    def ArrayFixed(self, msgstr):
+    def array_fixed(self, msgstr):
         """
 
         :param msgstr:
         :return:
         """
-        self.request.send(b'04')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
-    def ArrayRecovery(self, msgstr):
+    def array_recovery(self, msgstr):
         """
 
         :param msgstr:
         :return:
         """
-        self.request.send(b'05')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadState(self, msgstr):
@@ -182,7 +182,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes('state', 'utf-8'))
+        self.request.send(bytes('state ' + msgstr, 'utf-8'))
         pass
 
     def CleanData(self, msgstr):
@@ -192,7 +192,7 @@ class TcpHandler(BaseRequestHandler):
         :return:
         """
 
-        self.request.send(b'07')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadControlMode(self, msgstr):
@@ -210,7 +210,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(b'09')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
     def SetVoltage(self, msgstr):
@@ -219,7 +219,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(b'0A')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadSP(self, msgstr):
@@ -237,5 +237,5 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(b'0C')
+        self.request.send(bytes(msgstr, 'utf-8'))
         pass

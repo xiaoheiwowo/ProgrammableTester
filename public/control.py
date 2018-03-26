@@ -7,7 +7,7 @@
 
 import sys
 
-sys.path.append("..")
+# sys.path.append("..")
 from public.datacache import HardwareData as hw
 from driver.i2c import *
 from driver.spi import *
@@ -548,6 +548,7 @@ class Digital(object):
         self.i2c.init_relay()
         for j in group:
             self.connect_relay(j)
+
         pass
 
     def close_valve(self):
@@ -615,3 +616,4 @@ if __name__ == '__main__':
             break
 
     pass
+

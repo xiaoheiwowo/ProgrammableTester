@@ -18,7 +18,8 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(Ui_PowerCalibration, self).__init__(parent)
-        self.resize(1024, 550)
+        self.resize(1024, 520)
+        self.move(0, 0)
         self.setMinimumSize(600, 300)
         self.setWindowTitle('电源及采样校准')
         self.setWindowIcon(QtGui.QIcon(":/logo.png"))
@@ -103,12 +104,12 @@ class Tab_Widgets(QtWidgets.QWidget):
 
     # 采样校准操作说明
     text_operation = {'dcv': '操作步骤:\n'
-                             '1、按照左图连接电压表。\n'
+                             '1、按照上图连接电压表。\n'
                              '2、向Vi中输入一个电压值(0~36V)。\n'
                              '3、待电压表读数稳定后将电压表示数填入Vn。\n'
                              '4、重复上述步骤添加多组数据。',
                       'dca': '操作步骤:\n'
-                             '1、按照左图连接电流表。\n'
+                             '1、按照上图连接电流表。\n'
                              '2、调节适当的电压值(0~5V)。\n'
                              '3、待电流表读数稳定后将电流表示数填入In。\n'
                              '4、重复上述步骤添加多组数据。',
@@ -118,7 +119,7 @@ class Tab_Widgets(QtWidgets.QWidget):
                              '3、待电压表读数稳定后将电压表示数填入Vn。\n'
                              '4、重复上述步骤添加多组数据。',
                       'aca': '操作步骤:\n'
-                             '1、按照左图连接电流表。\n'
+                             '1、按照上图连接电流表。\n'
                              '2、调节适当的电压值(0~10V)。\n'
                              '3、待电流表读数稳定后将电流表示数填入In。\n'
                              '4、重复上述步骤添加多组数据。'}
@@ -136,6 +137,8 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.png = Tab_Widgets.png_wiring[page]
         self.text = Tab_Widgets.text_operation[page]
         self.tw_list = QtWidgets.QTableWidget(self.widget)
+        # 设置不可编辑
+        self.tw_list.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.bt_new = QtWidgets.QPushButton()
         self.bt_delete = QtWidgets.QPushButton()
         self.label_png = QtWidgets.QLabel()

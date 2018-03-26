@@ -105,12 +105,38 @@ class I2C_Driver(object):
     def __init__(self):
         self.i2c_bus = i2c2.SMBus(1)
 
+    def i2c_write_byte_data(self, i2c_addr, register, value):
+        """
+
+        :param i2c_addr:
+        :param register:
+        :param value:
+        :return:
+        """
+        try:
+            self.i2c_bus.write_byte_data(i2c_addr, register, value)
+        except OSError:
+            debug_print('Remote I/O error')
+
+    def i2c_read_byte_data(self, i2c_addr, register):
+        """
+
+        :param i2c_addr:
+        :param register:
+        :return:
+        """
+        try:
+            return self.i2c_bus.read_byte_data(i2c_addr, register)
+        except OSError:
+            debug_print('Remote I/O error')
+            return 0
+
     def reset_pca9548(self):
         """
 
         :return:
         """
-        self.i2c_bus.write_byte_data(addr_pca9548, 0x00, 0x00)
+        self.i2c_write_byte_data(addr_pca9548, 0x00, 0x00)
 
     def read_pca9548(self):
         """
@@ -147,7 +173,7 @@ class I2C_Driver(object):
         elif channel == 2:
             self.write_pca9548(0b00000100)
         else:
-            print('Channel' + str(channel) + ' Not Found')
+            debug_print('Channel' + str(channel) + ' Not Found')
 
     def init_extend_io(self):
         """
@@ -156,8 +182,8 @@ class I2C_Driver(object):
         """
 
         self.select_i2c_channel()
-        self.i2c_bus.write_byte_data(addr_pca9535, cmd_config_p0, config_port0)
-        self.i2c_bus.write_byte_data(addr_pca9535, cmd_config_p1, config_port1)
+        self.i2c_write_byte_data(addr_pca9535, cmd_config_p0, config_port0)
+        self.i2c_write_byte_data(addr_pca9535, cmd_config_p1, config_port1)
 
     def read_extend_io(self):
         """
@@ -166,8 +192,8 @@ class I2C_Driver(object):
         """
         self.select_i2c_channel()
         data = list()
-        data.append(self.i2c_bus.read_byte_data(addr_pca9535, cmd_input_p0))
-        data.append(self.i2c_bus.read_byte_data(addr_pca9535, cmd_input_p1))
+        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_input_p0))
+        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_input_p1))
         return data
 
     def read_output(self):
@@ -177,19 +203,19 @@ class I2C_Driver(object):
         """
         self.select_i2c_channel()
         data = list()
-        data.append(self.i2c_bus.read_byte_data(addr_pca9535, cmd_output_p0))
-        data.append(self.i2c_bus.read_byte_data(addr_pca9535, cmd_output_p1))
+        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_output_p0))
+        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_output_p1))
         return data
 
     def write_extend_io(self, data):
         """
         set extend io output port
-        :param data:
+        :param data:list [0x00, 0x00]
         :return:
         """
         self.select_i2c_channel()
-        self.i2c_bus.write_byte_data(addr_pca9535, cmd_output_p0, data[0])
-        self.i2c_bus.write_byte_data(addr_pca9535, cmd_output_p1, data[1])
+        self.i2c_write_byte_data(addr_pca9535, cmd_output_p0, data[0])
+        self.i2c_write_byte_data(addr_pca9535, cmd_output_p1, data[1])
 
     def change_port_state(self, port_num, port_state):
         """
@@ -225,20 +251,23 @@ class I2C_Driver(object):
         PCA9535输出高电平时继电器线圈通电
         :return:
         """
-        self.select_i2c_channel(1)
-        for i in range(5):
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p0, 0x00)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p1, 0x00)
-        self.select_i2c_channel(2)
-        for i in range(7):
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p0, 0x00)
-            self.i2c_bus.write_byte_data(0x21 + i, cmd_output_p1, 0x00)
-        pass
-        time.sleep(0.05)
+        try:
+            self.select_i2c_channel(1)
+            for i in range(5):
+                self.i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
+                self.i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
+                self.i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
+                self.i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
+            self.select_i2c_channel(2)
+            for i in range(7):
+                self.i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
+                self.i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
+                self.i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
+                self.i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
+            pass
+            time.sleep(0.05)
+        except:
+            debug_print('Init Delay Error!')
 
     # def set_delay_array(self):
     #     """
@@ -274,8 +303,8 @@ class I2C_Driver(object):
         for j in range(10):
             self.select_i2c_channel(j % 2 + 1)
             one_chip_port = list()
-            one_chip_port.append(self.i2c_bus.read_byte_data(0x21 + j // 2, cmd_output_p0))
-            one_chip_port.append(self.i2c_bus.read_byte_data(0x21 + j // 2, cmd_output_p1))
+            one_chip_port.append(self.i2c_read_byte_data(0x21 + j // 2, cmd_output_p0))
+            one_chip_port.append(self.i2c_read_byte_data(0x21 + j // 2, cmd_output_p1))
             all_chip_port.append(one_chip_port)
         return all_chip_port
 
@@ -311,12 +340,12 @@ class I2C_Driver(object):
                 offset = column - 8
 
             self.select_i2c_channel(i2c_channel)
-            output = self.i2c_bus.read_byte_data(address, register)
+            output = self.i2c_read_byte_data(address, register)
 
             debug_print('Read: ' + str(output))
 
             output |= 1 << offset
-            self.i2c_bus.write_byte_data(address, register, output)
+            self.i2c_write_byte_data(address, register, output)
 
             debug_print('Write: ' + str(output))
             debug_print('Delay ' + str(relay_number) + ' Connected!\n')
@@ -355,12 +384,12 @@ class I2C_Driver(object):
                 offset = column - 8
 
             self.select_i2c_channel(i2c_channel)
-            output = self.i2c_bus.read_byte_data(address, register)
+            output = self.i2c_read_byte_data(address, register)
 
             debug_print('Read: ' + str(output))
 
             output &= ~(1 << offset)
-            self.i2c_bus.write_byte_data(address, register, output)
+            self.i2c_write_byte_data(address, register, output)
 
             debug_print('Write: ' + str(output))
             debug_print('Delay ' + str(relay_number) + ' Disconnected!\n')
@@ -387,27 +416,27 @@ class I2C_Driver(object):
             self.select_i2c_channel(2)
             if relay_number < 8:
                 address = 0x26
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p1)
+                output = self.i2c_read_byte_data(address, cmd_output_p1)
                 output |= 1 << 7 - relay_number
-                self.i2c_bus.write_byte_data(address, cmd_output_p1, output)
+                self.i2c_write_byte_data(address, cmd_output_p1, output)
 
             elif 8 <= relay_number < 16:
                 address = 0x26
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p0)
+                output = self.i2c_read_byte_data(address, cmd_output_p0)
                 output |= 1 << 15 - relay_number
-                self.i2c_bus.write_byte_data(address, cmd_output_p0, output)
+                self.i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 16 <= relay_number < 24:
                 address = 0x27
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p0)
+                output = self.i2c_read_byte_data(address, cmd_output_p0)
                 output |= 1 << relay_number - 16
-                self.i2c_bus.write_byte_data(address, cmd_output_p0, output)
+                self.i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 24 <= relay_number < 26:
                 address = 0x27
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p1)
+                output = self.i2c_read_byte_data(address, cmd_output_p1)
                 output |= 1 << relay_number - 24
-                self.i2c_bus.write_byte_data(address, cmd_output_p1, output)
+                self.i2c_write_byte_data(address, cmd_output_p1, output)
             else:
                 pass
         else:
@@ -424,27 +453,27 @@ class I2C_Driver(object):
             self.select_i2c_channel(2)
             if relay_number < 8:
                 address = 0x26
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p1)
+                output = self.i2c_read_byte_data(address, cmd_output_p1)
                 output &= ~(1 << 7 - relay_number)
-                self.i2c_bus.write_byte_data(address, cmd_output_p1, output)
+                self.i2c_write_byte_data(address, cmd_output_p1, output)
 
             elif 8 <= relay_number < 16:
                 address = 0x26
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p0)
+                output = self.i2c_read_byte_data(address, cmd_output_p0)
                 output &= ~(1 << 15 - relay_number)
-                self.i2c_bus.write_byte_data(address, cmd_output_p0, output)
+                self.i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 16 <= relay_number < 24:
                 address = 0x27
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p0)
+                output = self.i2c_read_byte_data(address, cmd_output_p0)
                 output &= ~(1 << relay_number - 16)
-                self.i2c_bus.write_byte_data(address, cmd_output_p0, output)
+                self.i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 24 <= relay_number < 26:
                 address = 0x27
-                output = self.i2c_bus.read_byte_data(address, cmd_output_p1)
+                output = self.i2c_read_byte_data(address, cmd_output_p1)
                 output &= ~(1 << relay_number - 24)
-                self.i2c_bus.write_byte_data(address, cmd_output_p1, output)
+                self.i2c_write_byte_data(address, cmd_output_p1, output)
             else:
                 pass
         else:
@@ -494,7 +523,7 @@ if __name__ == "__main__":
     i2c.init_relay()
 
     # 中断
-    init_gpio_int()
+    # init_gpio_int()
 
     try:
         i2c.write_extend_io([0xff, 0xff])

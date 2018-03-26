@@ -17,11 +17,12 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
     """
     远程控制设置窗口，主要是网络连接
     """
+
     def __init__(self, parent=None):
         super(Ui_RemoteControlSet, self).__init__(parent)
         self.resize(1024, 550)
         self.setMinimumSize(600, 300)
-        self.setWindowTitle('外控设置')
+        self.setWindowTitle('网络及其他设置')
         self.setWindowIcon(QtGui.QIcon(":/logo.png"))
         # 设置窗口模态
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -35,17 +36,17 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         Layout_button.addWidget(self.DB_DialogButton)
 
         self.Init_LocalNetSet()
-        self.Init_ServerSelect()
-        self.Init_ConnectionState()
+        # self.Init_ServerSelect()
+        # self.Init_ConnectionState()
         self.Init_BusValveAdvance()
         self.Init_CurrentDiagramSet()
 
         Layout_Net = QtWidgets.QVBoxLayout()
         Layout_Net.addWidget(self.GB_LocalNetSet)
-        Layout_Net.addWidget(self.GB_ServerSelect)
+        # Layout_Net.addWidget(self.GB_ServerSelect)
 
         Layout_Current = QtWidgets.QVBoxLayout()
-        Layout_Current.addWidget(self.GB_Test)
+        # Layout_Current.addWidget(self.GB_Test)
         Layout_Current.addWidget(self.GB_CurrentDiagramSet)
 
         Layout_GB = QtWidgets.QHBoxLayout()
@@ -60,17 +61,23 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.load_all()
         # signal
         self.DB_DialogButton.BT_Save1.clicked.connect(self.save_all)
+        self.DB_DialogButton.BT_OK1.clicked.connect(self.save_and_exit)
+
     def Init_LocalNetSet(self):
         """
         初始化网络本地设置
         :return:
         """
         self.GB_LocalNetSet = QtWidgets.QGroupBox(self)
-        self.GB_LocalNetSet.setGeometry(10, 10, 300, 250)
-        self.GB_LocalNetSet.setTitle('本机')
+        # self.GB_LocalNetSet.setGeometry(10, 10, 300, 250)
+        self.GB_LocalNetSet.setTitle('网络设置（重启生效）')
         # 本机网络设置控件
         self.Layout_LocalNetSet = QtWidgets.QGridLayout(self.GB_LocalNetSet)
-        self.Label_b11 = QtWidgets.QLabel('本机名:')
+
+        self.lb_server_ip = QtWidgets.QLabel('服务器IP：')
+        self.LE_server_ip = QtWidgets.QLineEdit()
+
+        self.Label_b11 = QtWidgets.QLabel('本机名称:')
         self.LE_LocalName = QtWidgets.QLineEdit()
         vali_hostname = QtGui.QRegExpValidator(self)
         reg = QtCore.QRegExp('[a-zA-Z0-9\\s]+$')
@@ -85,9 +92,12 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.Label_b12 = QtWidgets.QLabel('本机IP:')
         self.LE_LocalIP = QtWidgets.QLineEdit()
         self.LE_LocalIP.setValidator(vali_ip)
-        self.Label_b13 = QtWidgets.QLabel('子网掩码:')
-        self.LE_SubnetMask = QtWidgets.QLineEdit()
-        self.LE_SubnetMask.setValidator(vali_ip)
+
+        # 子网掩码使用默认255.255.255.0
+        # self.Label_b13 = QtWidgets.QLabel('子网掩码:')
+        # self.LE_SubnetMask = QtWidgets.QLineEdit()
+        # self.LE_SubnetMask.setValidator(vali_ip)
+
         self.Label_b14 = QtWidgets.QLabel('默认网关:')
         self.LE_DefaultGateway = QtWidgets.QLineEdit()
         self.LE_DefaultGateway.setValidator(vali_ip)
@@ -96,25 +106,28 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.LE_DefaultDNS.setValidator(vali_ip)
 
         self.LE_DefaultDNS.setPlaceholderText('192.168.10.190')
-        # 本机网络设置布局
-        self.Layout_LocalNetSet.addWidget(self.Label_b11, 0 ,0)
-        self.Layout_LocalNetSet.addWidget(self.LE_LocalName, 0, 1)
-        self.Layout_LocalNetSet.addWidget(self.RB_AutoGetIP, 1, 0, 1, 2)
-        self.Layout_LocalNetSet.addWidget(self.RB_UseSettingBelow, 2, 0, 1, 2)
-        self.Layout_LocalNetSet.addWidget(self.Label_b12, 3, 0)
-        self.Layout_LocalNetSet.addWidget(self.LE_LocalIP, 3, 1)
-        self.Layout_LocalNetSet.addWidget(self.Label_b13, 4, 0)
-        self.Layout_LocalNetSet.addWidget(self.LE_SubnetMask, 4, 1)
-        self.Layout_LocalNetSet.addWidget(self.Label_b14, 5, 0)
-        self.Layout_LocalNetSet.addWidget(self.LE_DefaultGateway, 5, 1)
-        self.Layout_LocalNetSet.addWidget(self.Label_b15, 6, 0)
-        self.Layout_LocalNetSet.addWidget(self.LE_DefaultDNS, 6, 1)
+        # 网络设置布局
+        self.Layout_LocalNetSet.addWidget(self.lb_server_ip, 0, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_server_ip, 0, 1, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.Label_b11, 1, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_LocalName, 1, 1, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.RB_AutoGetIP, 2, 0, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.RB_UseSettingBelow, 3, 0, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.Label_b12, 4, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_LocalIP, 4, 1, 1, 2)
+        # self.Layout_LocalNetSet.addWidget(self.Label_b13, 4, 0)
+        # self.Layout_LocalNetSet.addWidget(self.LE_SubnetMask, 4, 1)
+        self.Layout_LocalNetSet.addWidget(self.Label_b14, 5, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_DefaultGateway, 5, 1, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.Label_b15, 6, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_DefaultDNS, 6, 1, 1, 2)
 
         self.IPSetDisable()
         # SIGNAL
         self.RB_AutoGetIP.clicked.connect(self.IPSetDisable)
         self.RB_UseSettingBelow.clicked.connect(self.IPSetEnable)
 
+    # 不显示
     def Init_ServerSelect(self):
         """
         初始化网络服务器设置
@@ -122,27 +135,31 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         """
         self.GB_ServerSelect = QtWidgets.QGroupBox(self)
         self.GB_ServerSelect.setGeometry(10, 265, 300, 100)
-        self.GB_ServerSelect.setTitle('上位机')
+        self.GB_ServerSelect.setTitle('服务器地址')
 
         self.Layout_ServerSelect = QtWidgets.QGridLayout(self.GB_ServerSelect)
-        self.Label_b21 = QtWidgets.QLabel('计算机名:')
-        self.CB_ServerName = QtWidgets.QComboBox()
-        for i in sw.upper_name_list:
-            self.CB_ServerName.addItem(i)
+        # self.Label_b21 = QtWidgets.QLabel('计算机名:')
+        # self.CB_ServerName = QtWidgets.QComboBox()
+        # for i in sw.upper_name_list:
+        #     self.CB_ServerName.addItem(i)
+
         self.Label_b22 = QtWidgets.QLabel('计算机IP:')
-        self.CB_ServerIP = QtWidgets.QComboBox()
-        for i in sw.upper_ip_list:
-            self.CB_ServerIP.addItem(i)
+        self.LE_server_ip = QtWidgets.QLineEdit()
+        # self.CB_ServerIP = QtWidgets.QComboBox()
+        # for i in sw.upper_ip_list:
+        #     self.CB_ServerIP.addItem(i)
 
         # 布局
-        self.Layout_ServerSelect.addWidget(self.Label_b21, 0, 0)
-        self.Layout_ServerSelect.addWidget(self.CB_ServerName, 0, 1, 1, 3)
+        # self.Layout_ServerSelect.addWidget(self.Label_b21, 0, 0)
+        # self.Layout_ServerSelect.addWidget(self.CB_ServerName, 0, 1, 1, 3)
 
-        self.Layout_ServerSelect.addWidget(self.Label_b22, 1 ,0)
-        self.Layout_ServerSelect.addWidget(self.CB_ServerIP, 1, 1, 1, 3)
+        self.Layout_ServerSelect.addWidget(self.Label_b22, 1, 0)
+        self.Layout_ServerSelect.addWidget(self.LE_server_ip, 1, 1, 1, 3)
         # SIGNAL
-        self.CB_ServerIP.currentIndexChanged.connect(self.CB_ServerName.setCurrentIndex)
-        self.CB_ServerName.currentIndexChanged.connect(self.CB_ServerIP.setCurrentIndex)
+        # self.CB_ServerIP.currentIndexChanged.connect(self.CB_ServerName.setCurrentIndex)
+        # self.CB_ServerName.currentIndexChanged.connect(self.CB_ServerIP.setCurrentIndex)
+
+    # 不显示
     def Init_ConnectionState(self):
         """
         初始化连接测试
@@ -177,7 +194,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         """
         self.GB_BusValveAdvance = QtWidgets.QGroupBox(self)
         self.GB_BusValveAdvance.setTitle('总线阀高级设置')
-        self.GB_BusValveAdvance.setGeometry(320, 10, 300, 300) #695, 500)
+        # self.GB_BusValveAdvance.setGeometry(320, 10, 300, 300) #695, 500)
 
         vali_cmd = QtGui.QRegExpValidator(self)
         reg_cmd = QtCore.QRegExp('[0-9A-Z]{2}\\s[0-9A-Z]{2}\\s[0-9A-Z]{2}\\s[0-9A-Z]{2}\\s[0-9A-Z]{2}\\s[0-9A-Z]{2}\\'
@@ -218,8 +235,8 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         self.CB_StopBits.addItem('2')
         # 布局
         layout = QtWidgets.QGridLayout(self.GB_BusValveAdvance)
-        layout.addWidget(Label_e11,0,0)
-        layout.addWidget(self.LE_OpenCommand,0,1)
+        layout.addWidget(Label_e11, 0, 0)
+        layout.addWidget(self.LE_OpenCommand, 0, 1)
         layout.addWidget(Label_e12)
         layout.addWidget(self.LE_CloseCommand)
         layout.addWidget(Label_e13)
@@ -241,7 +258,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         :return:
         """
         self.GB_CurrentDiagramSet = QtWidgets.QGroupBox(self)
-        self.GB_CurrentDiagramSet.setGeometry(320, 315, 300, 195)
+        # self.GB_CurrentDiagramSet.setGeometry(320, 315, 300, 195)
         self.GB_CurrentDiagramSet.setTitle('电流曲线设置')
 
         Label_f11 = QtWidgets.QLabel('数据储存深度：')
@@ -249,7 +266,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         Label_f13 = QtWidgets.QLabel('数据保存间隔：')
         Label_f14 = QtWidgets.QLabel('ms')
         Label_f15 = QtWidgets.QLabel('可保存总时长：')
-        Label_f16 = QtWidgets.QLabel('小窗口曲线显示时长：')
+        Label_f16 = QtWidgets.QLabel('默认显示时长：')
         Label_f17 = QtWidgets.QLabel('s')
         self.Label_TotalTime = QtWidgets.QLabel('196.605 s')
         self.Label_TotalTime.setMaximumHeight(15)
@@ -266,7 +283,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
 
         layout = QtWidgets.QGridLayout(self.GB_CurrentDiagramSet)
         layout.addWidget(Label_f11, 1, 0)
-        layout.addWidget(self.LE_DataStorageDepth, 1 ,1)
+        layout.addWidget(self.LE_DataStorageDepth, 1, 1)
         layout.addWidget(Label_f12, 1, 2)
         layout.addWidget(Label_f13, 2, 0)
         layout.addWidget(self.SB_DateStorageInterval, 2, 1)
@@ -276,6 +293,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         layout.addWidget(Label_f16, 4, 0)
         layout.addWidget(self.SB_DisplayTime, 4, 1)
         layout.addWidget(Label_f17, 4, 2)
+
     # 槽
 
     def IPSetEnable(self):
@@ -284,7 +302,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         :return:
         """
         self.LE_LocalIP.setDisabled(False)
-        self.LE_SubnetMask.setDisabled(False)
+        # self.LE_SubnetMask.setDisabled(False)
         self.LE_DefaultGateway.setDisabled(False)
         self.LE_DefaultDNS.setDisabled(False)
 
@@ -295,7 +313,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         """
 
         self.LE_LocalIP.setDisabled(True)
-        self.LE_SubnetMask.setDisabled(True)
+        # self.LE_SubnetMask.setDisabled(True)
         self.LE_DefaultGateway.setDisabled(True)
         self.LE_DefaultDNS.setDisabled(True)
 
@@ -318,9 +336,10 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         保存设置
         :return:
         """
+        sw.net_set['server_ip'] = self.LE_server_ip.text()
         sw.net_set['host_name'] = self.LE_LocalName.text()
         sw.net_set['host_ip'] = self.LE_LocalIP.text()
-        sw.net_set['subnet_mask'] = self.LE_SubnetMask.text()
+        # sw.net_set['subnet_mask'] = self.LE_SubnetMask.text()
         sw.net_set['default_gateway'] = self.LE_DefaultGateway.text()
         sw.net_set['dns'] = self.LE_DefaultDNS.text()
 
@@ -352,7 +371,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
             f3.write(pickle.dumps(sw.bus_control))
         # Json
         # with open('json/data.json', 'w') as f:
-            # json.dump(gv.data, f, ensure_ascii=False, indent=10)
+        # json.dump(gv.data, f, ensure_ascii=False, indent=10)
 
     def load_all(self):
         """
@@ -366,9 +385,10 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         with open('pkl/buscontrol.pkl', 'rb') as f3:
             sw.bus_control = pickle.loads(f3.read())
 
+        self.LE_server_ip.setText(sw.net_set['server_ip'])
         self.LE_LocalName.setText(sw.net_set['host_name'])
         self.LE_LocalIP.setText(sw.net_set['host_ip'])
-        self.LE_SubnetMask.setText(sw.net_set['subnet_mask'])
+        # self.LE_SubnetMask.setText(sw.net_set['subnet_mask'])
         self.LE_DefaultGateway.setText(sw.net_set['default_gateway'])
         self.LE_DefaultDNS.setText(sw.net_set['dns'])
 
@@ -395,3 +415,14 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
             self.IPSetEnable()
             self.RB_UseSettingBelow.setChecked(True)
 
+        # 修改系统文件
+        pass
+
+    def save_and_exit(self):
+        """
+        保存退出
+        :return:
+        """
+
+        self.save_all()
+        self.close()

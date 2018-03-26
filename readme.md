@@ -8,7 +8,9 @@ python3.6.1 + PyQt5 + matplotlib
     spidev
     smbus
     wiringpi
+    serial
     RPi.GPIO
+    xrdp
 
 
 ## 更新

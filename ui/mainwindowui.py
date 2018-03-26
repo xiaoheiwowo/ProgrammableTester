@@ -20,6 +20,7 @@ from public.datacache import Flag_Of as flag
 
 fg_update_diagram = 1
 
+
 class Ui_MainWin(QtWidgets.QMainWindow):
     """
     IN
@@ -27,6 +28,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
     lock_state = True
     # 设置电压信号
     voltage_set = QtCore.pyqtSignal(float)
+    adjust_input = QtCore.pyqtSignal(float)
 
     def __init__(self, parent=None):
         super(Ui_MainWin, self).__init__(parent, flags=QtCore.Qt.Window)
@@ -50,9 +52,12 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.fault_number.setDisabled(True)
         self.Action_ControlSet = QtWidgets.QAction('控制方式设置', self)
         self.Action_PowerCalibration = QtWidgets.QAction('电源及采样校准', self)
-        self.Action_RemoteControl = QtWidgets.QAction('外控及其他设置', self)
+        self.Action_RemoteControl = QtWidgets.QAction('网络及其他设置', self)
         self.Power_Set = QtWidgets.QAction('电源设置', self)
         self.Action_RelayCheck = QtWidgets.QAction('继电器自检', self)
+
+        self.quit_button = QtWidgets.QAction('退出', self)
+        self.quit_button.triggered.connect(self.close)
 
         self.init_menubar()
         self.setMenuBar(self.MenuBar)
@@ -143,6 +148,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         layout_main.addWidget(self.GB_CurrentCurve, 0, 2, 2, 4)
         layout_main.addWidget(self.GB_ValveControl, 2, 0, 3, 6)
 
+        # 全屏显示
+        # self.showFullScreen()
+
     #  初始化菜单栏
     def init_menubar(self):
         """
@@ -159,6 +167,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.SetMenu.addAction(self.Power_Set)
         # 继电器自检
         self.SetMenu.addAction(self.Action_RelayCheck)
+
+        self.SetMenu.addAction(self.quit_button)
 
     def fault_prompt(self, num='0'):
         """
