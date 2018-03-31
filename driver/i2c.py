@@ -29,7 +29,9 @@ except:
 #     button_int = 0
 
 
-# wiringpi 的中断注册函数使用有问题
+# wiringpi 的中断注册函数使用有问题 改用RPI.GPIO
+# 中断引脚
+int_pin = 36
 
 addr_pca9548 = 0x70
 addr_pca9535 = 0x21
@@ -104,8 +106,10 @@ class I2C_Driver(object):
 
     def __init__(self):
         self.i2c_bus = i2c2.SMBus(1)
+        # 中断注册
+        # self.init_gpio_int()
 
-    def i2c_write_byte_data(self, i2c_addr, register, value):
+    def __i2c_write_byte_data(self, i2c_addr, register, value):
         """
 
         :param i2c_addr:
@@ -118,7 +122,7 @@ class I2C_Driver(object):
         except OSError:
             debug_print('Remote I/O error')
 
-    def i2c_read_byte_data(self, i2c_addr, register):
+    def __i2c_read_byte_data(self, i2c_addr, register):
         """
 
         :param i2c_addr:
@@ -131,14 +135,7 @@ class I2C_Driver(object):
             debug_print('Remote I/O error')
             return 0
 
-    def reset_pca9548(self):
-        """
-
-        :return:
-        """
-        self.i2c_write_byte_data(addr_pca9548, 0x00, 0x00)
-
-    def read_pca9548(self):
+    def __read_pca9548(self):
         """
 
         :return:
@@ -149,7 +146,7 @@ class I2C_Driver(object):
         except IOError:
             pass
 
-    def write_pca9548(self, dat):
+    def __write_pca9548(self, dat):
         """
 
         :param dat:
@@ -160,6 +157,13 @@ class I2C_Driver(object):
         except IOError:
             pass
 
+    def reset_pca9548(self):
+        """
+        reset后不接通i2c通道
+        :return:
+        """
+        self.__i2c_write_byte_data(addr_pca9548, 0x00, 0x00)
+
     def select_i2c_channel(self, channel=0):
         """
         选择i2c通道。0为扩展io口， 1和2为继电器阵列以及自检继电器控制io口
@@ -167,55 +171,55 @@ class I2C_Driver(object):
         :return:
         """
         if channel == 0:
-            self.write_pca9548(0b00000001)
+            self.__write_pca9548(0b00000001)
         elif channel == 1:
-            self.write_pca9548(0b00000010)
+            self.__write_pca9548(0b00000010)
         elif channel == 2:
-            self.write_pca9548(0b00000100)
+            self.__write_pca9548(0b00000100)
         else:
             debug_print('Channel' + str(channel) + ' Not Found')
 
-    def init_extend_io(self):
+    def cfg_extend_io(self):
         """
         初始化扩展IO口，将io口配置为输入或者输出
         :return:
         """
 
         self.select_i2c_channel()
-        self.i2c_write_byte_data(addr_pca9535, cmd_config_p0, config_port0)
-        self.i2c_write_byte_data(addr_pca9535, cmd_config_p1, config_port1)
+        self.__i2c_write_byte_data(addr_pca9535, cmd_config_p0, config_port0)
+        self.__i2c_write_byte_data(addr_pca9535, cmd_config_p1, config_port1)
 
-    def read_extend_io(self):
+    def read_extend_input(self):
         """
         read extend io input
         :return: a list [port0, port1]
         """
         self.select_i2c_channel()
         data = list()
-        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_input_p0))
-        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_input_p1))
+        data.append(self.__i2c_read_byte_data(addr_pca9535, cmd_input_p0))
+        data.append(self.__i2c_read_byte_data(addr_pca9535, cmd_input_p1))
         return data
 
-    def read_output(self):
+    def read_extend_output(self):
         """
         read extend io output port
         :return: return a list:[port0, port1]
         """
         self.select_i2c_channel()
         data = list()
-        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_output_p0))
-        data.append(self.i2c_read_byte_data(addr_pca9535, cmd_output_p1))
+        data.append(self.__i2c_read_byte_data(addr_pca9535, cmd_output_p0))
+        data.append(self.__i2c_read_byte_data(addr_pca9535, cmd_output_p1))
         return data
 
-    def write_extend_io(self, data):
+    def write_extend_output(self, data):
         """
         set extend io output port
         :param data:list [0x00, 0x00]
         :return:
         """
         self.select_i2c_channel()
-        self.i2c_write_byte_data(addr_pca9535, cmd_output_p0, data[0])
-        self.i2c_write_byte_data(addr_pca9535, cmd_output_p1, data[1])
+        self.__i2c_write_byte_data(addr_pca9535, cmd_output_p0, data[0])
+        self.__i2c_write_byte_data(addr_pca9535, cmd_output_p1, data[1])
 
     def change_port_state(self, port_num, port_state):
         """
@@ -226,7 +230,7 @@ class I2C_Driver(object):
         """
 
         if port_num in output_port:
-            port = self.read_output()
+            port = self.read_extend_output()
             if port_state == 1:
                 if port_num < 8:
                     port[0] |= 1 << port_num
@@ -240,12 +244,12 @@ class I2C_Driver(object):
                     port[1] &= ~(1 << port_num - 8)
             else:
                 pass
-            self.write_extend_io(port)
+            self.write_extend_output(port)
         else:
             debug_print('This port can not output.')
             pass
 
-    def init_relay(self):
+    def init_relay_port(self):
         """
         初始化继电器阵列
         PCA9535输出高电平时继电器线圈通电
@@ -254,45 +258,20 @@ class I2C_Driver(object):
         try:
             self.select_i2c_channel(1)
             for i in range(5):
-                self.i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
-                self.i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
-                self.i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
-                self.i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
+                self.__i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
+                self.__i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
+                self.__i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
+                self.__i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
             self.select_i2c_channel(2)
             for i in range(7):
-                self.i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
-                self.i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
-                self.i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
-                self.i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
+                self.__i2c_write_byte_data(0x21 + i, cmd_config_p0, config_all_output)
+                self.__i2c_write_byte_data(0x21 + i, cmd_config_p1, config_all_output)
+                self.__i2c_write_byte_data(0x21 + i, cmd_output_p0, 0x00)
+                self.__i2c_write_byte_data(0x21 + i, cmd_output_p1, 0x00)
             pass
             time.sleep(0.05)
         except:
             debug_print('Init Delay Error!')
-
-    # def set_delay_array(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #
-    #     for i in range(10):
-    #         self.select_i2c_channel(i % 2 + 1)
-    #         self.i2c_bus.write_byte_data(0x21 + i // 2, cmd_output_p0, hw.register_port[i][0])
-    #         self.i2c_bus.write_byte_data(0x21 + i // 2, cmd_output_p1, hw.register_port[i][1])
-
-    # def set_delay_test(self):
-    #     """
-    #     设置自检继电器
-    #     :return:
-    #     """
-    #
-    #     self.select_i2c_channel(1)
-    #     self.i2c_bus.write_byte_data(0x25, cmd_output_p0, hw.ZJ00[0])
-    #     self.i2c_bus.write_byte_data(0x25, cmd_output_p1, hw.ZJ00[1])
-    #     self.i2c_bus.write_byte_data(0x26, cmd_output_p0, hw.ZJ01[0])
-    #     self.i2c_bus.write_byte_data(0x26, cmd_output_p1, hw.ZJ01[1])
-    #
-    #     pass
 
     def read_relay_state(self):
         """
@@ -303,8 +282,8 @@ class I2C_Driver(object):
         for j in range(10):
             self.select_i2c_channel(j % 2 + 1)
             one_chip_port = list()
-            one_chip_port.append(self.i2c_read_byte_data(0x21 + j // 2, cmd_output_p0))
-            one_chip_port.append(self.i2c_read_byte_data(0x21 + j // 2, cmd_output_p1))
+            one_chip_port.append(self.__i2c_read_byte_data(0x21 + j // 2, cmd_output_p0))
+            one_chip_port.append(self.__i2c_read_byte_data(0x21 + j // 2, cmd_output_p1))
             all_chip_port.append(one_chip_port)
         return all_chip_port
 
@@ -340,12 +319,12 @@ class I2C_Driver(object):
                 offset = column - 8
 
             self.select_i2c_channel(i2c_channel)
-            output = self.i2c_read_byte_data(address, register)
+            output = self.__i2c_read_byte_data(address, register)
 
             debug_print('Read: ' + str(output))
 
             output |= 1 << offset
-            self.i2c_write_byte_data(address, register, output)
+            self.__i2c_write_byte_data(address, register, output)
 
             debug_print('Write: ' + str(output))
             debug_print('Delay ' + str(relay_number) + ' Connected!\n')
@@ -384,19 +363,19 @@ class I2C_Driver(object):
                 offset = column - 8
 
             self.select_i2c_channel(i2c_channel)
-            output = self.i2c_read_byte_data(address, register)
+            output = self.__i2c_read_byte_data(address, register)
 
             debug_print('Read: ' + str(output))
 
             output &= ~(1 << offset)
-            self.i2c_write_byte_data(address, register, output)
+            self.__i2c_write_byte_data(address, register, output)
 
             debug_print('Write: ' + str(output))
             debug_print('Delay ' + str(relay_number) + ' Disconnected!\n')
         else:
             debug_print('Delay Number Error!\n')
 
-    def connect_check_relay(self, relay_number):
+    def __check_relay_connect(self, relay_number):
         """
         connect a check relay
                 relay     number
@@ -416,34 +395,34 @@ class I2C_Driver(object):
             self.select_i2c_channel(2)
             if relay_number < 8:
                 address = 0x26
-                output = self.i2c_read_byte_data(address, cmd_output_p1)
+                output = self.__i2c_read_byte_data(address, cmd_output_p1)
                 output |= 1 << 7 - relay_number
-                self.i2c_write_byte_data(address, cmd_output_p1, output)
+                self.__i2c_write_byte_data(address, cmd_output_p1, output)
 
             elif 8 <= relay_number < 16:
                 address = 0x26
-                output = self.i2c_read_byte_data(address, cmd_output_p0)
+                output = self.__i2c_read_byte_data(address, cmd_output_p0)
                 output |= 1 << 15 - relay_number
-                self.i2c_write_byte_data(address, cmd_output_p0, output)
+                self.__i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 16 <= relay_number < 24:
                 address = 0x27
-                output = self.i2c_read_byte_data(address, cmd_output_p0)
+                output = self.__i2c_read_byte_data(address, cmd_output_p0)
                 output |= 1 << relay_number - 16
-                self.i2c_write_byte_data(address, cmd_output_p0, output)
+                self.__i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 24 <= relay_number < 26:
                 address = 0x27
-                output = self.i2c_read_byte_data(address, cmd_output_p1)
+                output = self.__i2c_read_byte_data(address, cmd_output_p1)
                 output |= 1 << relay_number - 24
-                self.i2c_write_byte_data(address, cmd_output_p1, output)
+                self.__i2c_write_byte_data(address, cmd_output_p1, output)
             else:
                 pass
         else:
             debug_print('Delay Number Error!\n')
             pass
 
-    def disconnect_check_relay(self, relay_number):
+    def __check_relay_disconnect(self, relay_number):
         """
         dis connect a check relay
         :param relay_number:
@@ -453,33 +432,64 @@ class I2C_Driver(object):
             self.select_i2c_channel(2)
             if relay_number < 8:
                 address = 0x26
-                output = self.i2c_read_byte_data(address, cmd_output_p1)
+                output = self.__i2c_read_byte_data(address, cmd_output_p1)
                 output &= ~(1 << 7 - relay_number)
-                self.i2c_write_byte_data(address, cmd_output_p1, output)
+                self.__i2c_write_byte_data(address, cmd_output_p1, output)
 
             elif 8 <= relay_number < 16:
                 address = 0x26
-                output = self.i2c_read_byte_data(address, cmd_output_p0)
+                output = self.__i2c_read_byte_data(address, cmd_output_p0)
                 output &= ~(1 << 15 - relay_number)
-                self.i2c_write_byte_data(address, cmd_output_p0, output)
+                self.__i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 16 <= relay_number < 24:
                 address = 0x27
-                output = self.i2c_read_byte_data(address, cmd_output_p0)
+                output = self.__i2c_read_byte_data(address, cmd_output_p0)
                 output &= ~(1 << relay_number - 16)
-                self.i2c_write_byte_data(address, cmd_output_p0, output)
+                self.__i2c_write_byte_data(address, cmd_output_p0, output)
 
             elif 24 <= relay_number < 26:
                 address = 0x27
-                output = self.i2c_read_byte_data(address, cmd_output_p1)
+                output = self.__i2c_read_byte_data(address, cmd_output_p1)
                 output &= ~(1 << relay_number - 24)
-                self.i2c_write_byte_data(address, cmd_output_p1, output)
+                self.__i2c_write_byte_data(address, cmd_output_p1, output)
             else:
                 pass
         else:
             debug_print('Delay Number Error!\n')
             pass
         pass
+
+    def connect_check_relay(self, index):
+        """
+        连接2个自检继电器
+        :param index:
+        :return:
+        """
+        debug_print('TEST: ' + str(index) + '1')
+        # 行
+        row = index % 10
+        # 列
+        column = index // 10
+
+        self.__check_relay_connect(column)
+        self.__check_relay_connect(row + 16)
+
+    def disconnect_check_relay(self, index):
+        """
+        断开2个自检继电器
+        :param index:1~159
+        :return:
+        """
+        debug_print('TEST: ' + str(index) + '0')
+
+        # 行
+        row = index % 10
+        # 列
+        column = index // 10
+
+        self.__check_relay_disconnect(column)
+        self.__check_relay_disconnect(row + 15)
 
     def close_i2c(self):
         """
@@ -488,45 +498,37 @@ class I2C_Driver(object):
         """
         self.i2c_bus.close()
 
+    def init_gpio_int(self):
+        """
 
-def int_from_pca9535(pin_number):
-    """
+        :return:
+        """
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(int_pin, GPIO.IN)
+        # 中断注册
+        GPIO.add_event_detect(int_pin, GPIO.FALLING, callback=self.int_from_pca9535, bouncetime=30)
 
-    :param pin_number:
-    :return:
-    """
-    # print(pin_number)
-    debug_print(str(pin_number) + 'Int from pca9535-1.')
-    # print(i2c.read_extend_io())
+    @staticmethod
+    def int_from_pca9535(pin_number):
+        """
 
-    flag.button_int = 1
-
-    # global FG_READ_IO
-    # FG_READ_IO = 1
-
-
-def init_gpio_int():
-    """
-
-    :return:
-    """
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(36, GPIO.IN)
-
-    # 中断注册
-    GPIO.add_event_detect(36, GPIO.FALLING, callback=int_from_pca9535, bouncetime=15)
+        :param pin_number:
+        :return:
+        """
+        debug_print(str(pin_number) + 'Int from pca9535-1.')
+        flag.button_int = 1
 
 
 if __name__ == "__main__":
     i2c = I2C_Driver()
-    i2c.init_extend_io()
-    i2c.init_relay()
+    i2c.cfg_extend_io()
+    i2c.init_relay_port()
 
     # 中断
     # init_gpio_int()
 
     try:
-        i2c.write_extend_io([0xff, 0xff])
+        i2c.write_extend_output([0xff, 0xff])
         while True:
             print('1 EXTEND IO TEST')
             print('2 RELAY ARRAY TEST')
@@ -543,7 +545,7 @@ if __name__ == "__main__":
                             state = int(input('0 or 1?\n'))
                             print('set port ' + str(num) + ' as ' + str(state))
                             i2c.change_port_state(num, state)
-                            print(i2c.read_output())
+                            print(i2c.read_extend_output())
 
                         except ValueError:
                             print('Input Error!\n')
@@ -572,7 +574,7 @@ if __name__ == "__main__":
                     try:
                         print('You choose READ IO TEST.\n')
                         a = input('Press Enter to read io.')
-                        print(i2c.read_extend_io())
+                        print(i2c.read_extend_input())
                     except KeyboardInterrupt:
                         os.system('clear')
                         break
@@ -581,11 +583,11 @@ if __name__ == "__main__":
                 print('You choose INT TEST.\n')
                 while True:
                     try:
-                        i2c.read_extend_io()
+                        i2c.read_extend_input()
                         # i2c.i2c_bus.read_byte_data(addr_pca9535, cmd_input_p1)
                         if flag.button_int == 1:
                             print('read port:')
-                            print(i2c.read_extend_io())
+                            print(i2c.read_extend_input())
                             flag.button_int = 0
                         else:
                             pass
@@ -599,9 +601,9 @@ if __name__ == "__main__":
                         control = input('1:connect, 2:disconnect\n')
                         number = input('delay number: \n')
                         if control == '1':
-                            i2c.connect_check_relay(int(number))
+                            i2c.__check_relay_connect(int(number))
                         elif control == '2':
-                            i2c.disconnect_check_relay(int(number))
+                            i2c.__check_relay_disconnect(int(number))
                         else:
                             print('Input Error!\n')
                             pass
@@ -612,7 +614,7 @@ if __name__ == "__main__":
                 pass
 
     except KeyboardInterrupt:
-        i2c.write_extend_io([0x00, 0x00])
+        i2c.write_extend_output([0x00, 0x00])
         i2c.close_i2c()
         os.system('clear')
         debug_print('[i2c close]')

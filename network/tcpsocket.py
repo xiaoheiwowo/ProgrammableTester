@@ -97,7 +97,7 @@ class TcpHandler(BaseRequestHandler):
             # 输入错误
             else:
                 print('错误命令')
-                self.request.send(b'error command')
+                self.request.serial_send(b'error command')
                 pass
 
     def ReadData(self, msgstr):
@@ -108,22 +108,22 @@ class TcpHandler(BaseRequestHandler):
         """
         if msgstr[2:4] == '00':
             # 读电流
-            self.request.send(bytes('500mA', 'utf-8'))
+            self.request.serial_send(bytes('500mA', 'utf-8'))
             print('500mA')
             pass
         elif msgstr[2:4] == '01':
             # 读电压
-            self.request.send(bytes('12V', 'utf-8'))
+            self.request.serial_send(bytes('12V', 'utf-8'))
             print('12v')
             pass
         elif msgstr[2:4] == '02':
-            self.request.send(bytes('500mA 12V', 'utf-8'))
+            self.request.serial_send(bytes('500mA 12V', 'utf-8'))
             print('500mA 12v')
             # 读电流和电压
             pass
         else:
             print('error')
-            self.request.send(bytes('error', 'utf-8'))
+            self.request.serial_send(bytes('error', 'utf-8'))
 
     def ReadHistoryData(self, msgstr):
         """
@@ -135,9 +135,9 @@ class TcpHandler(BaseRequestHandler):
             start = msgstr[2:6]
             lengh = msgstr[6:10]
             data = sw.current_value[int(start):int(start) + int(lengh)]
-            self.request.send(bytes(str(data), 'utf-8'))
+            self.request.serial_send(bytes(str(data), 'utf-8'))
         except:
-            self.request.send(b'error 01')
+            self.request.serial_send(b'error 01')
         pass
 
     def read_data_continue(self, msgstr):
@@ -146,7 +146,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def stop_read_data_continue(self, msgstr):
@@ -155,7 +155,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def array_fixed(self, msgstr):
@@ -164,7 +164,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def array_recovery(self, msgstr):
@@ -173,7 +173,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadState(self, msgstr):
@@ -182,7 +182,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes('state ' + msgstr, 'utf-8'))
+        self.request.serial_send(bytes('state ' + msgstr, 'utf-8'))
         pass
 
     def CleanData(self, msgstr):
@@ -192,7 +192,7 @@ class TcpHandler(BaseRequestHandler):
         :return:
         """
 
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadControlMode(self, msgstr):
@@ -201,7 +201,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes('BD3S', 'utf-8'))
+        self.request.serial_send(bytes('BD3S', 'utf-8'))
         pass
 
     def SetControlMode(self, msgstr):
@@ -210,7 +210,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def SetVoltage(self, msgstr):
@@ -219,7 +219,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass
 
     def ReadSP(self, msgstr):
@@ -228,7 +228,7 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes('5555', 'utf-8'))
+        self.request.serial_send(bytes('5555', 'utf-8'))
         pass
 
     def ControlValve(self, msgstr):
@@ -237,5 +237,5 @@ class TcpHandler(BaseRequestHandler):
         :param msgstr:
         :return:
         """
-        self.request.send(bytes(msgstr, 'utf-8'))
+        self.request.serial_send(bytes(msgstr, 'utf-8'))
         pass

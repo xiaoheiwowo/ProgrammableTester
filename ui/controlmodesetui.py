@@ -253,13 +253,13 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         ID：int 序号
         NAME: str 控制方式名称 
         POWER: int 电源类型 0:None 1:DC 2:AC
-        ON: list 
-        OFF: list
-        STOP: list
-        M3: list
-        M4: list
+        ON: list 继电器接通列表
+        OFF: list 继电器接通列表
+        STOP: list 继电器接通列表
+        M3: list 继电器接通列表
+        M4: list 继电器接通列表
         SPECIAL: int 0: 普通  1: 调节阀  2: 总线阀  3: BP5
-        SIGNAL: 调节阀控制信号6种
+        SIGNAL: 调节阀控制信号6种 0 None, 1 0~20mA, 2 4~20mA, 3 0~5V, 4 1~5V, 5 0~10V, 6 2~10V
         EFFECT: 作用方式，0: None  1: 正作用  2: 反作用
         PROTOCOL: 总线协议 0：None 1: RS485  2: ModBus
         BAUDRATE: 波特率  1200~19200
@@ -390,10 +390,14 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
                 sw.control_mode[sw.select_line]['SPECIAL'] = 1
                 sw.control_mode[sw.select_line]['SIGNAL'] = self.CB_ControlMode2.currentIndex()
                 sw.control_mode[sw.select_line]['EFFECT'] = self.CB_ActionMode.currentIndex()
+                sw.control_mode[sw.select_line]['PROTOCOL'] = None
+                sw.control_mode[sw.select_line]['BAUDRATE'] = None
             elif self.CK_isBusValve.isChecked():
                 sw.control_mode[sw.select_line]['SPECIAL'] = 2
-                sw.control_mode[sw.select_line]['SIGNAL'] = self.CB_BusProtocol.currentIndex()
-                sw.control_mode[sw.select_line]['EFFECT'] = self.CB_BaudRate.currentIndex()
+                sw.control_mode[sw.select_line]['PROTOCOL'] = self.CB_BusProtocol.currentIndex()
+                sw.control_mode[sw.select_line]['BAUDRATE'] = self.CB_BaudRate.currentIndex()
+                sw.control_mode[sw.select_line]['SIGNAL'] = None
+                sw.control_mode[sw.select_line]['EFFECT'] = None
             elif self.CK_isBP5.isChecked():
                 sw.control_mode[sw.select_line]['SPECIAL'] = 3
             else:

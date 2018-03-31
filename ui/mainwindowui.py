@@ -1,34 +1,44 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-introduction
+主界面UI类，实现交互功能
 """
 
 import random
 import time
+import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import diagram
-
 from public.datacache import SoftwareData as sw
-
 from public.datacache import HardwareData as hw
-
-from public.control import ValveControl as vc
-
+from public.control import ElectricControl as vc
 from public.datacache import Flag_Of as flag
+from public.crc16ibm import *
 
 fg_update_diagram = 1
 
 
 class Ui_MainWin(QtWidgets.QMainWindow):
     """
-    IN
+    主界面UI类，实现交互功能
     """
-    lock_state = True
-    # 设置电压信号
+    # 设置电压
     voltage_set = QtCore.pyqtSignal(float)
+    # 调节阀输入信号
     adjust_input = QtCore.pyqtSignal(float)
+    # 调节阀信号类型选择
+    adjust_signal_select = QtCore.pyqtSignal()
+    # 调节阀信号断开
+    adjust_signal_cut_off = QtCore.pyqtSignal()
+    # 解锁控制方式
+    unlock = QtCore.pyqtSignal()
+    # 总线阀选择，连接线路
+    bus_valve_select = QtCore.pyqtSignal()
+    # 总线阀断开接线
+    bus_cut_off = QtCore.pyqtSignal()
+    # 总线阀发送按钮点击
+    send_clicked = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(Ui_MainWin, self).__init__(parent, flags=QtCore.Qt.Window)
@@ -103,7 +113,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_control_mode = QtWidgets.QLabel()
         self.CB_SelectControl = QtWidgets.QComboBox()
         self.lb_power_choose = QtWidgets.QLabel()
-        # self.CB_DCorAC = QtWidgets.QComboBox()
         self.SB_Voltage = QtWidgets.QDoubleSpinBox()
         self.lb_unit_v = QtWidgets.QLabel()
         self.BT_Lock = QtWidgets.QPushButton()
@@ -276,27 +285,18 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         Layout_Stack = QtWidgets.QHBoxLayout(self.GB_ValveControl)
         Layout_Stack.addWidget(self.left_list)
         Layout_Stack.addWidget(self.stack)
+        wgt_ = QtWidgets.QWidget(self)
+        wgt_.setFixedWidth(20)
+        Layout_Stack.addWidget(wgt_)
         Layout_Stack.addLayout(Layout_ControlButton)
 
-        # signal
+        # 左侧选项卡信号
         self.left_list.currentRowChanged.connect(self.display)
+
         self.CB_SelectControl.currentIndexChanged.connect(self.select_control_mode)
-        # self.CB_SelectControl.activated.connect(self.load_data)
-        # self.CB_DCorAC.currentIndexChanged.connect(self.select_power)
-        # self.SB_Voltage.valueChanged.connect(self.set_voltage)
         self.BT_Dynamic.clicked.connect(self.press_dynamic)
         self.BT_Static.clicked.connect(self.press_static)
 
-        # 开关停按钮
-        self.BT_ValveOpen.clicked.connect(vc.open_valve)
-        self.BT_ValveClose.clicked.connect(vc.close_valve)
-        self.BT_ValveStop.clicked.connect(vc.stop_valve)
-        self.BT_M3.clicked.connect(vc.m3_valve)
-        self.BT_M4.clicked.connect(vc.m4_valve)
-
-        self.BT_Send.clicked.connect(self.press_send)
-        # self.LE_Send.acceptDrops.connect(self.get_bus_cmd)
-        self.SB_AdjustValveInput.valueChanged.connect(self.get_adjust_value)
         self.SB_OpenTime.valueChanged.connect(self.get_open_time)
         self.SB_CloseTime.valueChanged.connect(self.get_close_time)
         self.BT_Begin.clicked.connect(self.begin_auto_test)
@@ -304,22 +304,27 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         # 自动复选框信号连接按钮禁用函数
         self.CK_Auto.clicked.connect(self.AutoTestDisable)
-        # self.BT_Lock.pressed.connect(self.TimerStart)
-        # self.BT_Lock.released.connect(self.QTimerLock.stop)
         self.BT_Lock.clicked.connect(self.JudgeLock)
 
         # 滑动条设置调节阀控制信号
-        self.slider_adjust_input.valueChanged.connect(self.adjust_input_change)
+        self.slider_adjust_input.valueChanged.connect(self.SB_AdjustValveInput.setValue)
+        self.SB_AdjustValveInput.valueChanged.connect(self.slider_adjust_input.setValue)
 
+        # 总线阀控制信号
+        self.BT_Send.clicked.connect(self.press_send)
+        self.BT_WriteIn.clicked.connect(self.press_write_in)
+        self.BT_ClearR.clicked.connect(self.press_clear_use)
+
+    # 标签页
     def stack1Ui(self):
         """
 
         :return:
         """
-        self.lb_control_mode.setText('      控制方式:')
+        self.lb_control_mode.setText('控制方式:')
         self.CB_SelectControl.setMinimumHeight(40)
         self.CB_SelectControl.addItem('None')
-        self.lb_power_choose.setText('        电压:')
+        self.lb_power_choose.setText('电压:')
         # self.CB_DCorAC.setMinimumHeight(40)
         # self.CB_DCorAC.addItem('DC')
         # self.CB_DCorAC.addItem('AC')
@@ -380,8 +385,9 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_adjust_input.setText('调节阀输入：')
         self.SB_AdjustValveInput.setMinimumHeight(40)
         self.SB_AdjustValveInput.setMinimumWidth(60)
+        self.SB_AdjustValveInput.setMaximum(20.00)
         self.lb_unit_ma.setText('mA')
-        self.lb_step_length.setText('            步距:')
+        self.lb_step_length.setText('步距:')
 
         self.CB_StepValve.setMinimumHeight(40)
         self.CB_StepValve.setMinimumWidth(50)
@@ -399,14 +405,15 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.slider_adjust_input.setTickPosition(QtWidgets.QSlider.TicksAbove)
         self.slider_adjust_input.setTickInterval(1)
 
-        self.Layout_AdjustPage.addWidget(self.lb_adjust_input, 1, 0)
-        self.Layout_AdjustPage.addWidget(self.SB_AdjustValveInput, 1, 1)
-        self.Layout_AdjustPage.addWidget(self.lb_unit_ma, 1, 2)
-        self.Layout_AdjustPage.addWidget(self.lb_step_length, 1, 3)
-        self.Layout_AdjustPage.addWidget(self.CB_StepValve, 1, 4)
-        self.Layout_AdjustPage.addWidget(self.lb_unit_ma2, 1, 5)
-        self.Layout_AdjustPage.addWidget(self.lb_adjust_output, 1, 6)
-        self.Layout_AdjustPage.addWidget(self.slider_adjust_input, 2, 0, 1, 6)
+        self.Layout_AdjustPage.addWidget(self.lb_adjust_input, 0, 0)
+        self.Layout_AdjustPage.addWidget(self.SB_AdjustValveInput, 0, 1)
+        self.Layout_AdjustPage.addWidget(self.lb_unit_ma, 0, 2)
+        self.Layout_AdjustPage.addWidget(self.slider_adjust_input, 0, 3, 1, 4)
+        self.Layout_AdjustPage.addWidget(self.lb_step_length, 1, 0)
+        self.Layout_AdjustPage.addWidget(self.CB_StepValve, 1, 1)
+        self.Layout_AdjustPage.addWidget(self.lb_unit_ma2, 1, 2)
+        self.Layout_AdjustPage.addWidget(self.lb_adjust_output, 1, 3)
+
 
     def stack3Ui(self):
         """
@@ -509,16 +516,25 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         :return:
         """
-        self.BT_Lock.setIcon(QtGui.QIcon(':/lock_closed_outline_105.8691588785px_1158659_easyicon.net.png'))
-        self.BT_Lock.setText('单击解锁')
-        self.valve_control_disabled(False)
-        hw.control_mode = sw.control_mode_selected
-        hw.voltage = float(self.SB_Voltage.text())
-        flag.control_mode_lock = 1
+        if self.CB_SelectControl.currentText() != 'None' and self.SB_Voltage.text() != '0.00':
+            self.BT_Lock.setIcon(QtGui.QIcon(':/lock_closed_outline_105.8691588785px_1158659_easyicon.net.png'))
+            self.BT_Lock.setText('单击解锁')
+            self.valve_control_disabled(False)
+            hw.control_mode = sw.control_mode_selected
+            hw.voltage = float(self.SB_Voltage.text())
+            flag.control_mode_lock = 1
 
-        # 发送信号
-        self.voltage_set.emit(hw.voltage)
-        print(hw.control_mode, hw.voltage)
+            # 发送信号
+            self.voltage_set.emit(hw.voltage)
+            print(hw.control_mode, hw.voltage)
+        if hw.control_mode['SPECIAL'] == 1:
+            self.adjust_page_update()
+            # 选择调节阀门控制信号的信号
+            self.adjust_signal_select.emit()
+
+        if hw.control_mode['SPECIAL'] == 2:
+            # 选择总线阀门控制方式时发送信号
+            self.bus_valve_select.emit()
 
     def UnlockControl(self):
         """
@@ -528,7 +544,13 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.BT_Lock.setIcon(QtGui.QIcon(':/lock_open_outline_128px_1158661_easyicon.net.png'))
         self.BT_Lock.setText('单击锁定')
         self.valve_control_disabled(True)
+        self.unlock.emit()
         flag.control_mode_lock = 0
+        if hw.control_mode['SPECIAL'] == 1:
+            self.adjust_signal_cut_off.emit()
+
+        if hw.control_mode['SPECIAL'] == 2:
+            self.bus_cut_off.emit()
 
     def valve_control_disabled(self, tof):
         """
@@ -551,12 +573,197 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         # self.CB_DCorAC.setDisabled(not tof)
         self.SB_Voltage.setDisabled(not tof)
 
-    def adjust_input_change(self):
+    @staticmethod
+    def select_control_mode(i):
+        """
+        选择一种控制方式
+        :param i:
+        :return:
+        """
+        if i:
+            sw.control_mode_selected = sw.control_mode[i - 1]
+        else:
+            sw.control_mode_selected = sw.ControlForm.copy()
+            pass
+        # hw.control_mode = sw.control_mode[i - 1]
+
+    # 电流曲线
+    def draw_dynamic(self):
         """
 
         :return:
         """
-        self.SB_AdjustValveInput.setValue(float(self.slider_adjust_input.value()))
+
+        yy = sw.current_value[-200:]
+        self.main_window_fig.update_diagram(yy, myflag=0)
+
+        # self.main_window_fig.myTable.remove()
+
+        self.change_position_signal(hw.open_signal, hw.close_signal)
+        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
+
+    @staticmethod
+    def press_dynamic():
+        """
+
+        :return:
+        """
+        global fg_update_diagram
+        fg_update_diagram = 1
+
+    @staticmethod
+    def press_static():
+        """
+
+        :return:
+        """
+        global fg_update_diagram
+        fg_update_diagram = 0
+
+    # 总线阀控制
+    def press_send(self):
+        """
+
+        :return:
+        """
+        text = self.LE_Send.text()
+        self.send_clicked.emit(text)
+        pass
+
+    def press_write_in(self):
+        """
+
+        :return:
+        """
+        date = self.DE_SetDate.date().getDate()
+        byte_0 = hex(int(str(date[0])[:2]))[2:]
+        byte_1 = hex(int(str(date[0])[2:]))[2:]
+        byte_2 = hex(date[1])[2:].rjust(2, '0')
+        byte_3 = hex(date[2])[2:].rjust(2, '0')
+
+        cmd_date = '01 5B ' + byte_0 + ' ' + byte_1 + ' ' + byte_2 + ' ' + byte_3
+        self.send_clicked.emit(crc(cmd_date.upper()))
+        # print(date)
+
+    def press_clear_use(self):
+        """
+
+        :return:
+        """
+        self.send_clicked.emit(sw.cmd_clear)
+        pass
+
+    def bus_return_show(self, msg):
+        """
+
+        :param msg:
+        :return:
+        """
+        # 字符串分割
+        result = re.sub(r"(?<=\w)(?=(?:\w\w)+$)", " ", msg)
+        if crc_check(result):
+            self.LE_Received.setText(result.upper())
+        else:
+            self.LE_Received.setText('返回错误')
+
+    # 自动测试
+    def get_open_time(self):
+        """
+        获取自动测试开阀时间
+        :return:
+        """
+        sw.open_time = self.SB_OpenTime.text()
+
+    def get_close_time(self):
+        """
+        获取自动测试关阀时间
+        :return:
+        """
+        sw.close_time = self.SB_CloseTime.text()
+
+    def begin_auto_test(self):
+        """
+        开始自动测试
+        :return:
+        """
+        self.BT_Begin.setDisabled(True)
+        self.BT_Stop.setDisabled(False)
+        # self.open_valve()
+
+        if self.auto_test_timer.isActive():
+            self.auto_test_timer.stop()
+        try:
+            self.auto_test_timer.timeout.disconnect(self.begin_auto_test)
+        except:
+            pass
+        self.auto_test_timer.timeout.connect(self.auto_test)
+        self.auto_test_timer.start(int(sw.open_time) * 1000)
+
+        pass
+
+    def stop_auto_test(self):
+        """
+        结束自动测试
+        :return:
+        """
+        self.BT_Begin.setDisabled(False)
+        self.BT_Stop.setDisabled(True)
+        self.auto_test_timer.stop()
+
+    def auto_test(self):
+        """
+        自动循环测试
+        :return:
+        """
+
+        # self.close_valve()
+        if self.auto_test_timer.isActive():
+            self.auto_test_timer.stop()
+        try:
+            self.auto_test_timer.timeout.disconnect(self.auto_test)
+        except:
+            pass
+        self.auto_test_timer.timeout.connect(self.begin_auto_test)
+        self.auto_test_timer.start(int(sw.close_time) * 1000)
+
+    # 窗口更新
+    def window_update(self):
+        """
+        更新窗口电流电压以及到位信号
+        :return:
+        """
+
+        # print(time.time())
+        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
+        self.change_position_signal(hw.open_signal, hw.close_signal)
+
+    def adjust_page_update(self):
+        """
+
+        :return:
+        """
+        if hw.control_mode['SIGNAL'] in [1, 2]:
+            self.lb_unit_ma.setText('mA')
+            self.lb_unit_ma2.setText('mA')
+            self.SB_AdjustValveInput.setMaximum(20.00)
+            self.slider_adjust_input.setRange(0, 20)
+            self.SB_AdjustValveInput.setValue(0.00)
+            self.slider_adjust_input.setValue(0)
+        elif hw.control_mode['SIGNAL'] in [3, 4]:
+            self.lb_unit_ma.setText('V')
+            self.lb_unit_ma2.setText('V')
+            self.SB_AdjustValveInput.setMaximum(5.00)
+            self.slider_adjust_input.setRange(0, 5)
+            self.SB_AdjustValveInput.setValue(0.00)
+            self.slider_adjust_input.setValue(0)
+        elif hw.control_mode['SIGNAL'] in [5, 6]:
+            self.lb_unit_ma.setText('V')
+            self.lb_unit_ma2.setText('V')
+            self.SB_AdjustValveInput.setMaximum(10.00)
+            self.slider_adjust_input.setRange(0, 10)
+            self.SB_AdjustValveInput.setValue(0.00)
+            self.slider_adjust_input.setValue(0)
+        pass
 
     def change_host_name(self, name):
         """
@@ -602,154 +809,45 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.lb_open_completely.setText('开阀到位：' + opened)
         self.lb_close_completely.setText('关阀到位：' + closed)
 
-    @staticmethod
-    def select_control_mode(i):
-        """
-        选择一种控制方式
-        :param i:
-        :return:
-        """
-        if i:
-            sw.control_mode_selected = sw.control_mode[i - 1]
-        else:
-            sw.control_mode_selected = sw.ControlForm.copy()
-            pass
-        # hw.control_mode = sw.control_mode[i - 1]
 
-    def draw_dynamic(self):
+class UpdateThread(QtCore.QThread):
+    """
+    更新界面数据和曲线
+    """
+
+    def __init__(self, _win):
+
+        super(UpdateThread, self).__init__()
+        self.win = _win
+
+    def run(self):
         """
 
         :return:
         """
 
-        yy = sw.current_value[-200:]
-        self.main_window_fig.update_diagram(yy, myflag=0)
+        window_update_time = time.time()
+        while True:
+            time.sleep(1)
+            now_time = time.time()
+            if now_time - window_update_time > 0.5:
+                self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
+                self.win.change_position_signal(hw.open_signal, hw.close_signal)
+                window_update_time = time.time()
 
-        # self.main_window_fig.myTable.remove()
+            if fg_update_diagram == 1:
 
-        self.change_position_signal(hw.open_signal, hw.close_signal)
-        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
-
-    @staticmethod
-    def press_dynamic():
-        """
-
-        :return:
-        """
-        global fg_update_diagram
-        fg_update_diagram = 1
-
-    @staticmethod
-    def press_static():
-        """
-
-        :return:
-        """
-        global fg_update_diagram
-        fg_update_diagram = 0
-
-    def press_send(self):
-        """
-
-        :return:
-        """
-        text = self.LE_Send.text()
-        hw.bus_cmd = text
-        vc.bus_control(hw.bus_cmd)
-
-    @staticmethod
-    def get_adjust_value(value):
-        """
-
-        :param value:
-        :return:
-        """
-        vc.adjust_control(value)
-        pass
-
-    def get_open_time(self):
-        """
-        获取自动测试开阀时间
-        :return:
-        """
-        sw.open_time = self.SB_OpenTime.text()
-
-    def get_close_time(self):
-        """
-        获取自动测试关阀时间
-        :return:
-        """
-        sw.close_time = self.SB_CloseTime.text()
-
-    def begin_auto_test(self):
-        """
-        开始自动测试
-        :return:
-        """
-        self.BT_Begin.setDisabled(True)
-        self.BT_Stop.setDisabled(False)
-        self.open_valve()
-        if self.auto_test_timer.isActive():
-            self.auto_test_timer.stop()
-        try:
-            self.auto_test_timer.timeout.disconnect(self.begin_auto_test)
-        except:
-            pass
-        self.auto_test_timer.timeout.connect(self.loop_open_close)
-        self.auto_test_timer.start(int(sw.open_time) * 1000)
-
-        pass
-
-    def stop_auto_test(self):
-        """
-        结束自动测试
-        :return:
-        """
-        self.BT_Begin.setDisabled(False)
-        self.BT_Stop.setDisabled(True)
-        self.auto_test_timer.stop()
-
-    def loop_open_close(self):
-        """
-        自动循环测试
-        :return:
-        """
-
-        self.close_valve()
-        if self.auto_test_timer.isActive():
-            self.auto_test_timer.stop()
-        try:
-            self.auto_test_timer.timeout.disconnect(self.loop_open_close)
-        except:
-            pass
-        self.auto_test_timer.timeout.connect(self.begin_auto_test)
-        self.auto_test_timer.start(int(sw.close_time) * 1000)
-
-    def window_update(self):
-        """
-        更新窗口电流电压以及到位信号
-        :return:
-        """
-
-        # print(time.time())
-        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
-        self.change_position_signal(hw.open_signal, hw.close_signal)
-
-    @staticmethod
-    def open_valve():
-        """
-        开阀, 区分不同种类阀门的不同控制方式
-        :return:
-        """
-        vc.open_valve()
-
-    @staticmethod
-    def close_valve():
-        """
-        关阀
-        :return:
-        """
-        vc.close_valve()
+                # sw.current_value.append(int(100 * random.random()))
+                # del sw.current_value[0]
+                if flag.control_mode_lock:
+                    try:
+                        yy = sw.current_value[
+                             -(int(sw.current_set['small_win_show_time'] * 1000 / sw.current_set['data_interval'])):]
+                    except:
+                        yy = sw.current_value[-1000:]
+                    self.win.main_window_fig.update_diagram(yy, myflag=0)
+            else:
+                pass
 
 
 class LongPressButton(QtWidgets.QPushButton):
@@ -804,43 +902,3 @@ class LongPressButton(QtWidgets.QPushButton):
         :return:
         """
         pass
-
-
-class UpdateThread(QtCore.QThread):
-    """
-    更新界面数据和曲线
-    """
-
-    def __init__(self, _win):
-
-        super(UpdateThread, self).__init__()
-        self.win = _win
-
-    def run(self):
-        """
-
-        :return:
-        """
-
-        window_update_time = time.time()
-        while True:
-            now_time = time.time()
-            if now_time - window_update_time > 0.5:
-                self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
-                self.win.change_position_signal(hw.open_signal, hw.close_signal)
-                window_update_time = time.time()
-
-            if fg_update_diagram == 1:
-
-                # sw.current_value.append(int(100 * random.random()))
-                # del sw.current_value[0]
-                try:
-                    yy = sw.current_value[
-                         -(int(sw.current_set['small_win_show_time'] * 1000 / sw.current_set['data_interval'])):]
-                except:
-                    yy = sw.current_value[-1000:]
-                    print('3')
-                self.win.main_window_fig.update_diagram(yy, myflag=0)
-                time.sleep(1)
-            else:
-                pass

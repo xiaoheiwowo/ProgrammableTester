@@ -32,6 +32,7 @@ from public.datacache import HardwareData as hw
 from public.datacache import Flag_Of as flag
 from public.controlthread import ControlThread
 
+
 # import qdarkstyle
 
 
@@ -72,20 +73,32 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             self.control_thread.start()
 
             # 开关停按钮
-            self.BT_ValveOpen.clicked.connect(self.control_thread.digital.open_valve)
-            self.BT_ValveClose.clicked.connect(self.control_thread.digital.close_valve)
-            self.BT_ValveStop.clicked.connect(self.control_thread.digital.stop_valve)
-            self.BT_M3.clicked.connect(self.control_thread.digital.m3_valve)
-            self.BT_M4.clicked.connect(self.control_thread.digital.m4_valve)
+            self.BT_ValveOpen.clicked.connect(self.control_thread.open_valve)
+            self.BT_ValveClose.clicked.connect(self.control_thread.close_valve)
+            self.BT_ValveStop.clicked.connect(self.control_thread.stop_valve)
+            self.BT_M3.clicked.connect(self.control_thread.m3_valve)
+            self.BT_M4.clicked.connect(self.control_thread.m4_valve)
 
             # 自检开始按钮
             self.control_thread.relay_check_signal.connect(self.relay_check.get_check_result)
-
             # 设置电压信号槽
             self.voltage_set.connect(self.control_thread.adjust_voltage)
-
             # 调节阀控制信号
-            self.SB_AdjustValveInput.valueChanged.connect(self.control_thread.analog.output_20ma)
+            self.SB_AdjustValveInput.valueChanged.connect(self.control_thread.adjust_control)
+            # 解锁后电源调为0
+            self.unlock.connect(self.control_thread.power_to_zero)
+            # 选择调节阀信号
+            self.adjust_signal_select.connect(self.control_thread.adjust_signal_connect)
+            # 调节阀信号断开
+            self.adjust_signal_cut_off.connect(self.control_thread.adjust_signal_disconnect)
+            # 总线阀连接
+            self.bus_valve_select.connect(self.control_thread.bus_connect)
+            # 总线阀断开
+            self.bus_cut_off.connect(self.control_thread.bus_disconnect)
+            # 总线命令发送
+            self.send_clicked.connect(self.control_thread.rs485_send_data)
+            # 总线命令接受
+            self.control_thread.bus_cmd_get.connect(self.bus_return_show)
         except:
             print('CAN NOT WORK IN WINDOWS')
 
@@ -165,20 +178,6 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         except:
             pass
 
-    def relay_self_check(self):
-        """
-        继电器阵列自检
-        :return:
-        """
-        pass
-
-    def relay_self_check_stop(self):
-        """
-        停止自检
-        :return:
-        """
-        pass
-
     def closeEvent(self, *args, **kwargs):
         """
 
@@ -187,15 +186,13 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         :return:
         """
         try:
-            self.control_thread.digital.i2c.write_extend_io([0x00, 0x00])
-            self.control_thread.digital.i2c.init_relay()
-            self.control_thread.analog.spi_.output_0()
+            self.control_thread.elec.write_extend_output([0x00, 0x00])
+            self.control_thread.elec.init_relay_port()
+            self.control_thread.elec.output_0()
         except:
             pass
 
         self.close()
-
-
 
 
 def data_init():
@@ -210,7 +207,6 @@ def data_init():
 
 
 if __name__ == '__main__':
-
     data_init()
 
     app = QApplication(sys.argv)

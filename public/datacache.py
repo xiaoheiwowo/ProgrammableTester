@@ -25,16 +25,51 @@ class SoftwareData(object):
                    'PROTOCOL': 0,
                    'BAUDRATE': 0}
 
+    control_mode_bak = [{'NAME': 'BD3', 'POWER': 2, 'ON': [0, 1, 12], 'OFF': [0, 12], 'STOP': [], 'M3': [], 'M4': [],
+                         'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+                        {'NAME': 'BD3S', 'POWER': 1, 'ON': [20, 21, 32, 43, 54, 65], 'OFF': [20, 32, 43, 54, 65],
+                         'STOP': [],
+                         'M3': [], 'M4': [], 'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+                        {'NAME': 'B3', 'POWER': 1, 'ON': [0, 11], 'OFF': [0, 12], 'STOP': [], 'M3': [], 'M4': [],
+                         'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+                        {'NAME': '0~20mA', 'POWER': 1, 'ON': [20, 32, 81, 73, 92], 'OFF': [], 'STOP': [], 'M3': [],
+                         'M4': [], 'SPECIAL': 1, 'SIGNAL': 1, 'EFFECT': 1, 'PROTOCOL': 0, 'BAUDRATE': 0},
+                        {'NAME': 'RS485', 'POWER': 1, 'ON': [20, 31, 102, 113], 'OFF': [], 'STOP': [], 'M3': [],
+                         'M4': [],
+                         'SPECIAL': 2, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 1, 'BAUDRATE': 4},
+                        {'NAME': 'BP5', 'POWER': 1, 'ON': [23, 34, 40, 51, 62], 'OFF': [24, 33, 40, 51, 62], 'STOP': [],
+                         'M3': [], 'M4': [], 'SPECIAL': 3, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0}
+                        ]
+    '''
+    键值说明：
+    ID：int 序号
+    NAME: str 控制方式名称 
+    POWER: int 电源类型 0:None 1:DC 2:AC
+    ON: list 继电器接通列表
+    OFF: list 继电器接通列表
+    STOP: list 继电器接通列表
+    M3: list 继电器接通列表
+    M4: list 继电器接通列表
+    SPECIAL: int 0: 普通  1: 调节阀  2: 总线阀  3: BP5
+    SIGNAL: 调节阀控制信号6种 0 None, 1 0~20mA, 2 4~20mA, 3 0~5V, 4 1~5V, 5 0~10V, 6 2~10V
+    EFFECT: 作用方式，0: None  1: 正作用  2: 反作用
+    PROTOCOL: 总线协议 0：None 1: RS485  2: ModBus
+    BAUDRATE: 波特率  1200~19200
+    ...
+    '''
+
     # 控制方式数据
     control_mode = []
     control_mode_selected = {}
 
     # 总线阀
+
     cmd_on = '01 06 00 04 00 00 C8 0B'
     cmd_off = '01 06 00 04 00 64 C9 E0'
     cmd_stop = '01 06 00 04 00 BA 49 B8'
     cmd_m3 = '01 06 00 04 00 1E 48 03'
     cmd_m4 = '01 06 00 04 00 B3 89 BE'
+    cmd_clear = '01 5C 00 00 00 00 D1 C7'
     data_bits = 3
     check_bits = 1
     stop_bits = 1
@@ -274,6 +309,3 @@ class Flag_Of(object):
 
     # 更新主界面电压电流值及到位信号标志位
     update_va_value = 0
-
-    # 控制方式
-    control_mode = []

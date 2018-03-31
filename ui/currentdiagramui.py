@@ -10,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import diagram, doubleslider
 from public.datacache import SoftwareData as sw
+from public.datacache import Flag_Of as flag
 
 
 class Ui_CurrentDiagram(QtWidgets.QDialog):
@@ -205,9 +206,11 @@ class RefreshThread(QtCore.QThread):
         刷新曲线图
         :return:
         """
+        self.win.draw_dynamic()
         while True:
             time.sleep(1)
-            if not self.win.fg_static:
-                # self.win.dynamic_diagram()
-                self.win.draw_dynamic()
+            if flag.control_mode_lock:
+                if not self.win.fg_static:
+                    # self.win.dynamic_diagram()
+                    self.win.draw_dynamic()
             pass
