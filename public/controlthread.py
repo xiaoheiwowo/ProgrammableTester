@@ -33,8 +33,20 @@ class ControlThread(QThread):
     relay_check_signal = pyqtSignal(int, int, int)
     # 总线命令收到信号
     bus_cmd_get = pyqtSignal(str)
+    # 实体按钮信号
+    bt_on_clicked = pyqtSignal()
+    bt_off_clicked = pyqtSignal()
+    bt_stop_clicked = pyqtSignal()
+    # 阀门bp5信号
+    # is_bp5 = pyqtSignal(int)
 
-    timer_start = pyqtSignal(int)
+    # 校准采样结果
+    cal_sample_result_aca = pyqtSignal(float)
+    cal_sample_result_acv = pyqtSignal(float)
+    cal_sample_result_dca = pyqtSignal(float)
+    cal_sample_result_dcv = pyqtSignal(float)
+
+    vol_cur_position = pyqtSignal(str, str, str, str)
 
     def __init__(self):
         super(ControlThread, self).__init__()
@@ -61,6 +73,10 @@ class ControlThread(QThread):
 
         :return:
         """
+
+        # my_timer = QTimer()
+        # my_timer.timeout.connect(self.read_position_signal)
+        # my_timer.start(1000)
         my_timer = 0
         self.elec.output_cut_x(1)
         while True:
@@ -68,29 +84,36 @@ class ControlThread(QThread):
 
             my_timer += 1
             # 定时器
-            if my_timer == 100:
+            if my_timer == 50:
                 flag.update_va_value = 1
                 my_timer = 0
 
             # 控制方式锁定
             if flag.control_mode_lock:
                 self.sample_current_once()
-
                 # 显示检测位置及电压电流
                 if flag.update_va_value:
                     self.read_position_signal()
                     flag.update_va_value = 0
-
+            else:
+                self.elec.init_relay_port()
             # 中断信号处理
             if flag.button_int:
                 self.int_from_io()
                 pass
 
+            # BP5 停阀
+            if flag.bp5_on:
+                self.bp5_on()
+
+            if flag.bp5_off:
+                self.bp5_off()
+
             # 继电器自检程序
             if flag.relay_check:
 
                 # 断开所有继电器
-                self.elec.i2c.init_relay_port()
+                self.elec.init_relay_port()
                 self.elec.output_cut_x(0)
                 self.elec.select_signal()
 
@@ -106,16 +129,32 @@ class ControlThread(QThread):
                 self.elec.output_cut_x(1)
                 pass
 
-    def time_control(self, switch):
-        if switch and not self.timer_update_win.isActive():
-            self.timer_update_win.start(1000)
-            print(1)
-        elif not switch and self.timer_update_win.isActive():
-            self.timer_update_win.stop()
-            print(2)
-        else:
-            print(3)
-            pass
+            # 采样校准
+            # if flag.calibration_start:
+            #     if open_cal:
+            #         if not hw.calibration_page:
+            #             for i in hw.calibration_relay_connect[hw.calibration_page]:
+            #                 if i:
+            #                     self.elec.connect_check_relay(i)
+            #                     open_cal = 0
+            #
+            # else:
+            #     open_cal = 1
+            #     self.elec.select_power(0)
+            #     self.elec.output_ac_power()
+            #     self.elec.output_dc_power()
+            #     self.elec.init_relay_port()
+
+    # def time_control(self, switch):
+    #     if switch and not self.timer_update_win.isActive():
+    #         self.timer_update_win.start(1000)
+    #         print(1)
+    #     elif not switch and self.timer_update_win.isActive():
+    #         self.timer_update_win.stop()
+    #         print(2)
+    #     else:
+    #         print(3)
+    #         pass
 
     def sample_current_once(self):
         """
@@ -144,6 +183,8 @@ class ControlThread(QThread):
 
         :return:
         """
+        # print(self.elec.read_u_dc())
+        # print(self.elec.read_u_ac())
         if hw.control_mode['POWER'] == 1:
             return self.elec.read_u_dc() * 10
         elif hw.control_mode['POWER'] == 2:
@@ -157,17 +198,29 @@ class ControlThread(QThread):
 
         :return:
         """
-        hw.voltage_value_show = str(round(self.read_voltage(), 2))
-        hw.current_value_show = str(sw.current_value[-1])
+        # hw.voltage_value_show = str(round(self.read_voltage(), 2))
+        # hw.current_value_show = str(sw.current_value[-1])
+        #
+        # if self.elec.read_IO(self.elec.ON_SIGNAL):
+        #     hw.open_signal = 'YES'
+        # else:
+        #     hw.open_signal = 'NO'
+        # if self.elec.read_IO(self.elec.OFF_SIGNAL):
+        #     hw.close_signal = 'YES'
+        # else:
+        #     hw.close_signal = 'NO'
 
+        voltage_value_show = str(round(self.read_voltage(), 2))
+        current_value_show = str(round(self.read_current(), 2))
         if self.elec.read_IO(self.elec.ON_SIGNAL):
-            hw.open_signal = 'YES'
+            open_signal = 'YES'
         else:
-            hw.open_signal = 'NO'
+            open_signal = 'NO'
         if self.elec.read_IO(self.elec.OFF_SIGNAL):
-            hw.close_signal = 'YES'
+            close_signal = 'YES'
         else:
-            hw.close_signal = 'NO'
+            close_signal = 'NO'
+        self.vol_cur_position.emit(voltage_value_show, current_value_show, open_signal, close_signal)
 
     def relay_self_check(self, index):
         """
@@ -214,10 +267,10 @@ class ControlThread(QThread):
         """
         if hw.control_mode['POWER'] == 1:
             self.elec.output_ac_power()
-            self.elec.output_dc_power(int(vol_value) * 5 * hw.correct_dc / 36)
+            self.elec.output_dc_power(float(vol_value) * 5 * hw.correct_dc / 36)
         elif hw.control_mode['POWER'] == 2:
             self.elec.output_dc_power()
-            self.elec.output_ac_power(int(vol_value) * 5 * hw.correct_ac / 300)
+            self.elec.output_ac_power(float(vol_value) * 5 * hw.correct_ac / 300)
         else:
             pass
         # 确定电压合格后接通电源
@@ -229,6 +282,24 @@ class ControlThread(QThread):
                 if self.voltage_ok():
                     self.connect_power()
                     break
+
+    def cal_adjust_voltage(self, page, vol_value):
+        """
+
+        :param page:
+        :param vol_value:
+        :return:
+        """
+        print(page, vol_value)
+        if page == 'aca' or 'acv':
+            self.elec.output_dc_power()
+            self.elec.output_ac_power(vol_value * 5 / 300)
+        elif page == 'dcv' or 'dca':
+            self.elec.output_ac_power()
+            self.elec.output_dc_power(vol_value * 5 / 36)
+
+        # 确定电压合格后接通电源
+        self.cal_connect_power(page)
 
     def power_to_zero(self):
         """
@@ -245,7 +316,7 @@ class ControlThread(QThread):
         :return:
         """
         if hw.voltage:
-            if abs(self.read_voltage() - hw.voltage) < 2:
+            if abs(self.read_voltage() - hw.voltage) < 5:
                 return 1
             else:
                 return 0
@@ -263,6 +334,20 @@ class ControlThread(QThread):
             print('connect power error')
         pass
 
+    def cal_connect_power(self, page):
+        """
+
+        :param page:
+        :return:
+        """
+        try:
+            if page == 'aca' or 'acv':
+                self.elec.select_power(2)
+            elif page == 'dcv' or 'dca':
+                self.elec.select_power(1)
+        except Exception:
+            print('connect power error')
+
     def int_from_io(self):
         """
         中断
@@ -271,14 +356,59 @@ class ControlThread(QThread):
         extend_in_bak = hw.extend_in[:]
         hw.extend_in = self.elec.read_digital()
         # 检测输入口
-
+        bt_num = None
         for i in [5, 6, 8, 10, 11, 12, 13, 14, 15]:
             if extend_in_bak[i] == 0 and hw.extend_in[i] == 1:
-                print('IO口电平变化: ' + str(i))
+                debug_print('IO口电平变化: ' + str(i))
+                bt_num = i
                 break
         else:
-            print('null')
+            # print('null')
+            pass
+
+        self.button_clicked(bt_num)
         flag.button_int = 0
+
+    def button_clicked(self, bt_num):
+        """
+
+        :param bt_num:
+        :return:
+        """
+        if flag.control_mode_lock:
+            if bt_num == self.elec.BT_OPEN:
+                self.open_valve()
+                self.bt_on_clicked.emit()
+            elif bt_num == self.elec.BT_CLOSE:
+                self.close_valve()
+                self.bt_off_clicked.emit()
+            elif bt_num == self.elec.BT_STOP:
+                self.stop_valve()
+                self.bt_stop_clicked.emit()
+            elif bt_num == self.elec.BT_OUT_CONTROL:
+                print('外控')
+            else:
+                pass
+
+    def bp5_on(self):
+        """
+
+        :return:
+        """
+        if self.elec.read_IO(self.elec.ON_SIGNAL):
+            self.stop_valve()
+
+            flag.bp5_on = 0
+
+    def bp5_off(self):
+        """
+
+        :return:
+        """
+        if self.elec.read_IO(self.elec.OFF_SIGNAL):
+            self.stop_valve()
+
+            flag.bp5_off = 0
 
     # Control
     def open_valve(self):
@@ -343,7 +473,15 @@ class ControlThread(QThread):
         # 总线阀
         elif hw.control_mode['SPECIAL'] == 2:
             self.elec.serial_send(sw.cmd_on)
-            # print(self.elec.serial_receive())
+            print(self.elec.serial_receive())
+            pass
+
+        # BP5
+        elif hw.control_mode['SPECIAL'] == 3:
+            self.elec.init_relay_port()
+            for j in hw.control_mode['ON']:
+                self.elec.connect_array_relay(j)
+            flag.bp5_on = 1
             pass
         pass
 
@@ -407,8 +545,15 @@ class ControlThread(QThread):
         # 总线阀
         elif hw.control_mode['SPECIAL'] == 2:
             self.elec.serial_send(sw.cmd_off)
-            # print(type(self.elec.serial_receive()))
+            print(self.elec.serial_receive())
             pass
+
+        # BP5
+        elif hw.control_mode['SPECIAL'] == 3:
+            self.elec.init_relay_port()
+            for j in hw.control_mode['ON']:
+                self.elec.connect_array_relay(j)
+            flag.bp5_off = 1
 
         pass
 
@@ -419,6 +564,7 @@ class ControlThread(QThread):
         """
         if hw.control_mode['SPECIAL'] == 2:
             self.elec.serial_send(sw.cmd_stop)
+            print(self.elec.serial_receive())
         else:
             debug_print('stop valve ' + str(hw.control_mode['STOP']))
             self.elec.init_relay_port()
@@ -508,8 +654,46 @@ class ControlThread(QThread):
         :return:
         """
         self.elec.serial_send(msg)
-        # self.elec.serial_receive()
         time.sleep(0.5)
-
         self.bus_cmd_get.emit(self.elec.serial_receive())
 
+    def quit_calibration(self):
+        """
+
+        :return:
+        """
+        self.elec.select_power(0)
+        self.elec.output_ac_power()
+        self.elec.output_dc_power()
+        self.elec.init_relay_port()
+
+    def prepare_for_calibration(self, page):
+        """
+
+        :param page:
+        :return:
+        """
+        for i in hw.calibration_relay_connect[page]:
+            if i:
+                self.elec.connect_check_relay(i)
+
+    def cal_sample_once(self, page):
+        """
+
+        :param page:
+        :return:
+        """
+        if page == 'aca':
+            result = self.elec.read_i_ac()
+            self.cal_sample_result_aca.emit(result)
+        elif page == 'acv':
+            result = self.elec.read_u_ac()
+            self.cal_sample_result_acv.emit(result)
+        elif page == 'dca':
+            result = self.elec.read_i_dc()
+            self.cal_sample_result_dca.emit(result)
+        elif page == 'dcv':
+            result = self.elec.read_u_dc()
+            self.cal_sample_result_dcv.emit(result)
+        else:
+            debug_print('page error')

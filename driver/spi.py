@@ -546,8 +546,11 @@ class SPI_Driver:
         # Concatenate the bytes
         total = (result1 << 16) + (result2 << 8) + result3
 
-        # return total
-        return round(total * 5 / 2 ** 23, 3)
+        if total > 2 ** 23:
+            return 0.0
+        else:
+            return round(total * 5 / 2 ** 23, 3)
+            # return total
 
     def ReadID(self):
         """
@@ -652,6 +655,40 @@ class SPI_Driver:
 
         while end - start < 0.001 * _ms:
             end = time.time()
+
+    def output_dc_power(self, vol=0.0):
+        """
+
+        :param vol:0~5v
+        :return:
+        """
+        debug_print('调节直流电源 输出：' + str(vol) + 'V')
+        if 0 <= vol <= 5:
+            vol_2 = int(vol * 1023 / 5)
+            high_bit = self.DAC_B | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_ac_power(self, vol=0):
+        """
+
+        :param vol: 电压值0~5v
+        :return:
+        """
+        debug_print('调节直流电源 输出：' + str(vol) + 'V')
+        if 0 <= vol <= 5:
+            vol_2 = int(vol * 1023 / 5)
+            high_bit = self.DAC_A | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
 
 
 if __name__ == '__main__':

@@ -63,10 +63,12 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         self.BT_FullScreen.clicked.connect(self.show_current_diagram_form)
         self.control_set.confirm.connect(self.update_main_win)
 
+        self.control_set.BT_Advanced.clicked.connect(self.show_remote_control_form)
+
         # 启动tcp server线程
         # self.tcp_thread = TcpThread()
         # self.tcp_thread.start()
-
+        # self.power_calibration.tab_dcv.dia_new.cal_sample.connect(self.cal_adjust_voltage)
         try:
             # 启动控制线程
             self.control_thread = ControlThread()
@@ -99,6 +101,35 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             self.send_clicked.connect(self.control_thread.rs485_send_data)
             # 总线命令接受
             self.control_thread.bus_cmd_get.connect(self.bus_return_show)
+
+            # 准备添加校准数据
+            self.power_calibration.tab_aca.add_cal_data.connect(self.control_thread.prepare_for_calibration)
+            self.power_calibration.tab_acv.add_cal_data.connect(self.control_thread.prepare_for_calibration)
+            self.power_calibration.tab_dca.add_cal_data.connect(self.control_thread.prepare_for_calibration)
+            self.power_calibration.tab_dcv.add_cal_data.connect(self.control_thread.prepare_for_calibration)
+            # 采样校准调节电压
+            self.power_calibration.tab_aca.dia_new.cal_adjust_vol.connect(self.control_thread.cal_adjust_voltage)
+            self.power_calibration.tab_acv.dia_new.cal_adjust_vol.connect(self.control_thread.cal_adjust_voltage)
+            self.power_calibration.tab_dca.dia_new.cal_adjust_vol.connect(self.control_thread.cal_adjust_voltage)
+            self.power_calibration.tab_dcv.dia_new.cal_adjust_vol.connect(self.control_thread.cal_adjust_voltage)
+            # 采样一次
+            self.power_calibration.tab_aca.dia_new.cal_sample.connect(self.control_thread.cal_sample_once)
+            self.power_calibration.tab_acv.dia_new.cal_sample.connect(self.control_thread.cal_sample_once)
+            self.power_calibration.tab_dca.dia_new.cal_sample.connect(self.control_thread.cal_sample_once)
+            self.power_calibration.tab_dcv.dia_new.cal_sample.connect(self.control_thread.cal_sample_once)
+            # 采样数据返回给界面
+            self.control_thread.cal_sample_result_aca.connect(self.power_calibration.tab_aca.dia_new.get_sampling)
+            self.control_thread.cal_sample_result_acv.connect(self.power_calibration.tab_acv.dia_new.get_sampling)
+            self.control_thread.cal_sample_result_dca.connect(self.power_calibration.tab_dca.dia_new.get_sampling)
+            self.control_thread.cal_sample_result_dcv.connect(self.power_calibration.tab_dcv.dia_new.get_sampling)
+            # 添加一组校准数据完成
+            self.power_calibration.tab_aca.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
+            self.power_calibration.tab_acv.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
+            self.power_calibration.tab_dca.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
+            self.power_calibration.tab_dcv.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
+
+            self.control_thread.vol_cur_position.connect(self.update_vol_cur_pos)
+
         except:
             print('CAN NOT WORK IN WINDOWS')
 

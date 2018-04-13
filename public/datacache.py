@@ -63,7 +63,6 @@ class SoftwareData(object):
     control_mode_selected = {}
 
     # 总线阀
-
     cmd_on = '01 06 00 04 00 00 C8 0B'
     cmd_off = '01 06 00 04 00 64 C9 E0'
     cmd_stop = '01 06 00 04 00 BA 49 B8'
@@ -141,25 +140,17 @@ class SoftwareData(object):
     control_set_bak = {'use_blank': True}
 
     # 电源采样校准数据
-    data_list = {'acv': [[0, '0x0000', 0],
-                         [100, '0x5555', 101],
-                         [200, '0xAAAA', 202],
-                         [300, '0xFFFF', 303]],
+    data_list = {'acv': [[0, 0, 0],
+                         [300, 300, 303]],
 
-                 'aca': [[0, '0x0000', 0],
-                         [100, '0x5555', 1],
-                         [200, '0xAAAA', 2],
-                         [300, '0xFFFF', 3]],
+                 'aca': [[0, 0, 0],
+                         [300, 3, 3]],
 
-                 'dcv': [[0, '0x0000', 0],
-                         [10, '0x5555', 11],
-                         [20, '0xAAAA', 22],
-                         [30, '0xFFFF', 33]],
+                 'dcv': [[0, 0, 0],
+                         [30, 30, 33]],
 
-                 'dca': [[0, '0x0000', 0],
-                         [1, '0x5555', 1],
-                         [2, '0xAAAA', 2],
-                         [3, '0xFFFF', 3]]}
+                 'dca': [[0, 0, 0],
+                         [3, 3, 3]]}
 
     data = {'control_set_bak': {'use_blank': True},
             'current_valve': current_value}
@@ -277,6 +268,13 @@ class HardwareData(object):
     correct_ac = 5 / 5.11
     correct_dc = 5 / 5.08
 
+    # 校准页面
+    # calibration_page = None
+    calibration_relay_connect = {'acv': [],
+                                 'aca': [],
+                                 'dcv': [],
+                                 'dca': []}
+
 
 class DataForServer(object):
     """
@@ -309,3 +307,10 @@ class Flag_Of(object):
 
     # 更新主界面电压电流值及到位信号标志位
     update_va_value = 0
+
+    # BP5 开关标志位
+    bp5_on = 0
+    bp5_off = 0
+
+    # 进入采样校准
+    # calibration_start = 0

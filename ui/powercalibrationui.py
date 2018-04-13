@@ -9,6 +9,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui import dialogbutton
 from public.datacache import SoftwareData as sw
+from public.datacache import HardwareData as hw
+from public.datacache import Flag_Of as flag
 
 
 class Ui_PowerCalibration(QtWidgets.QDialog):
@@ -124,6 +126,8 @@ class Tab_Widgets(QtWidgets.QWidget):
                              '3、待电流表读数稳定后将电流表示数填入In。\n'
                              '4、重复上述步骤添加多组数据。'}
 
+    add_cal_data = QtCore.pyqtSignal(str)
+
     def __init__(self, widget, page, parent=None):
         """
         初始化
@@ -147,7 +151,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.init_widget()
         self.load_data()
 
-        self.dia_new = Dia_Add_Line(self, voltage_limit=305, page=page)
+        self.dia_new = Dia_Add_Line(self, voltage_limit=305, page=self.page)
 
         # signal
         self.bt_new.clicked.connect(self.list_append_line)
@@ -216,7 +220,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         """
         for i in range(len(sw.data_list[self.page])):
             item1 = QtWidgets.QTableWidgetItem(str(sw.data_list[self.page][i][0]))
-            item2 = QtWidgets.QTableWidgetItem(sw.data_list[self.page][i][1])
+            item2 = QtWidgets.QTableWidgetItem(str(sw.data_list[self.page][i][1]))
             item3 = QtWidgets.QTableWidgetItem(str(sw.data_list[self.page][i][2]))
             self.tw_list.setItem(i, 1, item1)
             self.tw_list.setItem(i, 2, item2)
@@ -228,9 +232,12 @@ class Tab_Widgets(QtWidgets.QWidget):
         :return:
         """
         self.dia_new.le_samp.clear()
-        self.dia_new.sb_vol.clear()
+        self.dia_new.sb_vol.setValue(0)
         self.dia_new.le_real.clear()
         self.dia_new.show()
+
+        # 发射信号 校准表中添加数据
+        self.add_cal_data.emit(self.page)
 
     def list_select_line(self, item):
         """
@@ -260,7 +267,6 @@ class Tab_Widgets(QtWidgets.QWidget):
 
         :return:
         """
-        print('x')
         self.list_checkbox = []
         self.init_widget()
         self.load_data()
@@ -272,6 +278,11 @@ class Dia_Add_Line(QtWidgets.QDialog):
     """
 
     get_valve = QtCore.pyqtSignal()  # [int, str, int])
+    # 校准界面调节电压按钮信号
+    cal_adjust_vol = QtCore.pyqtSignal(str, float)
+    cal_sample = QtCore.pyqtSignal(str)
+
+    add_data_finish = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, voltage_limit=None, page=None):
         super(Dia_Add_Line, self).__init__(parent)
@@ -283,9 +294,10 @@ class Dia_Add_Line(QtWidgets.QDialog):
         label_vol = QtWidgets.QLabel()
         label_vol.setFixedSize(50, 40)
 
-        self.sb_vol = QtWidgets.QSpinBox()
+        self.sb_vol = QtWidgets.QDoubleSpinBox()
         self.sb_vol.setFixedSize(100, 40)
         self.sb_vol.setRange(0, voltage_limit)
+        # self.sb_vol.setValue(0.0)
         bt_adjust = QtWidgets.QPushButton()
         bt_adjust.setFixedSize(100, 40)
         bt_adjust.setText('调节电压')
@@ -337,8 +349,18 @@ class Dia_Add_Line(QtWidgets.QDialog):
         layout.addWidget(bt_save, 2, 2)
 
         # signal
+        bt_adjust.clicked.connect(self.adjust_voltage)
         bt_save.clicked.connect(self.save_valve)
-        bt_samp.clicked.connect(self.get_sampling)
+        bt_samp.clicked.connect(lambda: self.cal_sample.emit(self.page))
+
+    def adjust_voltage(self):
+        """
+
+        :return:
+        """
+        if self.sb_vol.text():
+            vol = float(self.sb_vol.text())
+            self.cal_adjust_vol.emit(self.page, vol)
 
     def save_valve(self):
         """
@@ -346,21 +368,28 @@ class Dia_Add_Line(QtWidgets.QDialog):
         :return:
         """
         try:
-            list1 = [int(self.sb_vol.text()), self.le_samp.text(), int(self.le_real.text())]
-            a = True
-        except ValueError:
-            print('ValueError')
-            a = False
-        if a:
-            sw.data_list[self.page].append(list1)
+            list_1 = [float(self.sb_vol.text()), float(self.le_samp.text()), float(self.le_real.text())]
+            sw.data_list[self.page].append(list_1)
             self.get_valve.emit()
-            print(list1)
+            print(list_1)
+        except Exception:
+            print('Exception')
         self.close()
 
-    def get_sampling(self):
+    def get_sampling(self, sample_value=0):
         """
 
         :return:
         """
-        self.le_samp.setText(hex(int(65535 * random.random())))
-        print(hex(int(65535 * random.random())))
+
+        self.le_samp.setText(str(sample_value))
+
+    def closeEvent(self, QCloseEvent):
+        """
+
+        :param QCloseEvent:
+        :return:
+        """
+
+        self.add_data_finish.emit()
+        self.close()

@@ -49,6 +49,7 @@ class ElectricControl(I2C_Driver, PiSerial):
     BT_OUT_CONTROL = 15
     BT_STOP = 14
     BT_CLOSE = 13
+    BT_OPEN = 12
     ON_SIGNAL = 11
     OFF_SIGNAL = 10
     RELAY_TEST = 8
@@ -232,7 +233,7 @@ class ElectricControl(I2C_Driver, PiSerial):
         wp.delay(300)
         if which == 1:
             self.change_port_state(self.PORT_DCP, self.HIGH)
-            debug_print('POWER: ' + 'DC')
+            print('POWER: ' + 'DC')
             pass
         elif which == 2:
             self.change_port_state(self.PORT_ACP, self.HIGH)

@@ -796,8 +796,8 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :param voltage:str
         :return:
         """
-        self.lb_current_value.setText('电流值：' + current)
-        self.lb_voltage_value.setText('电压值：' + voltage)
+        self.lb_current_value.setText('电流值：' + current + 'mA')
+        self.lb_voltage_value.setText('电压值：' + voltage + 'V')
 
     def change_position_signal(self, opened, closed):
         """
@@ -808,6 +808,18 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         """
         self.lb_open_completely.setText('开阀到位：' + opened)
         self.lb_close_completely.setText('关阀到位：' + closed)
+
+    def update_vol_cur_pos(self, vol='0', cur='0', open_='NO', close='NO'):
+        """
+
+        :param vol:
+        :param cur:
+        :param open_:
+        :param close:
+        :return:
+        """
+        self.change_va_value(cur, vol)
+        self.change_position_signal(open_, close)
 
 
 class UpdateThread(QtCore.QThread):
@@ -826,14 +838,14 @@ class UpdateThread(QtCore.QThread):
         :return:
         """
 
-        window_update_time = time.time()
+        # window_update_time = time.time()
         while True:
             time.sleep(1)
-            now_time = time.time()
-            if now_time - window_update_time > 0.5:
-                self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
-                self.win.change_position_signal(hw.open_signal, hw.close_signal)
-                window_update_time = time.time()
+            # now_time = time.time()
+            # if now_time - window_update_time > 0.5:
+            #     self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
+            #     self.win.change_position_signal(hw.open_signal, hw.close_signal)
+            #     window_update_time = time.time()
 
             if fg_update_diagram == 1:
 

@@ -506,7 +506,7 @@ class I2C_Driver(object):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(int_pin, GPIO.IN)
         # 中断注册
-        GPIO.add_event_detect(int_pin, GPIO.FALLING, callback=self.int_from_pca9535, bouncetime=30)
+        GPIO.add_event_detect(int_pin, GPIO.FALLING, callback=self.int_from_pca9535, bouncetime=20)
 
     @staticmethod
     def int_from_pca9535(pin_number):

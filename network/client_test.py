@@ -3,6 +3,7 @@
 import sys
 from PyQt5 import QtGui, QtWidgets, QtCore
 import socket
+import time
 
 
 # 命令字节
@@ -120,6 +121,7 @@ class ClientTest(QtWidgets.QWidget):
         # 发送数据
         client_socket.send(bytes(_data, 'utf-8'))
 
+        time.sleep(1)
         # 接收小于 1024 字节的数据
         msg = client_socket.recv(buf)
 

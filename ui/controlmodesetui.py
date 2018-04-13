@@ -11,6 +11,7 @@ from ui import remotecontrolsetui, dialogbutton
 
 import images.images_rc
 
+
 def debug_print(*string):
     """
     DEBUG
@@ -70,6 +71,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.setLayout(Layout_Main)
 
     def Init_ControlModeList(self):
+        """
+
+        :return:
+        """
         self.TW_ControlModeList = QtWidgets.QTableWidget(self)
         self.TW_ControlModeList.setFixedWidth(200)
         self.TW_ControlModeList.setRowCount(len(sw.control_mode) + 1)
@@ -100,6 +105,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.TW_ControlModeList.itemClicked.connect(self.load_wiring_ex)
 
     def Init_WiringDiagram(self):
+        """
+
+        :return:
+        """
 
         # self.GB_WiringDiagram = QtWidgets.QGroupBox(self)
         # self.GB_WiringDiagram.setTitle('接线图')
@@ -119,14 +128,20 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         # Layout_Tab = QtWidgets.QHBoxLayout(self.GB_WiringDiagram)
         # Layout_Tab.addWidget(self.TabWgt)
 
-    # 标签页
+        # 标签页
         self.TON = ControlModeWiring(self.Tab_ON)
         self.TOFF = ControlModeWiring(self.Tab_OFF)
         self.TSTOP = ControlModeWiring(self.Tab_STOP)
         self.TM3 = ControlModeWiring(self.Tab_M3)
         self.TM4 = ControlModeWiring(self.Tab_M4)
 
+        self.TabWgt.tabBarClicked.connect(self.change_page)
+
     def Init_Extend(self):
+        """
+
+        :return:
+        """
         self.GB_Extend = QtWidgets.QGroupBox(self)
         self.GB_Extend.setMinimumWidth(200)
         self.GB_Extend.setTitle('附加参数')
@@ -229,24 +244,28 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.Layout_Extend.addWidget(self.CK_isBP5)
         self.Layout_Extend.addWidget(self.Label_a15)
         # 信号
-        self.BT_Advanced.clicked.connect(self.showRemoteControlForm)
+        # self.BT_Advanced.clicked.connect(self.showRemoteControlForm)
         self.CK_isAdjustValve.clicked.connect(self.setAdjustValve)
         self.CK_isBusValve.clicked.connect(self.setBusValve)
         self.CK_isBP5.clicked.connect(self.setBP5)
 
     def readfile(self):
+        """
+
+        :return:
+        """
         a = [{'NAME': 'BD3', 'POWER': 2, 'ON': [0, 1, 12], 'OFF': [0, 12], 'STOP': [], 'M3': [], 'M4': [],
-                'SPECIAL':0,  'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+              'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
              {'NAME': 'BD3S', 'POWER': 1, 'ON': [20, 21, 32, 43, 54, 65], 'OFF': [20, 32, 43, 54, 65], 'STOP': [],
-                'M3': [], 'M4': [], 'SPECIAL':0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+              'M3': [], 'M4': [], 'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
              {'NAME': 'B3', 'POWER': 1, 'ON': [0, 11], 'OFF': [0, 12], 'STOP': [], 'M3': [], 'M4': [],
-                'SPECIAL':0,  'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
+              'SPECIAL': 0, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0},
              {'NAME': '0~20mA', 'POWER': 1, 'ON': [20, 32, 81, 73, 92], 'OFF': [], 'STOP': [], 'M3': [],
-                'M4': [], 'SPECIAL': 1,  'SIGNAL': 1, 'EFFECT': 1, 'PROTOCOL': 0, 'BAUDRATE': 0},
+              'M4': [], 'SPECIAL': 1, 'SIGNAL': 1, 'EFFECT': 1, 'PROTOCOL': 0, 'BAUDRATE': 0},
              {'NAME': 'RS485', 'POWER': 1, 'ON': [20, 31, 102, 113], 'OFF': [], 'STOP': [], 'M3': [], 'M4': [],
-                'SPECIAL': 2,  'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 1, 'BAUDRATE': 4},
+              'SPECIAL': 2, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 1, 'BAUDRATE': 4},
              {'NAME': 'BP5', 'POWER': 1, 'ON': [23, 34, 40, 51, 62], 'OFF': [24, 33, 40, 51, 62], 'STOP': [],
-                'M3': [], 'M4': [], 'SPECIAL': 3,  'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0}
+              'M3': [], 'M4': [], 'SPECIAL': 3, 'SIGNAL': 0, 'EFFECT': 0, 'PROTOCOL': 0, 'BAUDRATE': 0}
              ]
         '''
         键值说明：
@@ -272,12 +291,21 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             sw.control_mode = pickle.loads(f.read())
 
     def load_control_list(self):
+        """
+
+        :return:
+        """
         for i in range(len(sw.control_mode)):
             item0 = QtWidgets.QTableWidgetItem(sw.control_mode[i]['NAME'])
             self.TW_ControlModeList.setItem(i, 1, item0)
             self.CB_VList[i].setCurrentIndex(sw.control_mode[i]['POWER'])
 
     def load_wiring_ex(self, item):
+        """
+
+        :param item:
+        :return:
+        """
         sw.select_line = item.row()
         for m in range(160):
             self.TON.wiring[m].hide()
@@ -292,15 +320,15 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         self.CK_VList[item.row()].setChecked(True)
         data = sw.control_mode[item.row()]
         for j in data['ON']:
-            self.TON.wiring[j].show()
+            self.TON.one_wiring_show(j)
         for j in data['OFF']:
-            self.TOFF.wiring[j].show()
+            self.TOFF.one_wiring_show(j)
         for j in data['STOP']:
-            self.TSTOP.wiring[j].show()
+            self.TSTOP.one_wiring_show(j)
         for j in data['M3']:
-            self.TM3.wiring[j].show()
+            self.TM3.one_wiring_show(j)
         for j in data['M4']:
-            self.TM4.wiring[j].show()
+            self.TM4.one_wiring_show(j)
         if data['SPECIAL'] == 0:
             self.CK_isAdjustValve.setChecked(False)
             self.CK_isBusValve.setChecked(False)
@@ -323,7 +351,20 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         else:
             pass
 
+    def change_page(self, page=0):
+        """
+
+        :param page:
+        :return:
+        """
+        # print(page)
+        pass
+
     def update_control_list(self):
+        """
+
+        :return:
+        """
         # rowcount = len(gv.control_mode) - 1
         self.TW_ControlModeList.setRowCount(0)
         self.TW_ControlModeList.setRowCount(len(sw.control_mode) + 1)
@@ -343,16 +384,24 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.TW_ControlModeList.setCellWidget(i, 2, self.CB_VList[i])
 
     def new_control_mode(self):
+        """
+
+        :return:
+        """
         text, ok = QtWidgets.QInputDialog.getText(self, '新建控制方式', '输入控制方式名称：')
         if ok:
             # 赋值语句不改变引用，不会创建新的对象，此处需调用copy函数生成一个新的对象，否则会导致第二次改动上一次的dict
             newcontrol = sw.ControlForm.copy()
             newcontrol['NAME'] = str(text)
-        sw.control_mode.append(newcontrol)
+            sw.control_mode.append(newcontrol)
         self.update_control_list()
         self.load_control_list()
 
     def delate_control_mode(self):
+        """
+
+        :return:
+        """
         if sw.select_line:
             del sw.control_mode[sw.select_line]
             del self.CB_VList
@@ -362,6 +411,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         debug_print('delate')
 
     def save_control_mode(self):
+        """
+
+        :return:
+        """
         if sw.select_line:
             wiringON = []
             wiringOFF = []
@@ -410,16 +463,27 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             debug_print('save')
 
     def save_and_close(self):
+        """
+
+        :return:
+        """
         debug_print('save and close')
         # self.save_control_mode()
         self.close()
 
-
-    def showRemoteControlForm(self):
-        self.remotecontrolset = PT_RemoteControlSet()
-        self.remotecontrolset.show()
+    # def showRemoteControlForm(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.remotecontrolset = PT_RemoteControlSet()
+    #     self.remotecontrolset.show()
 
     def setAdjustValve(self):
+        """
+
+        :return:
+        """
         if self.CK_isAdjustValve.isChecked():
             self.CB_ControlMode2.setDisabled(False)
             self.CB_ActionMode.setDisabled(False)
@@ -432,7 +496,12 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.CB_ControlMode2.setDisabled(True)
             self.CB_ActionMode.setCurrentIndex(0)
             self.CB_ActionMode.setDisabled(True)
+
     def setBusValve(self):
+        """
+
+        :return:
+        """
         if self.CK_isBusValve.isChecked():
             self.BT_Advanced.setDisabled(False)
             self.CB_BusProtocol.setDisabled(False)
@@ -449,6 +518,10 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
             self.CB_BaudRate.setCurrentIndex(0)
 
     def setBP5(self):
+        """
+
+        :return:
+        """
         if self.CK_isBP5.isChecked():
             self.CK_isAdjustValve.setChecked(False)
             self.CK_isBusValve.setChecked(False)
@@ -457,48 +530,77 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         pass
 
 
-class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
-    def __init__(self, parent=None):
-        super(PT_RemoteControlSet, self).__init__(parent)
+# class PT_RemoteControlSet(remotecontrolsetui.Ui_RemoteControlSet):
+#     def __init__(self, parent=None):
+#         super(PT_RemoteControlSet, self).__init__(parent)
 
 
 class DrawWiring(QtWidgets.QWidget):
-    def __init__(self, Widget, x, y, parent=None):
+    """
+    绘制连线
+    """
+
+    def __init__(self, widget, x, y, parent=None):
         super(DrawWiring, self).__init__(parent)
         self.resize(1000, 500)
         # self.Canvas = Widget
         self.x_wiring = x
         self.y_wiring = y
-        self.setParent(Widget)
+        self.setParent(widget)
 
     def paintEvent(self, QPaintEvent):
+        """
+
+        :param QPaintEvent:
+        :return:
+        """
         qp = QtGui.QPainter()
         qp.begin(self)
         self.drawWiring(qp)
         qp.end()
 
     def drawWiring(self, qp):
+        """
+
+        :param qp:
+        :return:
+        """
         pen = QtGui.QPen(QtCore.Qt.red, 3, QtCore.Qt.SolidLine)
         qp.setPen(pen)
         qp.setBrush(QtCore.Qt.red)
         qp.drawLine(self.x_wiring, 0, self.x_wiring, self.y_wiring)
         qp.drawLine(0, self.y_wiring, self.x_wiring, self.y_wiring)
-        qp.drawEllipse(self.x_wiring-3, self.y_wiring-3, 6, 6,)
+        qp.drawEllipse(self.x_wiring - 3, self.y_wiring - 3, 6, 6, )
 
 
 class DrawBackground(QtWidgets.QWidget):
-    def __init__(self, Widget, parent=None):
+    """
+    绘制背景
+    """
+
+    def __init__(self, widget, parent=None):
         super(DrawBackground, self).__init__(parent)
         self.resize(1000, 500)
-        self.setParent(Widget)
+        self.setParent(widget)
 
     def paintEvent(self, QPaintEvent):
+        """
+
+        :param QPaintEvent:
+        :return:
+        """
         qp = QtGui.QPainter()
         qp.begin(self)
         self.drawWiring(qp)
         qp.end()
 
-    def drawWiring(self, qp):
+    @staticmethod
+    def drawWiring(qp):
+        """
+
+        :param qp:
+        :return:
+        """
         pen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.DotLine)
         qp.setPen(pen)
         # qp.setBrush(QtCore.Qt.blue)
@@ -509,6 +611,10 @@ class DrawBackground(QtWidgets.QWidget):
 
 
 class ControlModeWiring(QtWidgets.QWidget):
+    """
+    连线
+    """
+
     def __init__(self, wgt, parent=None):
         super(ControlModeWiring, self).__init__(parent)
 
@@ -522,6 +628,8 @@ class ControlModeWiring(QtWidgets.QWidget):
         self.WgtDraw = QtWidgets.QWidget(Wgt)
         self.WgtDraw.setGeometry(55, 40, 950, 400)
         self.drawback = DrawBackground(self.WgtDraw)
+
+        self.wiring = []
         self.draw_wiring()
 
         # 变量
@@ -589,18 +697,20 @@ class ControlModeWiring(QtWidgets.QWidget):
         # self.XMapper.mapped(str).connect(self.XisPressed(str))
 
     def x_is_pressed(self, a):
+        """
+
+        :param a:
+        :return:
+        """
         debug_print('X', a)
         self.PressedXNum = a
         self.XMark = True
-        try:
-            num = self.PressedXNum * 10 + self.PressedYNum
-        except:
-            debug_print('buttonerror')
         for i in range(16):
             if i != a:
                 self.BT_x[i].setChecked(False)
 
         if self.YMark:
+            num = self.PressedXNum * 10 + self.PressedYNum
             if self.wiringShow[num]:
                 self.wiring[num].hide()
                 self.wiringShow[num] = False
@@ -618,27 +728,28 @@ class ControlModeWiring(QtWidgets.QWidget):
             self.YMark = False
 
     def y_is_pressed(self, a):
+        """
+
+        :param a:
+        :return:
+        """
         debug_print('Y', a)
         self.YMark = True
         self.PressedYNum = a
-        try:
-            num = self.PressedXNum * 10 + self.PressedYNum
-        except:
-            debug_print('buttonerror')
         for i in range(10):
             if i != a:
                 self.BT_y[i].setChecked(False)
-
         if self.XMark:
-            if self.wiringShow[num]:
-                self.wiring[num].hide()
-                self.wiringShow[num] = False
+            _num = self.PressedXNum * 10 + self.PressedYNum
+            if self.wiringShow[_num]:
+                self.wiring[_num].hide()
+                self.wiringShow[_num] = False
             else:
-                if not self.wiring_lock(num):
-                    self.waringbox()
+                if not self.wiring_lock(_num):
+                    self.waring_box()
                 else:
-                    self.wiring[num].show()
-                    self.wiringShow[num] = True
+                    self.wiring[_num].show()
+                    self.wiringShow[_num] = True
             self.BT_x[self.PressedXNum].setChecked(False)
             self.BT_y[self.PressedYNum].setChecked(False)
             self.PressedXNum = None
@@ -646,22 +757,43 @@ class ControlModeWiring(QtWidgets.QWidget):
             self.XMark = False
             self.YMark = False
 
+    def one_wiring_show(self, num):
+        """
+
+        :param num:
+        :return:
+        """
+        self.wiring[num].show()
+        self.wiringShow[num] = True
+
+    def one_wiring_hide(self, num):
+        """
+
+        :param num:
+        :return:
+        """
+        self.wiring[num].hide()
+        self.wiringShow[num] = False
+
     def draw_wiring(self):
-        self.wiring = []
+        """
+
+        :return:
+        """
+        # self.wiring = []
         for i in range(16):
             for j in range(10):
                 self.wiring.append(DrawWiring(self.WgtDraw, 30 + i * 55, 20 + j * 35))
                 # self.wiring[i * 10 + j].show()
                 self.wiring[i * 10 + j].hide()
 
-    def waringbox(self):
+    def waring_box(self):
         """
         消息弹窗
         :return:
         """
-        msgbox = QtWidgets.QMessageBox.warning(self, 'Warning', '连线冲突                       ',
-                                               QtWidgets.QMessageBox.Ok)
-
+        _ = QtWidgets.QMessageBox.warning(self, 'Warning', '连线冲突                       ',
+                                          QtWidgets.QMessageBox.Ok)
 
     def wiring_lock(self, wi):
         """
@@ -674,8 +806,8 @@ class ControlModeWiring(QtWidgets.QWidget):
         for i in range(160):
             if self.wiringShow[i]:
                 li.append(i)
-                li.append(i-10)
-                li.append(i-20)
+                li.append(i - 10)
+                li.append(i - 20)
         if int(str(wi)[-1]) in li:
             return False
         else:
@@ -683,6 +815,9 @@ class ControlModeWiring(QtWidgets.QWidget):
 
 
 class KeyBoardUi(QtWidgets.QMessageBox):
+    """
+    虚拟键盘
+    """
+
     def __init__(self):
         super(KeyBoardUi, self).__init__()
-

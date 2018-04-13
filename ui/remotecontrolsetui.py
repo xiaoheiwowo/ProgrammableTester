@@ -268,18 +268,24 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         Label_f15 = QtWidgets.QLabel('可保存总时长：')
         Label_f16 = QtWidgets.QLabel('默认显示时长：')
         Label_f17 = QtWidgets.QLabel('s')
+        # Label_f17.setFixedHeight(40)
+
         self.Label_TotalTime = QtWidgets.QLabel('196.605 s')
-        self.Label_TotalTime.setMaximumHeight(15)
+        # self.Label_TotalTime.setMaximumHeight(40)
+        self.Label_TotalTime.setFixedHeight(40)
 
         self.LE_DataStorageDepth = QtWidgets.QLineEdit()
+        self.LE_DataStorageDepth.setFixedHeight(40)
         # 整形验证器
         vali_int = QtGui.QIntValidator(self)
         vali_int.setRange(0, 65535)
         self.LE_DataStorageDepth.setValidator(vali_int)
         self.SB_DateStorageInterval = QtWidgets.QSpinBox()
         self.SB_DateStorageInterval.setRange(0, 100)
+        self.SB_DateStorageInterval.setFixedHeight(40)
         self.SB_DisplayTime = QtWidgets.QSpinBox()
         self.SB_DisplayTime.setRange(0, 60)
+        self.SB_DisplayTime.setFixedHeight(40)
 
         layout = QtWidgets.QGridLayout(self.GB_CurrentDiagramSet)
         layout.addWidget(Label_f11, 1, 0)
@@ -293,6 +299,10 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         layout.addWidget(Label_f16, 4, 0)
         layout.addWidget(self.SB_DisplayTime, 4, 1)
         layout.addWidget(Label_f17, 4, 2)
+        wgt_useless = QtWidgets.QWidget()
+        wgt_useless.setFixedHeight(300)
+
+        layout.addWidget(wgt_useless, 5, 0, 2, 1)
 
     # 槽
 
