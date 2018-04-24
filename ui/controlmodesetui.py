@@ -308,11 +308,16 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
         """
         sw.select_line = item.row()
         for m in range(160):
-            self.TON.wiring[m].hide()
-            self.TOFF.wiring[m].hide()
-            self.TSTOP.wiring[m].hide()
-            self.TM3.wiring[m].hide()
-            self.TM4.wiring[m].hide()
+            # self.TON.wiring[m].hide()
+            # self.TOFF.wiring[m].hide()
+            # self.TSTOP.wiring[m].hide()
+            # self.TM3.wiring[m].hide()
+            # self.TM4.wiring[m].hide()
+            self.TON.one_wiring_hide(m)
+            self.TOFF.one_wiring_hide(m)
+            self.TSTOP.one_wiring_hide(m)
+            self.TM3.one_wiring_hide(m)
+            self.TM4.one_wiring_hide(m)
 
         for n in range(len(sw.control_mode)):
             self.CK_VList[n].setChecked(False)
@@ -402,10 +407,11 @@ class Ui_ControlModeSet(QtWidgets.QDialog):
 
         :return:
         """
-        if sw.select_line:
+        if sw.select_line <= len(sw.control_mode):
             del sw.control_mode[sw.select_line]
             del self.CB_VList
             del self.CK_VList
+            sw.select_line = None
         self.update_control_list()
         self.load_control_list()
         debug_print('delate')
@@ -644,9 +650,13 @@ class ControlModeWiring(QtWidgets.QWidget):
         self.BT_x = []
         self.BT_y = []
         # 生成X按钮
+
+        button_name = ['L', 'N', 'V+', 'V-', 'ON-S', 'OFF-S', 'COM-S', 'IN-T', 'OUT-T', 'COM-T', '485A', '485B', 'PE',
+                       'FREE1', 'FREE2', 'EXTN']
         for i in range(16):
             self.BT_x.append(QtWidgets.QPushButton(Wgt))
-            self.BT_x[i].setText('X0' + (str(hex(i))[2]).upper())
+            # self.BT_x[i].setText('X0' + (str(hex(i))[2]).upper())
+            self.BT_x[i].setText(button_name[i])
             self.BT_x[i].setGeometry(55 * i + 60, 10, 50, 30)
             self.BT_x[i].setCheckable(True)
             self.BT_x[i].setFocusPolicy(QtCore.Qt.NoFocus)

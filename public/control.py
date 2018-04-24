@@ -58,153 +58,155 @@ class ElectricControl(I2C_Driver, PiSerial):
         super(ElectricControl, self).__init__()
 
         # spi analog
-        self.spi = SPI_Driver()
-        self.spi.ads1256_cfg()
+        # self.spi = SPI_Driver()
+        # self.spi.ads1256_cfg()
 
         # i2c digital
         self.cfg_extend_io()
         self.write_extend_output([0x00, 0x00])
+
+        # 反馈信号公共端置高电平
+        self.change_port_state(9, 1)
         self.init_relay_port()
 
         # rs485.py
-        # self.rs485 = PiSerial()
         self.serial_init()
         pass
 
-    # Analog Output (5)
-    def output_ac_power(self, vol=0):
-        """
-
-        :param vol: 电压值0~5v
-        :return:
-        """
-        debug_print('调节直流电源 输出：' + str(vol) + 'V')
-        if 0 <= vol <= 5:
-            vol_2 = int(vol * 1023 / 5)
-            high_bit = self.spi.DAC_A | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.spi.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_dc_power(self, vol=0):
-        """
-
-        :param vol:0~5v
-        :return:
-        """
-        debug_print('调节直流电源 输出：' + str(vol) + 'V')
-        if 0 <= vol <= 5:
-            vol_2 = int(vol * 1023 / 5)
-            high_bit = self.spi.DAC_B | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.spi.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_adjust_i(self, vol_i=0):
-        """
-
-        :param vol_i:0~20ma
-        :return:
-        """
-        debug_print('调节阀控制信号 输出：' + str(vol_i) + 'mA')
-        if 0 <= vol_i <= 20:
-            vol_2 = int(vol_i * 1023 / 20)
-            high_bit = self.spi.DAC_C | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.spi.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_adjust_v(self, vol=0):
-        """
-
-        :param vol:0~10v
-        :return:
-        """
-        debug_print('调节阀控制信号 输出：' + str(vol) + 'V')
-        if 0 <= vol <= 10:
-            vol_2 = int(vol * 1023 / 10)
-            high_bit = self.spi.DAC_D | (vol_2 >> 6)
-            low_bit = (vol_2 & 0b0000111111) << 2
-            self.spi.send_to_ad5314([high_bit, low_bit])
-
-        else:
-            debug_print('error')
-            pass
-
-    def output_0(self):
-        """
-        all channel output 0
-        :return:
-        """
-
-        self.output_ac_power()
-        self.output_dc_power()
-        self.output_adjust_i()
-        self.output_adjust_v()
-
-    # Analog Input (5)
-    def read_i_dc(self):
-        """
-
-        :return:
-        """
-        debug_print('电流值：' + '100' + 'mA')
-        self.spi.ads1256_one_shot(3)
-        return self.spi.ReadADC()
-        pass
-
-    def read_u_dc(self):
-        """
-
-        :return:
-        """
-        debug_print('电压值：' + '5' + 'V')
-        self.spi.ads1256_one_shot(4)
-        return self.spi.ReadADC()
-        pass
-
-    def read_i_ac(self):
-        """
-
-        :return:
-        """
-        debug_print('电流值：' + '1' + 'mA')
-        self.spi.ads1256_one_shot(1)
-        return self.spi.ReadADC()
-        pass
-
-    def read_u_ac(self):
-        """
-
-        :return:
-        """
-        debug_print('电压值：' + '220' + 'V')
-        self.spi.ads1256_one_shot(2)
-        return self.spi.ReadADC()
-        pass
-
-    def read_feedback(self):
-        """
-
-        :return:
-        """
-        debug_print('反馈信号：' + '1' + 'mA')
-        self.spi.ads1256_one_shot(0)
-        # 电压信号
-        vol = self.spi.ReadADC()
-        # 转换为0~20mA
-        cur = vol * 4
-        return cur
-        pass
+    # # Analog Output (5)
+    # def output_ac_power(self, vol=0):
+    #     """
+    #
+    #     :param vol: 电压值0~5v
+    #     :return:
+    #     """
+    #     debug_print('调节直流电源 输出：' + str(vol) + 'V')
+    #     if 0 <= vol <= 5:
+    #         vol_2 = int(vol * 1023 / 5)
+    #         high_bit = self.spi.DAC_A | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.spi.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_dc_power(self, vol=0):
+    #     """
+    #
+    #     :param vol:0~5v
+    #     :return:
+    #     """
+    #     debug_print('调节直流电源 输出：' + str(vol) + 'V')
+    #     if 0 <= vol <= 5:
+    #         vol_2 = int(vol * 1023 / 5)
+    #         high_bit = self.spi.DAC_B | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.spi.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_adjust_i(self, vol_i=0):
+    #     """
+    #
+    #     :param vol_i:0~20ma
+    #     :return:
+    #     """
+    #     debug_print('调节阀控制信号 输出：' + str(vol_i) + 'mA')
+    #     if 0 <= vol_i <= 20:
+    #         vol_2 = int(vol_i * 1023 / 20)
+    #         high_bit = self.spi.DAC_C | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.spi.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_adjust_v(self, vol=0):
+    #     """
+    #
+    #     :param vol:0~10v
+    #     :return:
+    #     """
+    #     debug_print('调节阀控制信号 输出：' + str(vol) + 'V')
+    #     if 0 <= vol <= 10:
+    #         vol_2 = int(vol * 1023 / 10)
+    #         high_bit = self.spi.DAC_D | (vol_2 >> 6)
+    #         low_bit = (vol_2 & 0b0000111111) << 2
+    #         self.spi.send_to_ad5314([high_bit, low_bit])
+    #
+    #     else:
+    #         debug_print('error')
+    #         pass
+    #
+    # def output_0(self):
+    #     """
+    #     all channel output 0
+    #     :return:
+    #     """
+    #
+    #     self.output_ac_power()
+    #     self.output_dc_power()
+    #     self.output_adjust_i()
+    #     self.output_adjust_v()
+    #
+    # # Analog Input (5)
+    # def read_i_dc(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     debug_print('电流值：' + '100' + 'mA')
+    #     self.spi.ads1256_one_shot(3)
+    #     return self.spi.ReadADC()
+    #     pass
+    #
+    # def read_u_dc(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     debug_print('电压值：' + '5' + 'V')
+    #     self.spi.ads1256_one_shot(4)
+    #     return self.spi.ReadADC()
+    #     pass
+    #
+    # def read_i_ac(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     debug_print('电流值：' + '1' + 'mA')
+    #     self.spi.ads1256_one_shot(1)
+    #     return self.spi.ReadADC()
+    #     pass
+    #
+    # def read_u_ac(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     debug_print('电压值：' + '220' + 'V')
+    #     self.spi.ads1256_one_shot(2)
+    #     return self.spi.ReadADC()
+    #     pass
+    #
+    # def read_feedback(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     debug_print('反馈信号：' + '1' + 'mA')
+    #     self.spi.ads1256_one_shot(0)
+    #     # 电压信号
+    #     vol = self.spi.ReadADC()
+    #     # 转换为0~20mA
+    #     cur = vol * 4
+    #     return cur
+    #     pass
 
     # IO
     def output_cut_x(self, relay_state):

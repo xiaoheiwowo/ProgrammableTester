@@ -14,8 +14,8 @@ class PiSerial(object):
 
         :return:
         """
-        self.ser = serial.Serial("/dev/ttyAMA0", 115200, timeout=0.1)
-        self.ser.write(bytes("\n Waiting for message...\n", 'utf-8'))
+        self.ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.1)
+        # self.ser.write(bytes("\n Waiting for message...\n", 'utf-8'))
 
     def serial_send(self, msg_str):
         """
@@ -47,12 +47,14 @@ class PiSerial(object):
 if __name__ == '__main__':
     print('serial test start ...')
     my_ser = PiSerial()
+    my_ser.serial_init()
     while True:
         time.sleep(0.1)
         try:
             # cmd = input('IN\n')
             msg = my_ser.serial_receive()
-            print(str(msg.decode()))
+            if msg:
+                print(str(msg))
             my_ser.serial_send(msg)
         except KeyboardInterrupt:
             break

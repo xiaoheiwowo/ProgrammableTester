@@ -63,8 +63,8 @@ class SoftwareData(object):
     control_mode_selected = {}
 
     # 总线阀
-    cmd_on = '01 06 00 04 00 00 C8 0B'
-    cmd_off = '01 06 00 04 00 64 C9 E0'
+    cmd_on = '01 06 00 04 00 64 C9 E0'
+    cmd_off = '01 06 00 04 00 00 C8 0B'
     cmd_stop = '01 06 00 04 00 BA 49 B8'
     cmd_m3 = '01 06 00 04 00 1E 48 03'
     cmd_m4 = '01 06 00 04 00 B3 89 BE'
@@ -73,8 +73,8 @@ class SoftwareData(object):
     check_bits = 1
     stop_bits = 1
 
-    bus_control = ['01 06 00 04 00 00 C8 0B',
-                   '01 06 00 04 00 64 C9 E0',
+    bus_control = ['01 06 00 04 00 64 C9 E0',
+                   '01 06 00 04 00 00 C8 0B',
                    '01 06 00 04 00 BA 49 B8',
                    '01 06 00 04 00 1E 48 03',
                    '01 06 00 04 00 B3 89 BE',
@@ -82,8 +82,8 @@ class SoftwareData(object):
                    0,
                    0]
 
-    bus_control_bak = ['01 06 00 04 00 00 C8 0B',
-                       '01 06 00 04 00 64 C9 E0',
+    bus_control_bak = ['01 06 00 04 00 64 C9 E0',
+                       '01 06 00 04 00 00 C8 0B',
                        '01 06 00 04 00 BA 49 B8',
                        '01 06 00 04 00 1E 48 03',
                        '01 06 00 04 00 B3 89 BE',
@@ -122,7 +122,8 @@ class SoftwareData(object):
                'dns': '192.168.10.222',
                'upper_name': 'upper',
                'upper_ip': '192.168.10.8',
-               'server_ip': '192.168.0.112'}
+               'server_ip': '192.168.0.112',
+               'server_port': '9090'}
     # 上位机ip
     upper_ip_list = ['192.168.10.101',
                      '192.168.10.102',
@@ -268,12 +269,35 @@ class HardwareData(object):
     correct_ac = 5 / 5.11
     correct_dc = 5 / 5.08
 
+    # 模拟信号输出修正参数
+    correct_ti = 5 / 5.066
+    correct_tv = 1
+
+    calibrate_list_ti = [[0, 0], [1, 0.970], [2, 1.975], [3, 2.984], [4, 3.992], [5, 5.064]]
+
     # 校准页面
     # calibration_page = None
     calibration_relay_connect = {'acv': [],
                                  'aca': [],
                                  'dcv': [],
                                  'dca': []}
+
+    # AD DA 值
+    ad_value = [0, 0, 0, 0, 0, 0, 0, 0]
+    '''
+    [0]:调节阀反馈
+    [1]:交流 电流
+    [2]:交流 电压
+    [3]:直流 电流
+    [4]:直流 电压
+    '''
+    da_value = [0, 0, 0, 0]
+    '''
+    [0]:DC 电源
+    [1]:AC 电源
+    [2]:0~20mA
+    [3]:0~10V
+    '''
 
 
 class DataForServer(object):
@@ -313,4 +337,7 @@ class Flag_Of(object):
     bp5_off = 0
 
     # 进入采样校准
-    # calibration_start = 0
+    calibration_start = 0
+
+    # 曲线开关
+    canvas_switch = False

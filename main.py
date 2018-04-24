@@ -30,7 +30,7 @@ from ui import mainwindowui
 from public.datacache import SoftwareData as sw
 from public.datacache import HardwareData as hw
 from public.datacache import Flag_Of as flag
-from public.controlthread import ControlThread
+from public.controlthread import ControlThread, AD_DA
 
 
 # import qdarkstyle
@@ -68,7 +68,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         # 启动tcp server线程
         # self.tcp_thread = TcpThread()
         # self.tcp_thread.start()
-        # self.power_calibration.tab_dcv.dia_new.cal_sample.connect(self.cal_adjust_voltage)
+
         try:
             # 启动控制线程
             self.control_thread = ControlThread()
@@ -87,6 +87,8 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             self.voltage_set.connect(self.control_thread.adjust_voltage)
             # 调节阀控制信号
             self.SB_AdjustValveInput.valueChanged.connect(self.control_thread.adjust_control)
+            # 调节阀反馈信号
+            self.control_thread.adjust_feedback.connect(self.change_adjust_feedback)
             # 解锁后电源调为0
             self.unlock.connect(self.control_thread.power_to_zero)
             # 选择调节阀信号
@@ -128,7 +130,9 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             self.power_calibration.tab_dca.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
             self.power_calibration.tab_dcv.dia_new.add_data_finish.connect(self.control_thread.quit_calibration)
 
-            self.control_thread.vol_cur_position.connect(self.update_vol_cur_pos)
+            # 更新电流电压值，到位信号显示
+            self.control_thread.valve_vol_cur.connect(self.change_va_value)
+            self.control_thread.valve_pos_signal.connect(self.change_position_signal)
 
         except:
             print('CAN NOT WORK IN WINDOWS')
@@ -159,6 +163,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
 
         :return:
         """
+        flag.calibration_start = 1
         self.power_calibration.show()
 
     def show_relay_check_form(self):

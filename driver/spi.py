@@ -60,7 +60,7 @@ class SPI_Driver:
     # High Precision AD/DA board
     SPI_MODE = 1
     SPI_CHANNEL = 1
-    SPI_RATE = 1000000
+    SPI_RATE = 7000000
 
     # The RPI GPIO to use for chip select and ready polling
     CS_PIN_AD = 15
@@ -85,6 +85,8 @@ class SPI_Driver:
     DAC_B = 0b01100000
     DAC_C = 0b10100000
     DAC_D = 0b11100000
+
+    DAC = [0b00100000, 0b01100000, 0b10100000, 0b11100000]
 
     # These options can be adjusted to facilitate specific operation of the
     # ADS1256, the defaults are designed to be compatible with the Waveforms
@@ -400,7 +402,7 @@ class SPI_Driver:
         """
 
         debug_print("Sending: " + str(byte) + " (hex " + hex(byte) + ")")
-
+        self.delay_us(2)
         result = self.spi_bus.xfer2([byte])
         debug_print("Read " + str(result[0]))
 
@@ -433,6 +435,8 @@ class SPI_Driver:
         # Wait for TIMEOUT to elapse
         while elapsed < self.DATA_TIMEOUT:
             elapsed = time.time() - start
+
+        # self.delay_us(10)
 
     def ReadReg(self, start_reg):
         """
@@ -546,10 +550,11 @@ class SPI_Driver:
         # Concatenate the bytes
         total = (result1 << 16) + (result2 << 8) + result3
 
-        if total > 2 ** 23:
+        if total > 0x7fffff:
             return 0.0
+
         else:
-            return round(total * 5 / 2 ** 23, 3)
+            return round(total * 5 / 0x7fffff, 10)
             # return total
 
     def ReadID(self):
@@ -572,41 +577,25 @@ class SPI_Driver:
 
         print('++++++++++++++++++++++++++++++++++++')
 
-    def ADS1256_Init(self):
-        """
-        不用
-        :return:
-        """
-        # 高位在前、不使用校准、不使用缓冲
-        self.WriteReg(self.REG_STATUS, 0x00)
-
-        # 初始化端口A0为‘+’，AINCOM位‘-’
-        self.WriteReg(self.REG_MUX, 0x08)
-
-        # 放大倍数1
-        self.WriteReg(self.REG_ADCON, 0X00)
-
-        # SPS 1000
-        self.WriteReg(self.REG_DRATE, self.DRATE_1000)
-
     def ads1256_cfg(self):
         """
         ADS1256初始化
         :return:
         """
         """
-        buf[0]:高位在前、不使用校准、不使用缓冲
+        buf[0]:高位在前、使用校准、不使用缓冲
         buf[1]:初始化端口A0为‘+’，AINCOM位‘-’
         buf[2]:放大倍数1
         buf[3]:SPS 1000
         """
-        buf = [0x00, 0x08, 0x00, self.DRATE_1000]
+        buf = [0x04, 0x08, 0x00, self.DRATE_1000]
         self.WaitDRDY()
         self.chip_select_ad()
 
         # reset
-        self.SendByte(self.CMD_RESET)
-        self.delay_us(50)
+        # self.SendByte(self.CMD_RESET)
+        # self.delay_us(50)
+
         self.SendByte(self.CMD_WREG)
         self.SendByte(0x03)
         self.SendByte(buf[0])
@@ -622,7 +611,7 @@ class SPI_Driver:
         :param index: int 0~4 ---- ad0~ad4
         :return:
         """
-        channel_list = [0x0f, 0x1f, 0x2f, 0x3f, 0x4f]
+        channel_list = [0x0f, 0x1f, 0x2f, 0x3f, 0x4f, 0x5f, 0x6f, 0x7f]
         self.chip_select_ad()
         self.SendByte(self.CMD_WREG | 0x01)
         self.SendByte(0x00)
@@ -656,6 +645,7 @@ class SPI_Driver:
         while end - start < 0.001 * _ms:
             end = time.time()
 
+    # Analog Output (5)
     def output_dc_power(self, vol=0.0):
         """
 
@@ -673,7 +663,7 @@ class SPI_Driver:
             debug_print('error')
             pass
 
-    def output_ac_power(self, vol=0):
+    def output_ac_power(self, vol=0.0):
         """
 
         :param vol: 电压值0~5v
@@ -690,11 +680,125 @@ class SPI_Driver:
             debug_print('error')
             pass
 
+    def output_adjust_i(self, vol_i=0.0):
+        """
+
+        :param vol_i:0~20ma
+        :return:
+        """
+        debug_print('调节阀控制信号 输出：' + str(vol_i) + 'mA')
+        if 0 <= vol_i <= 20:
+            vol_2 = int(vol_i * 1023 / 20)
+            high_bit = self.DAC_C | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_adjust_v(self, vol=0.0):
+        """
+
+        :param vol:0~10v
+        :return:
+        """
+        debug_print('调节阀控制信号 输出：' + str(vol) + 'V')
+        if 0 <= vol <= 10:
+            vol_2 = int(vol * 1023 / 10)
+            high_bit = self.DAC_D | (vol_2 >> 6)
+            low_bit = (vol_2 & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+
+        else:
+            debug_print('error')
+            pass
+
+    def output_analog(self, _ch, _bit):
+        """
+
+        :param _ch: 通道
+        :param _bit: 0x0 ~ 0x3ff
+        :return:
+        """
+
+        if 0 <= _bit <= 0x3ff:
+            high_bit = self.DAC[_ch] | (_bit >> 6)
+            low_bit = (_bit & 0b0000111111) << 2
+            self.send_to_ad5314([high_bit, low_bit])
+        else:
+            debug_print('Value Error')
+            pass
+
+    def output_0(self):
+        """
+        all channel output 0
+        :return:
+        """
+
+        self.output_ac_power()
+        self.output_dc_power()
+        self.output_adjust_i()
+        self.output_adjust_v()
+
+    # Analog Input (5)
+    def read_i_dc(self):
+        """
+
+        :return:
+        """
+        debug_print('电流值：' + '100' + 'mA')
+        self.ads1256_one_shot(3)
+        return self.ReadADC()
+        pass
+
+    def read_u_dc(self):
+        """
+
+        :return:
+        """
+        debug_print('电压值：' + '5' + 'V')
+        self.ads1256_one_shot(4)
+        return self.ReadADC()
+        pass
+
+    def read_i_ac(self):
+        """
+
+        :return:
+        """
+        debug_print('电流值：' + '1' + 'mA')
+        self.ads1256_one_shot(1)
+        return self.ReadADC()
+        pass
+
+    def read_u_ac(self):
+        """
+
+        :return:
+        """
+        debug_print('电压值：' + '220' + 'V')
+        self.ads1256_one_shot(2)
+        return self.ReadADC()
+        pass
+
+    def read_feedback(self):
+        """
+
+        :return:
+        """
+        debug_print('反馈信号：' + '1' + 'mA')
+        self.ads1256_one_shot(0)
+        # 电压信号
+        vol = self.ReadADC()
+        # 转换为0~20mA
+        cur = vol * 4
+        return cur
+
 
 if __name__ == '__main__':
     ad_da = SPI_Driver()
-    # ad_da.ADS1256_Init()
-    # ad_da.read_all_reg()
+    ad_da.read_all_reg()
     ad_da.ads1256_cfg()
 
     while True:
@@ -707,6 +811,7 @@ if __name__ == '__main__':
                   '5 AD TEST\n')
             channel = input()
             value = input('Input a value\n')
+
             if channel == '1':
                 ad_da.output_ac_power(float(value))
             elif channel == '2':
@@ -718,16 +823,15 @@ if __name__ == '__main__':
             elif channel == '5':
                 while True:
                     try:
-                        if not input(''):
-                            os.system('clear')
-                            for i in range(5):
-                                ad_da.ads1256_one_shot(i)
-                                print('AD' + str(i) + ': ' + str(ad_da.ReadADC()))
-                                # ad_da.read_all_reg()
-                                time.sleep(0.005)
-                            time.sleep(1)
-                        else:
-                            pass
+                        os.system('clear')
+                        for i in range(8):
+                            ad_da.ads1256_one_shot(i)
+                            print('AD' + str(i) + ': ' + str(ad_da.ReadADC()))
+                            # ad_da.read_all_reg()
+                            # time.sleep(0.005)
+                            print(time.time())
+                        time.sleep(1)
+
                     except KeyboardInterrupt:
                         break
         except KeyboardInterrupt:

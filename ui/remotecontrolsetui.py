@@ -76,6 +76,8 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
 
         self.lb_server_ip = QtWidgets.QLabel('服务器IP：')
         self.LE_server_ip = QtWidgets.QLineEdit()
+        self.label_b23 = QtWidgets.QLabel('端口：')
+        self.LE_server_port = QtWidgets.QLineEdit()
 
         self.Label_b11 = QtWidgets.QLabel('本机名称:')
         self.LE_LocalName = QtWidgets.QLineEdit()
@@ -109,18 +111,22 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         # 网络设置布局
         self.Layout_LocalNetSet.addWidget(self.lb_server_ip, 0, 0, 1, 1)
         self.Layout_LocalNetSet.addWidget(self.LE_server_ip, 0, 1, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.Label_b11, 1, 0, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.LE_LocalName, 1, 1, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.RB_AutoGetIP, 2, 0, 1, 2)
-        self.Layout_LocalNetSet.addWidget(self.RB_UseSettingBelow, 3, 0, 1, 2)
-        self.Layout_LocalNetSet.addWidget(self.Label_b12, 4, 0, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.LE_LocalIP, 4, 1, 1, 2)
+
+        self.Layout_LocalNetSet.addWidget(self.label_b23, 1, 0)
+        self.Layout_LocalNetSet.addWidget(self.LE_server_port, 1, 1, 1, 1)
+
+        self.Layout_LocalNetSet.addWidget(self.Label_b11, 2, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_LocalName, 2, 1, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.RB_AutoGetIP, 3, 0, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.RB_UseSettingBelow, 4, 0, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.Label_b12, 5, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_LocalIP, 5, 1, 1, 2)
         # self.Layout_LocalNetSet.addWidget(self.Label_b13, 4, 0)
         # self.Layout_LocalNetSet.addWidget(self.LE_SubnetMask, 4, 1)
-        self.Layout_LocalNetSet.addWidget(self.Label_b14, 5, 0, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.LE_DefaultGateway, 5, 1, 1, 2)
-        self.Layout_LocalNetSet.addWidget(self.Label_b15, 6, 0, 1, 1)
-        self.Layout_LocalNetSet.addWidget(self.LE_DefaultDNS, 6, 1, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.Label_b14, 6, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_DefaultGateway, 6, 1, 1, 2)
+        self.Layout_LocalNetSet.addWidget(self.Label_b15, 7, 0, 1, 1)
+        self.Layout_LocalNetSet.addWidget(self.LE_DefaultDNS, 7, 1, 1, 2)
 
         self.IPSetDisable()
         # SIGNAL
@@ -143,8 +149,10 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         # for i in sw.upper_name_list:
         #     self.CB_ServerName.addItem(i)
 
-        self.Label_b22 = QtWidgets.QLabel('计算机IP:')
+        self.Label_b22 = QtWidgets.QLabel('服务器IP:')
         self.LE_server_ip = QtWidgets.QLineEdit()
+        self.label_b23 = QtWidgets.QLabel('端口：')
+        self.LE_server_port = QtWidgets.QLineEdit()
         # self.CB_ServerIP = QtWidgets.QComboBox()
         # for i in sw.upper_ip_list:
         #     self.CB_ServerIP.addItem(i)
@@ -155,6 +163,8 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
 
         self.Layout_ServerSelect.addWidget(self.Label_b22, 1, 0)
         self.Layout_ServerSelect.addWidget(self.LE_server_ip, 1, 1, 1, 3)
+        self.Layout_ServerSelect.addWidget(self.label_b23, 2, 0)
+        self.Layout_ServerSelect.addWidget(self.LE_server_port, 2, 1, 1, 3)
         # SIGNAL
         # self.CB_ServerIP.currentIndexChanged.connect(self.CB_ServerName.setCurrentIndex)
         # self.CB_ServerName.currentIndexChanged.connect(self.CB_ServerIP.setCurrentIndex)
@@ -347,6 +357,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
         :return:
         """
         sw.net_set['server_ip'] = self.LE_server_ip.text()
+        sw.net_set['server_port'] = self.LE_server_port.text()
         sw.net_set['host_name'] = self.LE_LocalName.text()
         sw.net_set['host_ip'] = self.LE_LocalIP.text()
         # sw.net_set['subnet_mask'] = self.LE_SubnetMask.text()
@@ -396,6 +407,7 @@ class Ui_RemoteControlSet(QtWidgets.QDialog):
             sw.bus_control = pickle.loads(f3.read())
 
         self.LE_server_ip.setText(sw.net_set['server_ip'])
+        self.LE_server_port.setText(sw.net_set['server_port'])
         self.LE_LocalName.setText(sw.net_set['host_name'])
         self.LE_LocalIP.setText(sw.net_set['host_ip'])
         # self.LE_SubnetMask.setText(sw.net_set['subnet_mask'])

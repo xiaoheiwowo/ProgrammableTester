@@ -94,6 +94,15 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         self.close()
         pass
 
+    def closeEvent(self, QCloseEvent):
+        """
+
+        :param QCloseEvent:
+        :return:
+        """
+        flag.calibration_start = 0
+        self.close()
+
 
 class Tab_Widgets(QtWidgets.QWidget):
     """

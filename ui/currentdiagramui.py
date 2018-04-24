@@ -207,7 +207,7 @@ class RefreshThread(QtCore.QThread):
         :return:
         """
         self.win.draw_dynamic()
-        while True:
+        while flag.canvas_switch:
             time.sleep(1)
             if flag.control_mode_lock:
                 if not self.win.fg_static:

@@ -518,6 +518,11 @@ class I2C_Driver(object):
         debug_print(str(pin_number) + 'Int from pca9535-1.')
         flag.button_int = 1
 
+    def test_connect(self, num):
+        self.__check_relay_connect(num)
+
+    def test_disconnect(self, num):
+        self.__check_relay_disconnect(num)
 
 if __name__ == "__main__":
     i2c = I2C_Driver()
@@ -601,9 +606,9 @@ if __name__ == "__main__":
                         control = input('1:connect, 2:disconnect\n')
                         number = input('delay number: \n')
                         if control == '1':
-                            i2c.__check_relay_connect(int(number))
+                            i2c.test_connect(int(number))
                         elif control == '2':
-                            i2c.__check_relay_disconnect(int(number))
+                            i2c.test_disconnect(int(number))
                         else:
                             print('Input Error!\n')
                             pass

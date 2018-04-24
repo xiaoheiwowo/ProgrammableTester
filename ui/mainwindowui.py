@@ -81,10 +81,10 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
         # 电流曲线部分
         self.GB_CurrentCurve = QtWidgets.QGroupBox(self.mainWidget)
-        self.lb_current_value = QtWidgets.QLabel('电流值: 100mA')
-        self.lb_voltage_value = QtWidgets.QLabel('电压值: 5V')
-        self.lb_open_completely = QtWidgets.QLabel('开到位: Yes')
-        self.lb_close_completely = QtWidgets.QLabel('关到位: No')
+        self.lb_current_value = QtWidgets.QLabel("电流值：")
+        self.lb_voltage_value = QtWidgets.QLabel("电压值：")
+        self.lb_open_completely = QtWidgets.QLabel("开到位：")
+        self.lb_close_completely = QtWidgets.QLabel("关到位：")
         self.main_window_fig = diagram.PlotWidget(self)
         self.BT_FullScreen = QtWidgets.QPushButton()
         self.BT_Dynamic = QtWidgets.QPushButton()
@@ -413,7 +413,6 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         self.Layout_AdjustPage.addWidget(self.CB_StepValve, 1, 1)
         self.Layout_AdjustPage.addWidget(self.lb_unit_ma2, 1, 2)
         self.Layout_AdjustPage.addWidget(self.lb_adjust_output, 1, 3)
-
 
     def stack3Ui(self):
         """
@@ -806,20 +805,23 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :param closed: str  'Yes' or 'No'
         :return:
         """
-        self.lb_open_completely.setText('开阀到位：' + opened)
-        self.lb_close_completely.setText('关阀到位：' + closed)
+        if opened == 'YES':
+            self.lb_open_completely.setText("<p>开到位：<font color=green>Yes</font></p>")
+        else:
+            self.lb_open_completely.setText("<p>开到位：<font color=red>No</font></p>")
 
-    def update_vol_cur_pos(self, vol='0', cur='0', open_='NO', close='NO'):
+        if closed == 'YES':
+            self.lb_close_completely.setText("<p>关到位：<font color=green>Yes</font></p>")
+        else:
+            self.lb_close_completely.setText("<p>关到位：<font color=red>No</font></p>")
+
+    def change_adjust_feedback(self, _cur):
         """
 
-        :param vol:
-        :param cur:
-        :param open_:
-        :param close:
+        :param _cur:
         :return:
         """
-        self.change_va_value(cur, vol)
-        self.change_position_signal(open_, close)
+        self.lb_adjust_output.setText('反馈信号： ' + str(_cur))
 
 
 class UpdateThread(QtCore.QThread):
@@ -839,16 +841,10 @@ class UpdateThread(QtCore.QThread):
         """
 
         # window_update_time = time.time()
-        while True:
+        while flag.canvas_switch:
             time.sleep(1)
-            # now_time = time.time()
-            # if now_time - window_update_time > 0.5:
-            #     self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)
-            #     self.win.change_position_signal(hw.open_signal, hw.close_signal)
-            #     window_update_time = time.time()
 
             if fg_update_diagram == 1:
-
                 # sw.current_value.append(int(100 * random.random()))
                 # del sw.current_value[0]
                 if flag.control_mode_lock:
@@ -858,8 +854,6 @@ class UpdateThread(QtCore.QThread):
                     except:
                         yy = sw.current_value[-1000:]
                     self.win.main_window_fig.update_diagram(yy, myflag=0)
-            else:
-                pass
 
 
 class LongPressButton(QtWidgets.QPushButton):
