@@ -60,7 +60,7 @@ class SPI_Driver:
     # High Precision AD/DA board
     SPI_MODE = 1
     SPI_CHANNEL = 1
-    SPI_RATE = 7000000
+    SPI_RATE = 1000000
 
     # The RPI GPIO to use for chip select and ready polling
     CS_PIN_AD = 15
@@ -798,7 +798,7 @@ class SPI_Driver:
 
 if __name__ == '__main__':
     ad_da = SPI_Driver()
-    ad_da.read_all_reg()
+    # ad_da.read_all_reg()
     ad_da.ads1256_cfg()
 
     while True:
@@ -813,6 +813,7 @@ if __name__ == '__main__':
             value = input('Input a value\n')
 
             if channel == '1':
+
                 ad_da.output_ac_power(float(value))
             elif channel == '2':
                 ad_da.output_dc_power(float(value))
@@ -828,8 +829,8 @@ if __name__ == '__main__':
                             ad_da.ads1256_one_shot(i)
                             print('AD' + str(i) + ': ' + str(ad_da.ReadADC()))
                             # ad_da.read_all_reg()
-                            # time.sleep(0.005)
-                            print(time.time())
+                            time.sleep(0.005)
+                            # print(time.time())
                         time.sleep(1)
 
                     except KeyboardInterrupt:

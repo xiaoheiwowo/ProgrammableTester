@@ -239,7 +239,7 @@ class ElectricControl(I2C_Driver, PiSerial):
             pass
         elif which == 2:
             self.change_port_state(self.PORT_ACP, self.HIGH)
-            debug_print('POWER: ' + 'AC')
+            print('POWER: ' + 'AC')
             pass
         else:
             debug_print('NO this power')

@@ -3,6 +3,10 @@
 
 """
 阀门控制thread
+
+未完成：
+    BP5 断电刹车
+    使用校准表
 """
 import time
 import random
@@ -110,13 +114,6 @@ class ControlThread(QThread):
                 self.int_from_io()
                 pass
 
-            # # BP5 停阀
-            # if flag.bp5_on:
-            #     self.bp5_on()
-            #
-            # if flag.bp5_off:
-            #     self.bp5_off()
-
             # 继电器自检程序
             if flag.relay_check:
 
@@ -172,7 +169,7 @@ class ControlThread(QThread):
         if hw.control_mode['POWER'] == 1:
             return self.read_ad_channel(4) * 10
         elif hw.control_mode['POWER'] == 2:
-            return self.read_ad_channel(2) * 60
+            return self.read_ad_channel(2) * 100
         else:
             return 0
             pass
@@ -216,13 +213,13 @@ class ControlThread(QThread):
         :return:
         """
         if hw.control_mode['POWER'] == 1:
-            self.write_da_channel(1, 0)
-            self.write_da_channel(0, float(vol_value * 5 * hw.correct_dc / 36))
+            # self.write_da_channel(1, 0)
+            self.write_da_channel(0, float(vol_value * 5 / 36))
             # hw.da_value[1] = 0
             # hw.da_value[0] = float(vol_value) * 5 * hw.correct_dc / 36
         elif hw.control_mode['POWER'] == 2:
-            self.write_da_channel(0, 0)
-            self.write_da_channel(1, float(vol_value * 5 * hw.correct_ac / 300))
+            # self.write_da_channel(0, 0)
+            self.write_da_channel(1, float(vol_value * 5 / 300))
             # hw.da_value[0] = 0
             # hw.da_value[1] = float(vol_value) * 5 * hw.correct_ac / 300
         else:
@@ -230,7 +227,7 @@ class ControlThread(QThread):
         # 确定电压合格后接通电源
         time_a = time.time()
         while True:
-            if time.time() - time_a > 3:
+            if time.time() - time_a > 8:
                 print('超时')
                 break
             else:
@@ -255,10 +252,16 @@ class ControlThread(QThread):
         :return:
         """
         if hw.voltage:
-            if abs(self.read_voltage() - hw.voltage) < 2:
-                return 1
-            else:
-                return 0
+            if hw.control_mode['POWER'] == 1:
+                if abs(self.read_voltage() - hw.voltage) < 2:
+                    return 1
+                else:
+                    return 0
+            if hw.control_mode['POWER'] == 2:
+                if abs(self.read_voltage() - hw.voltage) < 5:
+                    return 1
+                else:
+                    return 0
         else:
             return 0
 
@@ -353,16 +356,16 @@ class ControlThread(QThread):
             elif bt_num == self.elec.ON_SIGNAL:
                 self.valve_pos_signal.emit('YES', 'NO')
                 if hw.control_mode['SPECIAL'] == 3:
-                    if flag.bp5_off == 1:
+                    if flag.bp5_on == 1:
                         self.stop_valve()
-                        flag.bp5_off = 0
+                        flag.bp5_on = 0
                     pass
             elif bt_num == self.elec.OFF_SIGNAL:
                 self.valve_pos_signal.emit('NO', 'YES')
                 if hw.control_mode['SPECIAL'] == 3:
-                    if flag.bp5_on == 1:
+                    if flag.bp5_off == 1:
                         self.stop_valve()
-                        flag.bp5_on = 0
+                        flag.bp5_off = 0
             else:
                 pass
 
@@ -454,11 +457,13 @@ class ControlThread(QThread):
 
         # BP5
         elif hw.control_mode['SPECIAL'] == 3:
-            self.elec.init_relay_port()
-            for j in hw.control_mode['ON']:
-                self.elec.connect_array_relay(j)
-            flag.bp5_on = 1
-            pass
+            if not self.elec.read_IO(self.elec.ON_SIGNAL):
+                self.elec.init_relay_port()
+                # time.sleep(0.2)
+                for j in hw.control_mode['ON']:
+                    self.elec.connect_array_relay(j)
+                flag.bp5_on = 1
+                pass
         pass
 
     def close_valve(self):
@@ -538,10 +543,12 @@ class ControlThread(QThread):
 
         # BP5
         elif hw.control_mode['SPECIAL'] == 3:
-            self.elec.init_relay_port()
-            for j in hw.control_mode['ON']:
-                self.elec.connect_array_relay(j)
-            flag.bp5_off = 1
+            if not self.elec.read_IO(self.elec.OFF_SIGNAL):
+                self.elec.init_relay_port()
+                # time.sleep(0.2)
+                for j in hw.control_mode['OFF']:
+                    self.elec.connect_array_relay(j)
+                flag.bp5_off = 1
 
         pass
 
@@ -550,9 +557,18 @@ class ControlThread(QThread):
 
         :return:
         """
+        # BUS
         if hw.control_mode['SPECIAL'] == 2:
             self.elec.serial_send(sw.cmd_stop)
             debug_print(self.elec.serial_receive())
+
+        # BP5
+        elif hw.control_mode['SPECIAL'] == 3:
+            self.elec.init_relay_port()
+            # time.sleep(0.2)
+
+            # for j in hw.control_mode['OFF']:
+            #     self.elec.connect_check_relay(j)
         else:
             debug_print('stop valve ' + str(hw.control_mode['STOP']))
             self.elec.init_relay_port()
@@ -766,7 +782,11 @@ class ControlThread(QThread):
                 break
             if self.ad_da.read_channel == 0:
                 break
-        return round(hw.ad_value[_ch], 3)
+
+        if hw.ad_value[_ch] - 0.013 < 0:
+            return 0
+        else:
+            return round(hw.ad_value[_ch] - 0.013, 3)
         pass
 
     def write_da_channel(self, _ch, _value):
@@ -806,8 +826,9 @@ class AD_DA(QThread):
         """
 
         self.spi_driver.ads1256_cfg()
-        while True:
 
+        while True:
+            time.sleep(0.1)
             if flag.control_mode_lock or flag.calibration_start:
                 # AD
                 for j in range(5):
@@ -851,11 +872,18 @@ class AD_DA(QThread):
         :return:
         """
         if _ch == 0:
-            self.spi_driver.output_dc_power(hw.da_value[_ch])
+            if hw.da_value[_ch] == 0:
+                self.spi_driver.output_dc_power(0)
+            else:
+                self.spi_driver.output_dc_power(self.calibrate_power(hw.calibrate_list_dcp, hw.da_value[_ch]))
         elif _ch == 1:
-            self.spi_driver.output_ac_power(hw.da_value[_ch])
+            if hw.da_value[_ch] == 0:
+                self.spi_driver.output_ac_power(0)
+            else:
+                self.spi_driver.output_ac_power(self.calibrate_power(hw.calibrate_list_acp, hw.da_value[_ch]))
         elif _ch == 2:
             vol = hw.da_value[_ch] / 4
+            j = 0
             for j in range(6):
                 if vol <= hw.calibrate_list_ti[j][1]:
                     break
@@ -868,8 +896,27 @@ class AD_DA(QThread):
             self.spi_driver.output_adjust_i(round(y, 3) * 4)
         elif _ch == 3:
             self.spi_driver.output_adjust_v(hw.da_value[_ch])
+
         else:
             pass
+
+    @staticmethod
+    def calibrate_power(cal_list, vol):
+        """
+
+        :param cal_list:
+        :param vol:
+        :return:
+        """
+        # print(vol)
+        for j in range(len(cal_list)):
+            if cal_list[j] > vol:
+                y_1, y_2 = j - 1, j
+                x_1, x_2 = cal_list[j - 1], cal_list[j]
+                x = vol
+                y = (y_2 - y_1) * (x - x_1) / (x_2 - x_1) + y_1
+                # print(y)
+                return y
 
     def ad_da_loop(self):
         """

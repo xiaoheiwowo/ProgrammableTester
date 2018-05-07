@@ -266,7 +266,10 @@ class HardwareData(object):
     ZJ01 = [0x00, 0x00]
 
     # 电源调节修正参数
-    correct_ac = 5 / 5.11
+    calibrate_list_acp = [0, 1.058, 2.059, 3.070, 4.127, 5.046]
+    calibrate_list_dcp = [0, 1.113, 2.132, 3.147, 4.155, 5.053]
+    # correct_ac = 5 / 5.11
+    correct_ac = 4 / 4.124
     correct_dc = 5 / 5.08
 
     # 模拟信号输出修正参数

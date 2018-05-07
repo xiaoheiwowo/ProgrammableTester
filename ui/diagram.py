@@ -5,6 +5,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 
+from matplotlib.ticker import FormatStrFormatter
 from matplotlib import patheffects
 
 from public.datacache import SoftwareData as sw
@@ -107,6 +108,9 @@ class PlotWidget(FigureCanvas):
         self.ax.set_xlim(right=0)
         self.ax.set_ylim(bottom=0, top=max(yy) * 1.2 + 0.00001)
         self.ax.yaxis.tick_right()
+        # Y坐标保留两位小数
+        self.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
         # 网格
         # self.ax.grid()
         # 图表

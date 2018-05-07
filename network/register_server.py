@@ -11,10 +11,10 @@ def register_in_server():
 
     :return:
     """
-    server_url = "http://192.168.0.31:8181/kldpro/autodetect/setaddress"
-    jsondata = {'name': 'TE1', 'ip': '192.168.0.34', 'port': 2332}
-    postdata = {'jsondata': str(jsondata)}
-    r = requests.post(url=server_url, data=postdata)
+    server_url = "http://192.168.0.32:8080/kldpro/autodetect/setaddress"
+    json_data = {'name': 'TE1', 'ip': '192.168.0.32', 'port': 9955}
+    post_data = {'jsondata': str(json_data)}
+    r = requests.post(url=server_url, data=post_data)
     return r.text
 
 
