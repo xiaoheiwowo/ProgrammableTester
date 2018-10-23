@@ -5,11 +5,11 @@ title:
 """
 import time
 import os
-import numpy as np
+
 try:
     from libbcm2835._bcm2835 import *
 except ImportError:
-    from driver._bcm2835 import *
+    from driver.bak._bcm2835 import *
 
     pass
 

@@ -452,7 +452,7 @@ class Ui_MainWin(QtWidgets.QMainWindow):
 
     def display(self, i):
         """
-
+        切换标签页
         :param i:
         :return:
         """
@@ -593,13 +593,19 @@ class Ui_MainWin(QtWidgets.QMainWindow):
         :return:
         """
 
-        yy = sw.current_value[-200:]
-        self.main_window_fig.update_diagram(yy, myflag=0)
-
+        # yy = sw.current_value[-200:]
+        # self.main_window_fig.update_diagram(yy, myflag=0)
         # self.main_window_fig.myTable.remove()
 
-        self.change_position_signal(hw.open_signal, hw.close_signal)
-        self.change_va_value(hw.current_value_show, hw.voltage_value_show)
+        # self.change_position_signal(hw.open_signal, hw.close_signal)
+        # self.change_va_value(hw.current_value_show, hw.voltage_value_show)
+
+        try:
+            yy = sw.current_value[
+                 -(int(sw.current_set['small_win_show_time'] * 1000 / sw.current_set['data_interval'])):]
+        except:
+            yy = sw.current_value[-1000:]
+        self.main_window_fig.update_diagram(yy, myflag=0)
 
     @staticmethod
     def press_dynamic():
@@ -854,6 +860,8 @@ class UpdateThread(QtCore.QThread):
                     except:
                         yy = sw.current_value[-1000:]
                     self.win.main_window_fig.update_diagram(yy, myflag=0)
+                    # self.win.window_update()
+            # self.win.change_va_value(hw.current_value_show, hw.voltage_value_show)ram(yy, myflag=0)
 
 
 class LongPressButton(QtWidgets.QPushButton):

@@ -7,7 +7,7 @@ try:
     import spidev
     import wiringpi as wp
 except ImportError:
-    from driver import wiringpi as wp
+    from driver.bak import wiringpi as wp
 
     pass
 

@@ -265,9 +265,20 @@ class HardwareData(object):
     ZJ00 = [0x00, 0x00]
     ZJ01 = [0x00, 0x00]
 
-    # 电源调节修正参数
+    # da输出校准表
     calibrate_list_acp = [0, 1.058, 2.059, 3.070, 4.127, 5.046]
     calibrate_list_dcp = [0, 1.113, 2.132, 3.147, 4.155, 5.053]
+    calibrate_list_ti = [0, 0.970, 1.975, 2.984, 3.992, 5.064]
+    calibrate_list_tv = [0, 0.970, 1.975, 2.984, 3.992, 5.064]
+
+    # ad采样校准表
+    calibrate_list_acv = {'samp': [], 'real': []}
+    calibrate_list_aca = {'samp': [], 'real': []}
+    calibrate_list_dcv = {'samp': [], 'real': []}
+    calibrate_list_dca = {'samp': [], 'real': []}
+
+    calibrate_list_test = {'samp': [0, 1, 2, 3, 4, 5], 'real': [0, 1, 2, 3, 4, 5]}
+
     # correct_ac = 5 / 5.11
     correct_ac = 4 / 4.124
     correct_dc = 5 / 5.08
@@ -276,7 +287,7 @@ class HardwareData(object):
     correct_ti = 5 / 5.066
     correct_tv = 1
 
-    calibrate_list_ti = [[0, 0], [1, 0.970], [2, 1.975], [3, 2.984], [4, 3.992], [5, 5.064]]
+    # calibrate_list_ti = [[0, 0], [1, 0.970], [2, 1.975], [3, 2.984], [4, 3.992], [5, 5.064]]
 
     # 校准页面
     # calibration_page = None
@@ -343,4 +354,4 @@ class Flag_Of(object):
     calibration_start = 0
 
     # 曲线开关
-    canvas_switch = False
+    canvas_switch = True

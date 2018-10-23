@@ -73,6 +73,28 @@ class Ui_PowerCalibration(QtWidgets.QDialog):
         with open('pkl/calibration.pkl', 'rb') as f:
             sw.data_list = pickle.loads(f.read())
 
+        hw.calibrate_list_dcv = {'samp': [], 'real': [], 'standard': []}
+        hw.calibrate_list_dca = {'samp': [], 'real': [], 'standard': []}
+        hw.calibrate_list_acv = {'samp': [], 'real': [], 'standard': []}
+        hw.calibrate_list_aca = {'samp': [], 'real': [], 'standard': []}
+
+        for line in sw.data_list['dcv']:
+            hw.calibrate_list_dcv['samp'].append(line[1])
+            hw.calibrate_list_dcv['real'].append(line[2])
+            hw.calibrate_list_dcv['standard'].append(line[2] / 10)
+        for line in sw.data_list['dca']:
+            hw.calibrate_list_dca['samp'].append(line[1])
+            hw.calibrate_list_dca['real'].append(line[2])
+            hw.calibrate_list_dca['standard'].append(line[2] / 200)
+        for line in sw.data_list['acv']:
+            hw.calibrate_list_acv['samp'].append(line[1])
+            hw.calibrate_list_acv['real'].append(line[2])
+            hw.calibrate_list_acv['standard'].append(line[2] / 100)
+        for line in sw.data_list['aca']:
+            hw.calibrate_list_aca['samp'].append(line[1])
+            hw.calibrate_list_aca['real'].append(line[2])
+            hw.calibrate_list_aca['standard'].append(line[2] / 200)
+
         pass
 
     @staticmethod
@@ -157,7 +179,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.label_png = QtWidgets.QLabel()
         self.label_operation = QtWidgets.QLabel()
         self.list_checkbox = []
-        self.init_widget()
+        self.init_widget(page)
         self.load_data()
 
         self.dia_new = Dia_Add_Line(self, voltage_limit=305, page=self.page)
@@ -168,7 +190,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.dia_new.get_valve.connect(self.update_list)
         self.tw_list.itemClicked.connect(self.list_select_line)
 
-    def init_widget(self):
+    def init_widget(self, page):
         """
         控件设置
         :return:
@@ -176,7 +198,11 @@ class Tab_Widgets(QtWidgets.QWidget):
         self.tw_list.setFixedWidth(265)
         self.tw_list.setRowCount(len(sw.data_list[self.page]))
         self.tw_list.setColumnCount(4)
-        self.tw_list.setHorizontalHeaderLabels([' ', '电压(V)', '采样Io', 'In(mA)'])
+        if page == 'acv' or page == 'dcv':
+            self.tw_list.setHorizontalHeaderLabels([' ', '电压(V)', '采样Vo', 'Vn(V)'])
+        else:
+            self.tw_list.setHorizontalHeaderLabels([' ', '电压(V)', '采样Io', 'In(mA)'])
+        # self.tw_list.setHorizontalHeaderLabels([' ', '电压(V)', '采样Io', 'In(mA)'])
         self.tw_list.setColumnWidth(0, 30)
         self.tw_list.setColumnWidth(1, 60)
         self.tw_list.setColumnWidth(2, 70)
@@ -277,7 +303,7 @@ class Tab_Widgets(QtWidgets.QWidget):
         :return:
         """
         self.list_checkbox = []
-        self.init_widget()
+        self.init_widget(self.page)
         self.load_data()
 
 

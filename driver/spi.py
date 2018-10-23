@@ -210,7 +210,6 @@ class SPI_Driver:
     STATUS_BUFFER_ENABLE = 0x02
     STATUS_AUTOCAL_ENABLE = 0x04
     STATUS_ORDER_LSB = 0x08
-
     """
     A/D Control Register - Address 0x02
 
@@ -392,7 +391,7 @@ class SPI_Driver:
             elapsed = time.time() - start
             drdy_level = wp.digitalRead(self.DRDY_PIN)
         if elapsed >= self.DRDY_TIMEOUT:
-            print("WaitDRDY() Timeout\r\n")
+            debug_print("WaitDRDY() Timeout\r\n")
 
     def SendByte(self, byte):
         """
@@ -799,7 +798,7 @@ class SPI_Driver:
 if __name__ == '__main__':
     ad_da = SPI_Driver()
     # ad_da.read_all_reg()
-    ad_da.ads1256_cfg()
+    # ad_da.ads1256_cfg()
 
     while True:
         try:
@@ -825,12 +824,13 @@ if __name__ == '__main__':
                 while True:
                     try:
                         os.system('clear')
+                        start = time.time()
                         for i in range(8):
                             ad_da.ads1256_one_shot(i)
                             print('AD' + str(i) + ': ' + str(ad_da.ReadADC()))
                             # ad_da.read_all_reg()
-                            time.sleep(0.005)
-                            # print(time.time())
+                            # time.sleep(0.005)
+                        print(time.time()-start)
                         time.sleep(1)
 
                     except KeyboardInterrupt:

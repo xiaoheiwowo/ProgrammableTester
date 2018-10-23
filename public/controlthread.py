@@ -14,10 +14,12 @@ import os
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 
 from .control import ElectricControl
-from driver.spi import *
+# from driver.spi import *
+from .raspiad import *
 from .datacache import HardwareData as hw
 from .datacache import SoftwareData as sw
 from .datacache import Flag_Of as flag
+# from public.addaprocess import AD_DA_2
 
 
 def debug_print(string=None):
@@ -53,6 +55,7 @@ class ControlThread(QThread):
     cal_sample_result_dca = pyqtSignal(float)
     cal_sample_result_dcv = pyqtSignal(float)
 
+    # 更新界面电流电压值及到位信号
     valve_vol_cur = pyqtSignal(str, str)
     valve_pos_signal = pyqtSignal(str, str)
 
@@ -66,8 +69,16 @@ class ControlThread(QThread):
         self.elec = ElectricControl()
 
         # ADDA
-        self.ad_da = AD_DA()
-        self.ad_da.start()
+        self.raspi = RaspiAD()
+        self.raspi.spi.hard_reset()
+        self.raspi.send_sample_data.connect(self.rcv_ad_data)
+        # self.start_pi_ad()
+        time.sleep(1)
+        self.raspi.start()
+
+        # 调节电压定时
+        self.wait_for_vol = VoltageOk()
+        self.wait_for_vol.voltage_ok_signal.connect(self.connect_power)
 
         # 初始化变量
         hw.extend_in = self.elec.read_digital()
@@ -91,21 +102,19 @@ class ControlThread(QThread):
         my_timer = 0
         self.elec.output_cut_x(1)
         while True:
-            time.sleep(0.01)
+            time.sleep(0.1)
 
             my_timer += 1
             # 定时器
-            if my_timer == 100:
+            if my_timer == 10:
                 flag.update_va_value = 1
                 my_timer = 0
 
             # 控制方式锁定
             if flag.control_mode_lock:
-                # self.sample_current_once()
-                # 显示检测位置及电压电流
+                # 显示检测位置
                 if flag.update_va_value:
                     self.read_position_signal()
-                    self.read_adjust_feedback()
                     flag.update_va_value = 0
             else:
                 self.elec.init_relay_port()
@@ -149,51 +158,11 @@ class ControlThread(QThread):
         sw.current_value.append(result)
         pass
 
-    def read_current(self):
-        """
-
-        :return:
-        """
-        if hw.control_mode['POWER'] == 1:
-            return self.read_ad_channel(3) * 200
-        elif hw.control_mode['POWER'] == 2:
-            return self.read_ad_channel(1) * 200
-        else:
-            return 0
-
-    def read_voltage(self):
-        """
-
-        :return:
-        """
-        if hw.control_mode['POWER'] == 1:
-            return self.read_ad_channel(4) * 10
-        elif hw.control_mode['POWER'] == 2:
-            return self.read_ad_channel(2) * 100
-        else:
-            return 0
-            pass
-
     def read_position_signal(self):
         """
 
         :return:
         """
-        # hw.voltage_value_show = str(round(self.read_voltage(), 2))
-        # hw.current_value_show = str(sw.current_value[-1])
-        #
-        # if self.elec.read_IO(self.elec.ON_SIGNAL):
-        #     hw.open_signal = 'YES'
-        # else:
-        #     hw.open_signal = 'NO'
-        # if self.elec.read_IO(self.elec.OFF_SIGNAL):
-        #     hw.close_signal = 'YES'
-        # else:
-        #     hw.close_signal = 'NO'
-
-        voltage_value_show = str(round(self.read_voltage(), 2))
-        current_value_show = str(round(self.read_current(), 2))
-        # print(voltage_value_show, current_value_show)
         if self.elec.read_IO(self.elec.ON_SIGNAL):
             open_signal = 'YES'
         else:
@@ -202,7 +171,7 @@ class ControlThread(QThread):
             close_signal = 'YES'
         else:
             close_signal = 'NO'
-        self.valve_vol_cur.emit(current_value_show, voltage_value_show)
+        # self.valve_vol_cur.emit(current_value_show, voltage_value_show)
         self.valve_pos_signal.emit(open_signal, close_signal)
 
     def adjust_voltage(self, vol_value):
@@ -213,27 +182,23 @@ class ControlThread(QThread):
         :return:
         """
         if hw.control_mode['POWER'] == 1:
-            # self.write_da_channel(1, 0)
+            self.write_da_channel(1, 0)
             self.write_da_channel(0, float(vol_value * 5 / 36))
-            # hw.da_value[1] = 0
-            # hw.da_value[0] = float(vol_value) * 5 * hw.correct_dc / 36
         elif hw.control_mode['POWER'] == 2:
-            # self.write_da_channel(0, 0)
+            self.write_da_channel(0, 0)
             self.write_da_channel(1, float(vol_value * 5 / 300))
-            # hw.da_value[0] = 0
-            # hw.da_value[1] = float(vol_value) * 5 * hw.correct_ac / 300
-        else:
-            pass
+
         # 确定电压合格后接通电源
-        time_a = time.time()
-        while True:
-            if time.time() - time_a > 8:
-                print('超时')
-                break
-            else:
-                if self.voltage_ok():
-                    self.connect_power()
-                    break
+        self.wait_for_vol.start()
+        # time_a = time.time()
+        # while True:
+        #     if time.time() - time_a > 8:
+        #         print('超时')
+        #         break
+        #     else:
+        #         if self.voltage_ok():
+        #             self.connect_power()
+        #             break
 
     def power_to_zero(self):
         """
@@ -243,27 +208,6 @@ class ControlThread(QThread):
         # 解锁后电源调为0
         self.write_da_channel(0, 0)
         self.write_da_channel(1, 0)
-        # hw.da_value[0] = 0
-        # hw.da_value[1] = 0
-
-    def voltage_ok(self):
-        """
-        检测电压是否符合设定
-        :return:
-        """
-        if hw.voltage:
-            if hw.control_mode['POWER'] == 1:
-                if abs(self.read_voltage() - hw.voltage) < 2:
-                    return 1
-                else:
-                    return 0
-            if hw.control_mode['POWER'] == 2:
-                if abs(self.read_voltage() - hw.voltage) < 5:
-                    return 1
-                else:
-                    return 0
-        else:
-            return 0
 
     def connect_power(self):
         """
@@ -650,8 +594,8 @@ class ControlThread(QThread):
         :return:
         """
         if hw.control_mode['SPECIAL'] == 1:
-            a = self.read_ad_channel(0)
-            self.adjust_feedback.emit(a * 4)
+            self.adjust_feedback.emit(self.get_ad_data(0) * 4)
+            pass
 
     # 总线阀控制
     def bus_connect(self):
@@ -700,15 +644,16 @@ class ControlThread(QThread):
             # hw.da_value[0] = float(vol_value) * 5 / 36
 
         # 确定电压合格后接通电源
-        time_a = time.time()
-        while True:
-            if time.time() - time_a > 5:
-                print('超时')
-                break
-            else:
-                if self.voltage_ok():
-                    self.cal_connect_power(page)
-                    break
+        self.cal_connect_power(page)
+        # time_a = time.time()
+        # while True:
+        #     if time.time() - time_a > 5:
+        #         print('超时')
+        #         break
+        #     else:
+        #         if self.voltage_ok():
+        #             self.cal_connect_power(page)
+        #             break
 
     def cal_connect_power(self, page):
         """
@@ -733,8 +678,6 @@ class ControlThread(QThread):
         self.elec.init_relay_port()
         self.write_da_channel(0, 0)
         self.write_da_channel(1, 0)
-        # hw.da_value[0], hw.da_value[1] = 0, 0
-        # self.ad_da.write_channel[0], self.ad_da.write_channel[1] = 1, 1
 
     def prepare_for_calibration(self, page):
         """
@@ -753,41 +696,86 @@ class ControlThread(QThread):
         :return:
         """
         if page == 'aca':
-            result = self.read_ad_channel(1)
+            result = self.cal_get_ad_data(1)
             self.cal_sample_result_aca.emit(result)
         elif page == 'acv':
-            result = self.read_ad_channel(2)
+            result = self.cal_get_ad_data(2)
             self.cal_sample_result_acv.emit(result)
         elif page == 'dca':
-            result = self.read_ad_channel(3)
+            result = self.cal_get_ad_data(3)
             self.cal_sample_result_dca.emit(result)
         elif page == 'dcv':
-            result = self.read_ad_channel(4)
+            result = self.cal_get_ad_data(4)
             self.cal_sample_result_dcv.emit(result)
         else:
             debug_print('page error')
 
-    # AD/DA
-    def read_ad_channel(self, _ch):
+    @staticmethod
+    def cal_get_ad_data(_ch):
         """
 
         :param _ch:
         :return:
         """
-        self.ad_da.read_channel[_ch] = 1
-        time_mark = time.time()
-        while True:
-            if time.time() - time_mark > 0.5:
-                debug_print('采样超时')
-                break
-            if self.ad_da.read_channel == 0:
-                break
+        return hw.ad_value[_ch]
 
-        if hw.ad_value[_ch] - 0.013 < 0:
-            return 0
+    def get_ad_data(self, _ch):
+        """
+
+        :param _ch:
+        :return:0~5
+        """
+        if _ch == 0:
+            return round(hw.ad_value[_ch] * 5 / 0xfff, 1)
+        elif _ch == 1:
+            return self.calibrate_sample(hw.calibrate_list_aca, hw.ad_value[_ch]) * 200
+        elif _ch == 2:
+            return self.calibrate_sample(hw.calibrate_list_acv, hw.ad_value[_ch]) * 100
+        elif _ch == 3:
+            return self.calibrate_sample(hw.calibrate_list_dca, hw.ad_value[_ch]) * 200
+        elif _ch == 4:
+            return self.calibrate_sample(hw.calibrate_list_dcv, hw.ad_value[_ch]) * 10
         else:
-            return round(hw.ad_value[_ch] - 0.013, 3)
-        pass
+            return 0
+
+    # AD/DA
+    def rcv_ad_data(self, _data):
+        """
+        接收处理采样数据
+        :param _data:
+        :return:
+        """
+
+        mm = _data.strip('[]').split(',')
+        print(mm)
+        # n = 8
+        # l = [int(i) for i in mm]
+        # for i in range(0, len(l), n):
+        #     print(l[i:i+n])
+
+        # hw.ad_value = [round(int(i) / 0xfff * 5, 2) for i in mm[-5:]]
+        hw.ad_value = [int(i) for i in mm[-5:]]
+        # print(hw.ad_value)
+
+        # 直流
+        if hw.control_mode['POWER'] == 1:
+            for i in range(len(mm)):
+                if i % 8 == 6:
+                    sw.current_value.pop(0)
+                    sw.current_value.append(round(self.calibrate_sample(hw.calibrate_list_dca, int(mm[i])) * 200, 1))
+            hw.voltage_value_show = str(round(self.get_ad_data(4), 1))
+            # hw.voltage_value_show = str(round(float(mm[-1]) / 0xfff * 50, 1))
+            hw.current_value_show = str(sw.current_value[-1])
+        # 交流
+        elif hw.control_mode['POWER'] == 2:
+            for i in range(len(mm)):
+                if i % 8 == 4:
+                    sw.current_value.pop(0)
+                    sw.current_value.append(round(float(mm[i]) / 0xfff * 1000, 1))
+            hw.voltage_value_show = str(round(float(mm[-3]) / 0xfff * 500, 1))
+            hw.current_value_show = str(sw.current_value[-1])
+        # print(hw.voltage_value_show, hw.current_value_show)
+        self.valve_vol_cur.emit(hw.current_value_show, hw.voltage_value_show)
 
     def write_da_channel(self, _ch, _value):
         """
@@ -796,109 +784,21 @@ class ControlThread(QThread):
         :param _value:
         :return:
         """
-        # if _ch == 2:
-        #     _value *= hw.correct_ti
-        hw.da_value[_ch] = _value
-        self.ad_da.write_channel[_ch] = 1
+        # print(_ch, _value)
 
-
-class AD_DA(QThread):
-    """
-    ad da
-    """
-
-    # 通道开关
-    read_channel = [0, 0, 0, 0, 0]
-    write_channel = [0, 0, 0, 0]
-
-    # 当前ad通道
-    current_ad_channel = 5
-
-    def __init__(self):
-        super(AD_DA, self).__init__()
-        self.spi_driver = SPI_Driver()
-        print('ADDA Thread Run ...')
-
-    def run(self):
-        """
-
-        :return:
-        """
-
-        self.spi_driver.ads1256_cfg()
-
-        while True:
-            time.sleep(0.1)
-            if flag.control_mode_lock or flag.calibration_start:
-                # AD
-                for j in range(5):
-                    if self.read_channel[j]:
-                        # print(time.time())
-                        if self.current_ad_channel != j:
-                            self.spi_driver.ads1256_one_shot(j)
-                            self.current_ad_channel = j
-                        hw.ad_value[j] = self.spi_driver.ReadADC()
-                        # print(time.time())
-                        # print('AD' + str(j) + ': ' + str(hw.ad_value[j]))
-                        # time.sleep(0.005)
-                        self.read_channel[j] = 0
-
-                for j in range(4):
-                    if self.write_channel[j]:
-                        self.__write_da(j)
-                        self.write_channel[j] = 0
-
-                # for j in range(5):
-                #     self.ad_and_da.ads1256_one_shot(j)
-                #     hw.ad_value[j] = self.ad_and_da.ReadADC()
-                #     # print('AD' + str(j) + ': ' + str(hw.ad_value[j]))
-                #     # time.sleep(0.005)
-
-                # DA
-                # print(hw.da_value)
-                # self.spi_driver.output_dc_power(hw.da_value[0])
-                # self.spi_driver.output_ac_power(hw.da_value[1])
-            if not (flag.control_mode_lock or flag.calibration_start):
-                time.sleep(1)
-                self.spi_driver.output_dc_power(0)
-                self.spi_driver.output_ac_power(0)
-                self.spi_driver.output_adjust_v(0)
-                self.spi_driver.output_adjust_i(0)
-
-    def __write_da(self, _ch=4):
-        """
-
-        :param _ch:
-        :return:
-        """
         if _ch == 0:
-            if hw.da_value[_ch] == 0:
-                self.spi_driver.output_dc_power(0)
-            else:
-                self.spi_driver.output_dc_power(self.calibrate_power(hw.calibrate_list_dcp, hw.da_value[_ch]))
+            self.raspi.da_out[0]['flag'] = 1
+            self.raspi.da_out[0]['value'] = int(self.calibrate_power(hw.calibrate_list_dcp, _value) * 0x3ff / 5)
         elif _ch == 1:
-            if hw.da_value[_ch] == 0:
-                self.spi_driver.output_ac_power(0)
-            else:
-                self.spi_driver.output_ac_power(self.calibrate_power(hw.calibrate_list_acp, hw.da_value[_ch]))
+            self.raspi.da_out[1]['flag'] = 1
+            self.raspi.da_out[1]['value'] = int(self.calibrate_power(hw.calibrate_list_acp, _value) * 0x3ff / 5)
         elif _ch == 2:
-            vol = hw.da_value[_ch] / 4
-            j = 0
-            for j in range(6):
-                if vol <= hw.calibrate_list_ti[j][1]:
-                    break
-
-            x_1, y_1 = float(hw.calibrate_list_ti[j][1]), float(hw.calibrate_list_ti[j][0])
-            x_2, y_2 = float(hw.calibrate_list_ti[j - 1][1]), float(hw.calibrate_list_ti[j - 1][0])
-            x = float(vol)
-
-            y = (y_2 - y_1) * (x - x_1) / (x_2 - x_1) + y_1
-            self.spi_driver.output_adjust_i(round(y, 3) * 4)
+            self.raspi.da_out[2]['flag'] = 1
+            self.raspi.da_out[2]['value'] = int(self.calibrate_power(hw.calibrate_list_ti, _value) * 0x3ff / 20)
         elif _ch == 3:
-            self.spi_driver.output_adjust_v(hw.da_value[_ch])
-
-        else:
-            pass
+            self.raspi.da_out[3]['flag'] = 1
+            self.raspi.da_out[3]['value'] = int(self.calibrate_power(hw.calibrate_list_tv, _value) * 0x3ff / 10)
+        pass
 
     @staticmethod
     def calibrate_power(cal_list, vol):
@@ -918,17 +818,84 @@ class AD_DA(QThread):
                 # print(y)
                 return y
 
-    def ad_da_loop(self):
+    @staticmethod
+    def calibrate_sample(cal_dic, value):
+        if len(cal_dic['samp']) < 2:
+            return round(value * 5 / 4095, 3)
+        else:
+            for i in range(len(cal_dic['samp'])):
+                if cal_dic['samp'][i] > value:
+                    y_1, y_2 = cal_dic['standard'][i-1], cal_dic['standard'][i]
+                    x_1, x_2 = cal_dic['samp'][i-1], cal_dic['samp'][i]
+                    x = value
+                    y = (y_2 - y_1) * (x - x_1) / (x_2 - x_1) + y_1
+                    return round(y, 3)
+
+
+class VoltageOk(QThread):
+    """
+    按钮
+    """
+    voltage_ok_signal = pyqtSignal()
+
+    def __init__(self):
+        super(VoltageOk, self).__init__()
+
+    def run(self):
+        start = time.time()
+        while True:
+            time.sleep(0.5)
+            if time.time() - start > 8:
+                print('调节电压超时')
+                break
+            else:
+                if self.voltage_ok():
+                    self.voltage_ok_signal.emit()
+                    break
+        pass
+
+    def voltage_ok(self):
+        """
+        检测电压是否符合设定
+        :return:
+        """
+        if hw.voltage:
+            print(hw.da_value, hw.voltage)
+            if hw.control_mode['POWER'] == 1:
+                if abs(self.read_voltage() - hw.voltage) < 2:
+                    return 1
+                else:
+                    return 0
+            if hw.control_mode['POWER'] == 2:
+                if abs(self.read_voltage() - hw.voltage) < 5:
+                    return 1
+                else:
+                    return 0
+        else:
+            return 0
+
+    def read_voltage(self):
         """
 
         :return:
         """
-        pass
+        if hw.control_mode['POWER'] == 1:
+            return self.calibrate_sample(hw.calibrate_list_dcv, hw.ad_value[4]) * 10
+        elif hw.control_mode['POWER'] == 2:
+            return self.calibrate_sample(hw.calibrate_list_acv, hw.ad_value[2]) * 100
+        else:
+            return 0
+            pass
 
-    def switch_channel(self, _ch):
-        """
-
-        :param _ch:
-        :return:
-        """
-        pass
+    @staticmethod
+    def calibrate_sample(cal_dic, value):
+        if len(cal_dic['samp']) < 2:
+            return round(value * 5 / 4095, 3)
+        else:
+            for i in range(len(cal_dic['samp'])):
+                if cal_dic['samp'][i] > value:
+                    y_1, y_2 = cal_dic['standard'][i-1], cal_dic['standard'][i]
+                    x_1, x_2 = cal_dic['samp'][i-1], cal_dic['samp'][i]
+                    x = value
+                    y = (y_2 - y_1) * (x - x_1) / (x_2 - x_1) + y_1
+                    return round(y, 3)

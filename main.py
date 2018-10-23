@@ -30,8 +30,7 @@ from ui import mainwindowui
 from public.datacache import SoftwareData as sw
 from public.datacache import HardwareData as hw
 from public.datacache import Flag_Of as flag
-from public.controlthread import ControlThread, AD_DA
-
+from public.controlthread import ControlThread
 
 # import qdarkstyle
 
@@ -135,7 +134,7 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
             self.control_thread.valve_pos_signal.connect(self.change_position_signal)
 
         except:
-            print('CAN NOT WORK IN WINDOWS')
+            print("It can't work in windows.")
 
     def show_control_set_form(self):
         """
@@ -224,7 +223,8 @@ class PT_MainWin(mainwindowui.Ui_MainWin):
         try:
             self.control_thread.elec.write_extend_output([0x00, 0x00])
             self.control_thread.elec.init_relay_port()
-            self.control_thread.elec.output_0()
+            # self.control_thread.elec.output_0()
+            # self.control_thread.ad_da.close_process()
         except:
             pass
 
@@ -244,11 +244,7 @@ def data_init():
 
 if __name__ == '__main__':
     data_init()
-
     app = QApplication(sys.argv)
-    # 设置字体 在树莓派上使用注释下行
-    # app.setFont(QFont('微软雅黑 Semilight', 9))
-
     win = PT_MainWin()
     # win = Ui_ControlModeSet()
     # win = Ui_RemoteControlSet()
@@ -259,6 +255,7 @@ if __name__ == '__main__':
 
     # 黑色主题
     # win.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-
+    # 设置字体 在树莓派上使用注释下行
+    # app.setFont(QFont('微软雅黑 Semilight', 9))
     win.show()
     sys.exit(app.exec_())

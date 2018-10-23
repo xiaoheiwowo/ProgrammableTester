@@ -1,7 +1,7 @@
 # Python module for ADS1256 
 
 try:
-    from driver._bcm2835 import *
+    from driver.bak._bcm2835 import *
 except ImportError:
     from libbcm2835._bcm2835 import *
 

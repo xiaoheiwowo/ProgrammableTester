@@ -1,8 +1,7 @@
 # !/usr/bin/evn python3
 # -*- coding: utf-8 -*-
 
-import time
-from driver import wiringpi as wp
+from driver.bak import wiringpi as wp
 import spidev
 
 

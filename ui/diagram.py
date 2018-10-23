@@ -19,7 +19,7 @@ class PlotWidget(FigureCanvas):
     def __init__(self, parent=None):
         self.fig = Figure(figsize=(8, 5), dpi=80, facecolor='none')
         self.cvs = FigureCanvas(self.fig)
-        self.ax = self.fig.add_axes([0.02, 0.12, 0.92, 0.8])
+        self.ax = self.fig.add_axes([0.02, 0.2, 0.85, 0.8])
         # 设置图标内背景颜色
         self.ax.set_facecolor('none')
 
@@ -106,10 +106,10 @@ class PlotWidget(FigureCanvas):
                                    )
         # 设置坐标轴限值
         self.ax.set_xlim(right=0)
-        self.ax.set_ylim(bottom=0, top=max(yy) * 1.2 + 0.00001)
+        self.ax.set_ylim(bottom=0, top=1100)#max(yy) * 1.2 + 0.00001)
         self.ax.yaxis.tick_right()
         # Y坐标保留两位小数
-        self.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        # self.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
         # 网格
         # self.ax.grid()
