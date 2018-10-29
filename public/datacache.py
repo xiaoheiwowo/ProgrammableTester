@@ -266,7 +266,8 @@ class HardwareData(object):
     ZJ01 = [0x00, 0x00]
 
     # da输出校准表
-    calibrate_list_acp = [0, 1.058, 2.059, 3.070, 4.127, 5.046]
+    calibrate_list_acp = [0, 1.058, 2.059, 3.070, 4.140, 5.048]
+    # calibrate_list_acp = [0, 1, 2, 3, 4, 5]
     calibrate_list_dcp = [0, 1.113, 2.132, 3.147, 4.155, 5.053]
     calibrate_list_ti = [0, 0.970, 1.975, 2.984, 3.992, 5.064]
     calibrate_list_tv = [0, 0.970, 1.975, 2.984, 3.992, 5.064]

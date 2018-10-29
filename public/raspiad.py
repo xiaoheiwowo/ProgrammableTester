@@ -24,27 +24,31 @@ class RaspiAD(QThread):
     def run(self):
         self.config_sample(99, 8)
         while not self.isInterruptionRequested():
+        # while 1:
             time.sleep(0.1)
             # print(time.time())
             if self.spi.read_int_pin():
                 self.spi.chip_select_pic()
                 cmd = (7 << 8) + 255
                 self.spi.SendWord(cmd)
-                self.spi.delay_us(100)
+                # while self.spi.read_int_pin() == 1:
+                #     pass
+                self.spi.delay_us(1000)
                 result = []
+                # self.spi.SendWord(0xaaaa)
                 for i in range((self.buf_size + 1) * self.ad_ch_num):
-                    self.spi.delay_us(3)
+                    # self.spi.delay_us(3)
                     ret = self.spi.SendWord(0xaaaa)
                     result.append(ret)
-                    # if ret == 0xffff:
-                    #     break
-                    #     # result.append(ret)
+                    if ret == 0xaaaa:
+                        print(ret)
+                        # result.append(ret)
                     # else:
                     #     result.append(ret)
                 self.send_sample_data.emit(str(result))
                 # print(str(result))
                 self.spi.chip_release_pic()
-                time.sleep(0.5)
+                time.sleep(0.2)
 
             for i in range(4):
                 if self.da_out[i]['flag'] == 1:
@@ -77,12 +81,18 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(1)
-        timer += 1
-        if timer == 60:
-            raspi_ad.spi.hard_reset()
-            raspi_ad.requestInterruption()
-            # time.sleep(1)
-            raspi_ad.deleteLater()
-            break
+        for i in range(6):
+            a = input()
+            raspi_ad.spi.analog_output(1, int(i * 204.6))
+
+
+        #
+        # timer += 1
+        # if timer == 60:
+        #     raspi_ad.spi.hard_reset()
+        #     raspi_ad.requestInterruption()
+        #     # time.sleep(1)
+        #     raspi_ad.deleteLater()
+        #     break
 
 

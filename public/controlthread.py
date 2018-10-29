@@ -747,14 +747,9 @@ class ControlThread(QThread):
         """
 
         mm = _data.strip('[]').split(',')
-        print(mm)
-        # n = 8
-        # l = [int(i) for i in mm]
-        # for i in range(0, len(l), n):
-        #     print(l[i:i+n])
-
-        # hw.ad_value = [round(int(i) / 0xfff * 5, 2) for i in mm[-5:]]
-        hw.ad_value = [int(i) for i in mm[-5:]]
+        nn = list(map(int, mm))
+        # print(nn)
+        hw.ad_value = [i for i in nn[-5:]]
         # print(hw.ad_value)
 
         # 直流
@@ -764,7 +759,6 @@ class ControlThread(QThread):
                     sw.current_value.pop(0)
                     sw.current_value.append(round(self.calibrate_sample(hw.calibrate_list_dca, int(mm[i])) * 200, 1))
             hw.voltage_value_show = str(round(self.get_ad_data(4), 1))
-            # hw.voltage_value_show = str(round(float(mm[-1]) / 0xfff * 50, 1))
             hw.current_value_show = str(sw.current_value[-1])
         # 交流
         elif hw.control_mode['POWER'] == 2:
@@ -772,7 +766,8 @@ class ControlThread(QThread):
                 if i % 8 == 4:
                     sw.current_value.pop(0)
                     sw.current_value.append(round(float(mm[i]) / 0xfff * 1000, 1))
-            hw.voltage_value_show = str(round(float(mm[-3]) / 0xfff * 500, 1))
+            # hw.voltage_value_show = str(round(float(mm[-3]) / 0xfff * 500, 1))
+            hw.voltage_value_show = str(round(self.get_ad_data(2), 1))
             hw.current_value_show = str(sw.current_value[-1])
         # print(hw.voltage_value_show, hw.current_value_show)
         self.valve_vol_cur.emit(hw.current_value_show, hw.voltage_value_show)
@@ -867,7 +862,7 @@ class VoltageOk(QThread):
                 else:
                     return 0
             if hw.control_mode['POWER'] == 2:
-                if abs(self.read_voltage() - hw.voltage) < 5:
+                if abs(self.read_voltage() - hw.voltage) < 8:
                     return 1
                 else:
                     return 0
@@ -899,3 +894,4 @@ class VoltageOk(QThread):
                     x = value
                     y = (y_2 - y_1) * (x - x_1) / (x_2 - x_1) + y_1
                     return round(y, 3)
+

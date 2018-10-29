@@ -241,9 +241,16 @@ class SPIDriver(object):
 
 if __name__ == '__main__':
     spi = SPIDriver()
-    spi.analog_output(0, 0x3ff)
-    for i in range(11):
-        spi.analog_output(0, i * 100)
-        a = input(str(i * 100))
+    while True:
+        ret = []
+        for i in range(500):
+            ret.append(spi.SendWord(0xaaaa))
+        print(ret)
+        time.sleep(1)
+    # spi = SPIDriver()
+    # spi.analog_output(0, 0x3ff)
+    # for i in range(11):
+    #     spi.analog_output(0, i * 100)
+    #     a = input(str(i * 100))
     # spi.SendWord(0x7f01)
 
